@@ -87,7 +87,9 @@
  * section Aliases
  * @subsection multi_status_alias_mst mst  
  * @section Examples
- * @subsection multi_status_example1 drush -r /path/to/drupal multi status
+ * @code
+ * drush -r /path/to/drupal multi status
+ * @endcode
  * We asume that we are running drupal-6-14 with the 2 sites, default and foobar.com
  * and drupal-6.11, drupal-6.12 and drupal-6.13 before drupal-6.14.
  * @code'
@@ -127,7 +129,8 @@
  * @subsection core Core compatibility
  * Core compatibility e.g. 6 for drupal 6
  * @section Examples
- * @subsection multi_create_example drush multi create /var/www 6
+ * @code
+ * multi_create_example drush multi create /var/www 6
  * Create a drupal 6 installation in /var/www 
  * with creating the directories 6.x_sites, 
  * 6.x_backup in /var/www linked as sites 
@@ -153,12 +156,22 @@
  * Argument to pass to drush command e.g. 'php'
  * as type for 'watchdog delete' and  'watchdog show'. Optional.
  * @section Examples
- * @subsection multi_exec_example1 drush -r /path/to/drupal multi exec cron
+ * @code
+ * drush -r /path/to/drupal multi exec cron
+ * @endcode
  * Run all cron hooks on all sites in your multisite installation.
- * @subsection multi_exec_example2  drush -r /path/to/drupal multi exec 'watchdog show' --option='--limit=30' --argument=php
+ * @code 
+ * drush -r /path/to/drupal multi exec 'watchdog show' --option='--limit=30' --argument=php
+ * @endcode
  * Shows the 30 newest log entries with facility 'php'
- * @subsection multi_exec_example3  drush -r /path/to/drupal multi exec updatedb
+ * @code
+ * drush -r /path/to/drupal multi exec updatedb
+ * @endcode
  * Execute the update.php process for all sites.
+ * @code
+ * drush -r /path/to/drupal multi cache clear
+ * @endcode
+ * Flushes the cache for all sites
  */ 
 
 /**
@@ -169,7 +182,9 @@
  * @subsection multi_drupalupdate_alias_mdr mdr
  * @subsection multi_drupalupdate_alias_drupalupdate drupalupdate
  * @section Examples
- * @subsection multi_drupalupdate_example1 drush -r /path/to/drupal multi drupalupdate 
+ * @code
+ * drush -r /path/to/drupal multi drupalupdate
+ * @endcode 
  */
    
 /** 
@@ -186,7 +201,9 @@
  * @subsection multi_sql_dump_bzip2 --bzip2
  * Use bzip2 for compression of each sql dump.
  * @section Examples
- * @subsection multi_sql_dump_example1 drush -r /path/to/drupal multi sql dump --bzip2 --comment=before-update-to-6.15 --destination=$HOME/db_backups
+ * @code
+ * drush -r /path/to/drupal multi sql dump --bzip2 --comment=before-update-to-6.15 --destination=$HOME/db_backups
+ * @endcode
  * Run 'sql dump' on all sites with comment 
  * 'before-update-to-6.15' as comment for each  result file.
  * The result files are bzip compressed and stored in 'db_backups' in your
@@ -211,7 +228,9 @@
  * It is also possible to supply path via URI, 
  * like http://updates.drupal.org/release-history/drupal/6.x.
  * @section Examples
- * @subsection multi_nagios_example1 drush -r /path/to/drupal multi nagios
+ * @code
+ * drush -r /path/to/drupal multi nagios
+ * @endcode
  * We assume that drupal-6.14 is the recommended release.
  * With an older version, eg. drupal-6.13 we get:
  * @code
@@ -243,7 +262,9 @@
  * @subsection multi_site_create_dirs --create-directories
  * Comma seperated list of aditional directories.
  * @section Examples
- * @subsection multi_site_example1 drush -r /path/to/drupal multi site example.com --create-directories=dir1,dir2,dir3
+ * @code
+ * drush -r /path/to/drupal multi site example.com --create-directories=dir1,dir2,dir3
+ * @endcode
  * Create the site 'example.com' within a settings.php, a 'files', 'themes', 'modules' directory
  * and the additional directories 'dir1', 'dir2' and 'dir3' in /path/to/drupal/sites.
  */   
