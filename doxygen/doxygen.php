@@ -130,7 +130,8 @@
  * Core compatibility e.g. 6 for drupal 6
  * @section Examples
  * @code
- * multi_create_example drush multi create /var/www 6
+ * drush multi create /var/www 6
+ * @endcode
  * Create a drupal 6 installation in /var/www 
  * with creating the directories 6.x_sites, 
  * 6.x_backup in /var/www linked as sites 
@@ -159,11 +160,11 @@
  * @code
  * drush -r /path/to/drupal multi exec cron
  * @endcode
- * Run all cron hooks on all sites in your multisite installation.
+ * Run all cron hooks on all sites in your multisite installation.  
  * @code 
  * drush -r /path/to/drupal multi exec 'watchdog show' --option='--limit=30' --argument=php
  * @endcode
- * Shows the 30 newest log entries with facility 'php'
+ * Shows the 30 newest log entries with facility 'php' 
  * @code
  * drush -r /path/to/drupal multi exec updatedb
  * @endcode
@@ -234,18 +235,18 @@
  * We assume that drupal-6.14 is the recommended release.
  * With an older version, eg. drupal-6.13 we get:
  * @code
- * 'DRUPAL 6.x CRITICAL: drupal-6.13 @ /var/www/drupal-6.13
- * - drupal-6.14 (2009-09-16 21:40) available, see http://drupal.org/node/579476 for details.'
+ * DRUPAL 6.x CRITICAL: drupal-6.13 @ /var/www/drupal-6.13
+ * - drupal-6.14 (2009-09-16 21:40) available, see http://drupal.org/node/579476 for details.
  * @endcode
- * with exit status 2
- * 
+ * with exit status 2 
  * Or if we are running the recommended version:
  * @code
- * 'DRUPAL 6.x OK: drupal-6.14 @ /path/to/drupal/6.x is uptodate.'
+ * DRUPAL 6.x OK: drupal-6.14 @ /path/to/drupal/6.x is uptodate.
  * @endcode
  * with exit status 0.
- * 
- * @subsection multi_nagios_example2 drush -r /path/to/drupal multi nagios --file=/path/to/file
+ * @code
+ * drush -r /path/to/drupal multi nagios --file=/path/to/file
+ * @endcode
  * Same as above with a specified file.
  */
 
