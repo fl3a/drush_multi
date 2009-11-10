@@ -62,9 +62,10 @@
  * - In a folder specified with the include option.
  * - In /path/to/drush/commands (not a "Smart Thing to Do", but it would work).
  */
+
 /**
  * @page cmds Commands  
- * Multi provides the following commands:
+ * Drush_multi provides the following commands:
  * 
  * @subpage multi_status_help "multi status"
  * 
@@ -221,7 +222,7 @@
  * if there is a drupal update available.
  * @section Aliases
  * @subsection multi_nagios_alias_mna mna
- * * @subsection multi_nagios_alias_nagios nagios
+ * @subsection multi_nagios_alias_nagios nagios
  * @section Options
  * @subsection multi_nagios_file --file
  * Path to release information file, this could
