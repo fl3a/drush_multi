@@ -200,12 +200,14 @@ function _multi_check_drupalmajorversion($core, $project = 'drupal') {
 
 /**
  * Finds all sites in the drupal installation, 
- * by searching for a settings.php which indicates a drupal-site
+ * by searching for a settings.php which indicates a drupal-site.
+ * and check for a valid $db_url for database connections.  
  * 
  * @param boolean $symlinks
  *   Allows symlink site folders
  * @return $sites
- * 	 An array with folder names under sites/all or an empty array if no site detected
+ * 	 An array with folder names under sites/all 
+ *   or an empty array if no site detected.
  */
 function _multi_scan_sites($symlinks = TRUE){
   
