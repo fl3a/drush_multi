@@ -209,8 +209,6 @@ function _multi_check_drupalmajorversion($core, $project = 'drupal') {
  */
 function _multi_scan_sites($uniq = TRUE){
   
-  /** @todo Check if settings.php is valid. Bootstrapping? */
-  
   $sites = array();	
   $scan_result = drush_scan_directory(drush_get_context('DRUSH_DRUPAL_ROOT') . '/sites', 
   	'^settings.php$'
