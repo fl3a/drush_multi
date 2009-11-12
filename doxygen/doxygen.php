@@ -7,7 +7,7 @@
  * @file
  * Doxygen documentation 
  */
- 
+  
 /** 
  * @mainpage 
  * Documentation of drush_multi http://drupal.org/project/drush_multi
@@ -256,7 +256,7 @@
  * Create a new site in your your multisite installation within a files, modules and themes directory.
  * @section Aliases 
  * @subsection multi_nagios_site_alias_msi msi
- * * @subsection multi_nagios_site_alias_site site
+ * @subsection multi_nagios_site_alias_site site
  * @section Arguments
  * @subsection multi_nagios_site_name site-name
  * Name of the site. Mandatory.
