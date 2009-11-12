@@ -202,12 +202,12 @@ function _multi_check_drupalmajorversion($core, $project = 'drupal') {
  * Finds all sites in the drupal installation, 
  * by searching for a settings.php which indicates a drupal-site
  * 
- * @param $uniq
- *   Suppress symlinks
+ * @param boolean $symlinks
+ *   Allows symlink site folders
  * @return $sites
  * 	 An array with folder names under sites/all or an empty array if no site detected
  */
-function _multi_scan_sites($uniq = TRUE){
+function _multi_scan_sites($symlinks = TRUE){
   
   $sites = array();	
   $scan_result = drush_scan_directory(drush_get_context('DRUSH_DRUPAL_ROOT') . '/sites', 
@@ -218,10 +218,11 @@ function _multi_scan_sites($uniq = TRUE){
     
     $tmp = array();
   	$tmp = split('/', ltrim($site->filename, '/'));
-  	if ($uniq) {  	  
+  	if (!$symlinks) {  	  
   	  $dir = $tmp;
-  	  // unset last path part (settings.php), the site directory elements remain 
-      unset($dir[count($dir)-1]);      
+  	  // unset last path part (settings.php), it remains the site directory element 
+      unset($dir[count($dir)-1]);
+      // get directory string without a leading slash       
       $dir = implode('/', $dir);      
       // add a leading slash
       $dir = '/' . $dir;            
@@ -229,6 +230,7 @@ function _multi_scan_sites($uniq = TRUE){
   	    continue;
   	  }
   	}
+  	// check site got a valid $db_url within settings.php
   	if (_multi_check_db_url($tmp[count($tmp)-2])) {
   	  // the site element
   	  $sites[] = $tmp[count($tmp)-2];
