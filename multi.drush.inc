@@ -486,7 +486,10 @@ function drush_multi_multi_exec($command) {
   // prepend php to exec
   $exec = "php ";
   
-  foreach (_multi_scan_sites() as $site) {
+  $sites = array();
+  $sites = _multi_scan_sites();
+  
+  foreach ($sites as $site) {
     $exec .= $drush . $yes . $root . $uri . $site . $command . $opt . $arg;
     drush_shell_exec($exec);
     foreach (drush_shell_exec_output() as $line) {
