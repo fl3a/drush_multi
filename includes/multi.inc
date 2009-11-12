@@ -231,8 +231,10 @@ function _multi_scan_sites($uniq = TRUE){
   	    continue;
   	  }
   	}
-  	// the site element
-  	$sites[] = $tmp[count($tmp)-2];  		  	   		
+  	if (_multi_check_db_url($tmp[count($tmp)-2])) {
+  	  // the site element
+  	  $sites[] = $tmp[count($tmp)-2];
+    }  		  	   		
   }
   return $sites;
 }
