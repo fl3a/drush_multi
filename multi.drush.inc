@@ -814,22 +814,43 @@ function drush_multi_multi_site($site_name) {
        dt('Could not change to !dir.', array('!dir' => $site))
     );
   } 
-        
-  // copy default.settings.php to settings.php
-  $settings_src = $sites_dir . 'default/default.settings.php';
-  if (drush_op('copy', $settings_src, 'settings.php')) { 
-    drush_log(
-      dt('Copied !src to !target.', 
-        array('!src' => $settings_src, '!target' => $site . '/settings.php')
-      ), 'success'
-    );
-  }
-  else {
-    return drush_set_error('MULTI_SITE_COULD_NOT_COPY_DEFAULT_SETTINGS',
-      dt('Could not copy !src to settings.php.', array('!src' => $settings_src))      
-    );
-  }
-
+  
+  // create a settings.php
+  switch (drush_drupal_major_version()){
+    case '6':
+      // copy sites/default.settings.php to settings.php
+      $settings_src = $sites_dir . 'default/default.settings.php';
+      if (drush_op('copy', $settings_src, 'settings.php')) { 
+        drush_log(
+          dt('Copied !src to !target.', 
+            array('!src' => $settings_src, '!target' => $site . '/settings.php')
+          ), 'success'
+        );
+      }
+      else {
+        return drush_set_error('MULTI_SITE_COULD_NOT_COPY_DEFAULT_SETTINGS',
+          dt('Could not copy !src to settings.php.', array('!src' => $settings_src))      
+        );
+      }
+      break;
+    case '5':  
+      // copy sites/settings.php to settings.php
+      $settings_src = $sites_dir . 'default/settings.php';
+      if (drush_op('copy', $settings_src, 'settings.php')) { 
+        drush_log(
+          dt('Copied !src to !target.', 
+            array('!src' => $settings_src, '!target' => $site . '/settings.php')
+          ), 'success'
+        );
+      }
+      else {
+        return drush_set_error('MULTI_SITE_COULD_NOT_COPY_DEFAULT_SETTINGS',
+          dt('Could not copy !src to settings.php.', array('!src' => $settings_src))      
+        );
+      }
+      break;
+  }      
+  
   // get additional directories from create-directories option
   if($directories_option = drush_get_option('create-directories')) {
     $directories = array();    
