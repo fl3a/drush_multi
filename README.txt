@@ -109,7 +109,7 @@ drush help multi ${multicommand}
 
 Since the the code is commented with doxygen 
 you can find the documentation at 
-http://is-loesungen.de/docu/multi/.
+http://is-loesungen.de/docu/drush_multi/.
     
 FAQ
 ---
