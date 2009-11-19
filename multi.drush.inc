@@ -815,11 +815,11 @@ function drush_multi_multi_site($site_name) {
     );
   } 
   
-  // create a settings.php
-  switch (drush_drupal_major_version()){
-    case '6':
-      // copy sites/default.settings.php to settings.php
-      $settings_src = $sites_dir . 'default/default.settings.php';
+  // create a settings.php by copying
+  switch (drush_drupal_major_version()){    
+    case '5':  
+      // copy sites/default/settings.php to settings.php for 5.x
+      $settings_src = $sites_dir . 'default/settings.php';
       if (drush_op('copy', $settings_src, 'settings.php')) { 
         drush_log(
           dt('Copied !src to !target.', 
@@ -833,9 +833,10 @@ function drush_multi_multi_site($site_name) {
         );
       }
       break;
-    case '5':  
-      // copy sites/settings.php to settings.php
-      $settings_src = $sites_dir . 'default/settings.php';
+    case '6':
+    case '7':
+      // copy sites/default.settings.php to settings.php for 6.x and 7.x
+      $settings_src = $sites_dir . 'default/default.settings.php';
       if (drush_op('copy', $settings_src, 'settings.php')) { 
         drush_log(
           dt('Copied !src to !target.', 
