@@ -256,8 +256,13 @@ function multi_status() {
  */
 function multi_nagios() {
   
-  if (!$file = drush_get_option('file')) { 
-    $file = FALSE; 
+  if ($file = drush_get_option('file')) { 
+     if (!is_file($file)) {
+       $file = FALSE;
+     }
+  }
+  else {
+    $file = FALSE;
   }
   if ($recommended_version = _multi_recommended_version(drush_drupal_major_version(), 'drupal', FALSE, $file)) {
     if ((float) drush_drupal_version() < (float) $recommended_version['version']) {
@@ -297,7 +302,7 @@ function multi_nagios() {
  * Congratulation, you have found an easteregg
  */
 function multi_moo() {
-  $cowsay = " ------------\n";
+  $cowsay = "  -----------\n";
   $cowsay .= "< i <3 drush >\n";
   $cowsay .= " ------------\n";
   $cowsay .= "        \   ^__^\n";
@@ -317,7 +322,7 @@ function multi_moo() {
  */
 
 /**
- * Implementation of hook_drush_mycommand_validate 
+ * Implementation of drush_hook_COMMAND_validate 
  */
 function drush_multi_multi_sql_dump_validate() {
   
@@ -350,7 +355,7 @@ function drush_multi_multi_sql_dump_validate() {
 }
 
 /**
- * Implemetation of hook_drush_pre_mycommand()
+ * Implementation of hook_drush_pre_COMMAND()
  */
 function drush_multi_pre_multi_sql_dump() {
   
@@ -360,7 +365,7 @@ function drush_multi_pre_multi_sql_dump() {
 }
 
 /**
- * Implemetation of hook_drush_command()
+ * Implementation of drush_hook_COMMAND()
  */
 function drush_multi_multi_sql_dump() { 
     
@@ -419,9 +424,8 @@ function drush_multi_multi_sql_dump() {
  */
 
 /**
- * Implementation of hook_drush_mycommand_validate 
+ * Implementation of drush_hook_COMMAND_validate 
  * @param $command
- * @return unknown_type
  */
 function drush_multi_multi_exec_validate ($command) {
   
@@ -456,7 +460,7 @@ function drush_multi_multi_exec_validate ($command) {
 }
 
 /**
- * Implemetation of hook_drush_command()
+ * Implementation of drush_hook_COMMAND()
  * @param $command 
  */
 function drush_multi_multi_exec($command) {  
@@ -499,7 +503,6 @@ function drush_multi_multi_exec($command) {
 }
 /** @} */ /** End of defgroup multi_exec */
 
-
 /**
  * @defgroup multi_create 'multi_create'
  * Hooks for invocation of @ref multi_create_help, see multi_drush_command() for definition
@@ -507,9 +510,9 @@ function drush_multi_multi_exec($command) {
  */
 
 /**
+ * Implementation of drush_hook_COMMAND_validate()
  * @param $destination
  * @param $core
- * @return unknown_type
  */
 function drush_multi_multi_create_validate($destination, $core) {
   
@@ -533,7 +536,11 @@ function drush_multi_multi_create_validate($destination, $core) {
   }   
 }
 
-
+/**
+ * Implementation of drush_hook_COMMAND()
+ * @param $destination
+ * @param $core
+ */
 function drush_multi_multi_create($destination, $core) {
   
   // Download and  unpack drupal via drush dl to $destination / pwd
@@ -627,11 +634,13 @@ function drush_multi_multi_create($destination, $core) {
   }           	
 }
 
+/**
+ * Implementation of drush_hook_COMMAND_rollback()
+ */
 function drush_multi_multi_create_rollback() {
 
 }
 /** @} */ /** End of defgroup multi_create */
-
 
 /**
  * @defgroup multi_drupalupdate 'multi_drupalupdate'
@@ -639,6 +648,9 @@ function drush_multi_multi_create_rollback() {
  * @{  
  */
 
+/**
+ * Implementation of drush_hook_pre_command()
+ */
 function drush_multi_pre_multi_drupalupdate () {
   if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
     return drush_set_error('MULTI_DRUPALUPDATE_DESTINATION_NOT_WRITABLE',
@@ -649,6 +661,9 @@ function drush_multi_pre_multi_drupalupdate () {
   }
 }
 
+/**
+ * Implementation of drush_hook_COMMAND()
+ */
 function drush_multi_multi_drupalupdate() {
   
   // needed variables: 
@@ -741,10 +756,12 @@ function drush_multi_multi_drupalupdate() {
   drush_log(dt('Drupalupdate finished, now you should run update.php for each site'), 'completed');
 }
 
+/**
+ * Implementation of drush_hook_COMMAND_rollback()
+ */
 function drush_multi_multi_drupalupdate_rollback() {
   
 }
-
 /** @} */ /** End of defgroup multi_drupalupdate */
  
 /**
@@ -754,9 +771,8 @@ function drush_multi_multi_drupalupdate_rollback() {
  */
 
 /**
- * @see multi_drush_command()
+ * Implementation of drush_hook_COMMAND_validate()
  * @param $site_name
- * @return unknown_type
  */
 function drush_multi_multi_site_validate($site_name) {
 
@@ -779,6 +795,10 @@ function drush_multi_multi_site_validate($site_name) {
   }  
 }
 
+/**
+ * Implementation of drush_hook_pre_COMMAND()
+ * @param $site_name
+ */
 function drush_multi_pre_multi_site($site_name) {
   
   $sites_dir = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/';
@@ -789,6 +809,10 @@ function drush_multi_pre_multi_site($site_name) {
   }  
 }  
 
+/**
+ * Implementation of drush_hook_COMMAND()
+ * @param $site_name
+ */
 function drush_multi_multi_site($site_name) {
   
   $sites_dir = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/';
