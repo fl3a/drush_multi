@@ -30,25 +30,27 @@
  * @code
  * '
  * drupal/
- *  |-- 6.x -> drupal-6.14
- *  |-- 6.x_backup
- *  |-- 6.x_sites
- *  |   |--all
- *  |   |   |-- modules
- *  |   |   `-- themes
- *  |   |-- default
- *  |   `-- example.com
- *  |      |-- files
- *  |      |-- modules
- *  |      `-- themes
- *  `-- drupal-6.14
- *      |-- backup -> ../6.x_backup
- *      |-- includes
- *      |-- misc
- *      |-- modules
- *      |-- profiles
- *      |-- scripts
- *      `-- sites  -> ../6.x_sites
+ * |-- 6.x -> drupal-6.14
+ * |-- 6.x_backup
+ * |-- 6.x_sites
+ * |   |-- all   
+ * |   |-- default
+ * |   |-- example.com
+ * |   |   |-- files
+ * |   |   |-- modules
+ * |   |   `-- themes
+ * |   `-- sub.example.com 
+ * |       |-- files
+ * |       |-- modules
+ * |       `-- themes 
+ * `-- drupal-6.14
+ *    |-- backup -> ../6.x_backup
+ *    |-- includes
+ *    |-- misc
+ *    |-- modules
+ *    |-- profiles
+ *    |-- scripts
+ *    `-- sites  -> ../6.x_sites
  * '
  * @endcode
  */
