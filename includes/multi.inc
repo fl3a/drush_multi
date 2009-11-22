@@ -482,7 +482,7 @@ function _multi_check_db_url($site) {
       );
       break;
     case 'mysqli':
-      /** check mysqli_connect(), not tested */      
+      /** @todo check mysqli_connect(), not tested */      
       $link = mysqli_connect(
         $db_spec['host'],
         $db_spec['username'],
@@ -492,7 +492,7 @@ function _multi_check_db_url($site) {
       );
       break;
     case 'pgsql':
-      /** check pg_connect(), not tested */
+      /** @todo check pg_connect(), not tested */
       // creating postgresql connection string
       $connection_string  = 'host=' . $db_spec['host'] .' ';
       $connection_string .= 'user=' . $db_spec['user'] .' ';
