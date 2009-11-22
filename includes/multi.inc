@@ -189,7 +189,7 @@ function _multi_check_drupalmajorversion($core, $project = 'drupal') {
 	);
   }  	
 }
-
+ 
 /** @} */ /** End of defgroup xml_xpath */
  
 /**
@@ -415,9 +415,16 @@ function _multi_relative_path($target) {
 
   return $path;
 }
-
 /** @} */ /** End of defgroup filesystemm */
- 
+
+/**
+ * @defgroup nagios 'Nagios functions'
+ * Functions that deals with Nagios
+ * @{  
+ */
+
+/** @} */ /** End of defgroup nagios */
+
 /**
  * @defgroup misc 'Miscellaneous functions'
  * Miscellaneous functions. 
