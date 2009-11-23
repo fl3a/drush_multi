@@ -256,43 +256,15 @@ function multi_status() {
  */
 function multi_nagios() {
   
-  if ($file = drush_get_option('file')) { 
-     if (!is_file($file)) {
-       $file = FALSE;
-     }
+  $uri = drush_get_context('DRUSH_DRUPAL_SITE_ROOT');
+  
+  if (isset($uri)) {
+    // multi nagios was called with -l/--uri
+    return _multi_nagios_site();
   }
   else {
-    $file = FALSE;
-  }
-  if ($recommended_version = _multi_recommended_version(drush_drupal_major_version(), 'drupal', FALSE, $file)) {
-    if ((float) drush_drupal_version() < (float) $recommended_version['version']) {
-      drush_print(  
-        dt('DRUPAL !major.x CRITICAL: !version @ !drupal_root - drupal-!remcommended_version (!release-date) available, see !release_link for details.',
-          array(
-          	'!major' => drush_drupal_major_version(), 
-          	'!version' => _multi_current_version(), 
-         	'!drupal_root' => drush_get_context('DRUSH_DRUPAL_ROOT'),
-          	'!remcommended_version' => $recommended_version['version'],
-           	'!release-date' => date('Y-m-d\ H:i', $recommended_version['date']),
-           	'!release_link' => $recommended_version['release_link'],       
-         )
-        )
-      );      
-      return MULTI_NAGIOS_CRITICAL;
-    } 
-    else {
-      drush_print(
-      	dt('DRUPAL !major.x OK: !version @ !drupal_root is uptodate.',
-          array(
-      		'!major' => drush_drupal_major_version(),'!version' => _multi_current_version(), 
-         	'!drupal_root' => drush_get_context('DRUSH_DRUPAL_ROOT'),         	
-          )
-        )
-      );           
-    }   
-  }
-  else {
-    return $recommended_version; // FALSE if _multi_recommended_version() sets an error
+    // multi nagios was called with -r/--root only
+    return _multi_nagios_root();
   }
 }
 
