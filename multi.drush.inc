@@ -252,15 +252,21 @@ function multi_status() {
 
 /**
  * Command callback for @ref multi_nagios_help
- * @return MULTI_NAGIOS_CRITICAL when a new minor realease is available 
+ * 
+ * Calls _multi_nagios_site() if a valid site was supplied or _multi_nagios_root()
+ * 
+ * @return MULTI_NAGIOS_CRITICAL (2) or MULTI_NAGIOS_OK (0) 
  */
 function multi_nagios() {
-  
-  $uri = drush_get_context('DRUSH_DRUPAL_SITE_ROOT');
-  
+ 
+  // get -l/--uri option
+  (drush_get_option('uri')) ? $uri = drush_get_option('uri') : $uri = drush_get_option('l');  
+    
   if (!empty($uri)) {
-    // multi nagios was called with -l/--uri
-    return _multi_nagios_site();
+    if (_multi_check_site($uri)) {
+      // multi nagios was called with -l/--uri
+      return _multi_nagios_site();
+    }
   }
   else {
     // multi nagios was called with -r/--root only
