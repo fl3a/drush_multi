@@ -20,6 +20,9 @@ define('MULTI_SUCCESS', 0);
 /** Status 0 */
 define('MULTI_NOTHING_TO_DO', 0);
 
+/** Status 0 for nagios OK, see also _multi_nagios_site() and _multi_nagios_root() */
+define('MULTI_NAGIOS_OK', 0);
+
 /** Status 1 for nagios warning @see multi_nagios() */
 define('MULTI_NAGIOS_WARNING', 1);
 
@@ -423,6 +426,109 @@ function _multi_relative_path($target) {
  * @{  
  */
 
+/**
+ * Monitores a Drupal installation for core updates
+ * @return MULTI_NAGIOS_OK(0) if monitored DRUPAL_ROOT is uptodate
+ * or MULTI_NAGIOS_CRITICAL(2) if there are updates available
+ */
+function _multi_nagios_root() {
+  
+  if ($file = drush_get_option('file')) { 
+     if (!is_file($file)) {
+       $file = FALSE;
+     }
+  }
+  else {
+    $file = FALSE;
+  }
+  if ($recommended_version = _multi_recommended_version(drush_drupal_major_version(), 'drupal', FALSE, $file)) {
+    if ((float) drush_drupal_version() < (float) $recommended_version['version']) {
+      drush_print(  
+        dt('DRUPAL ROOT CRITICAL - !version @ !drupal_root: drupal-!remcommended_version (!release-date) available, see !release_link for details.',
+          array(
+          	'!version'     => _multi_current_version(), 
+         	'!drupal_root' => drush_get_context('DRUSH_DRUPAL_ROOT'),
+          	'!remcommended_version' => $recommended_version['version'],
+           	'!release-date' => date('Y-m-d\ H:i', $recommended_version['date']),
+           	'!release_link' => $recommended_version['release_link'],       
+         )
+        )
+      );      
+      return MULTI_NAGIOS_CRITICAL;
+    } 
+    else {
+      drush_print(
+      	dt('DRUPAL ROOT OK - !version @ !drupal_root is uptodate.',
+          array(
+      		'!version' => _multi_current_version(), 
+         	'!drupal_root' => drush_get_context('DRUSH_DRUPAL_ROOT'),         	
+          )
+        )
+      );
+      return MULTI_NAGIOS_OK;           
+    }   
+  }
+  else {
+    return $recommended_version; // FALSE if _multi_recommended_version() sets an error
+  }
+}
+
+/**
+ * Monitores a single Drupal site for module and core updates
+ * 
+ * This function was heavily inspired by Markus Benning's
+ * script at http://www.w3r3wolf.de/blog/wp-content/uploads/2009/08/check_drupal_update.php.gz
+ * 
+ * This function will be used by default if there is a site at sites/default.
+ *  
+ * @return MULTI_NAGIOS_OK(0) if monitored site is uptodate
+ * or MULTI_NAGIOS_CRITICAL(2) if there are updates available
+ */
+function _multi_nagios_site() {
+
+  drush_bootstrap_max();
+
+  drush_include_engine('update_info', 'drupal', NULL, DRUSH_BASE_PATH . '/commands/pm/update_info');
+ 
+  $data = array(); 
+  $data = _pm_get_update_info();
+  
+  $modules = array();
+  $updates = FALSE;
+
+  foreach($data as $module) {
+
+    if($module["info"]["version"] != $module["recommended"]) {
+      $updates = TRUE;
+      $modules[] = $module['name'];    
+    }
+  }
+
+  if($updates) {
+    drush_print(
+      dt('DRUPAL SITE CRITICAL - !site @ !site_root: there are updates for !modules, see !uri?q=admin/reports/updates for datails.',
+        array(
+      	  '!site'     => drush_get_context('DRUSH_URI'),
+          '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
+          '!modules'  => explode(',', $modules),
+          '!uri'      =>  drush_get_context('DRUSH_URI')
+        )
+      )
+    );
+    return MULTI_NAGIOS_CRITICAL;
+  } 
+  else {
+    drush_print(
+      dt('DRUPAL SITE - !site @ !site_root: All modules are uptodate.',
+        array(
+      	  '!site'    => drush_get_context('DRUSH_URI'),
+          '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
+        )
+      )
+    );
+    return MULTI_NAGIOS_OK;
+  }
+}
 /** @} */ /** End of defgroup nagios */
 
 /**
