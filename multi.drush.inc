@@ -258,7 +258,7 @@ function multi_nagios() {
   
   $uri = drush_get_context('DRUSH_DRUPAL_SITE_ROOT');
   
-  if (isset($uri)) {
+  if (!empty($uri)) {
     // multi nagios was called with -l/--uri
     return _multi_nagios_site();
   }
