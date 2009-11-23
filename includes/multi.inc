@@ -510,12 +510,11 @@ function _multi_nagios_site() {
 
   if($updates) {
     drush_print(
-      dt('DRUPAL SITE CRITICAL - !site @ !site_root: there are updates for !modules, see !uri?q=admin/reports/updates for datails.',
+      dt('DRUPAL SITE CRITICAL - !uri @ !site_root: there are updates for !modules, see http://!uri?q=admin/reports/updates for datails.',
         array(
-      	  '!site'     => drush_get_context('DRUSH_URI'),
+      	  '!uri'      => drush_get_context('DRUSH_URI'),
           '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
-          '!modules'  => implode(',', $modules),
-          '!uri'      =>  drush_get_context('DRUSH_URI')
+          '!modules'  => implode(',', $modules),          
         )
       )
     );
@@ -523,9 +522,9 @@ function _multi_nagios_site() {
   } 
   else {
     drush_print(
-      dt('DRUPAL SITE - !site @ !site_root: All modules are uptodate.',
+      dt('DRUPAL SITE OK - !uri @ !site_root: All modules are uptodate.',
         array(
-      	  '!site'    => drush_get_context('DRUSH_URI'),
+      	  '!uri'      => drush_get_context('DRUSH_URI'),
           '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
         )
       )
