@@ -479,7 +479,7 @@ function _multi_nagios_root() {
  * This function was heavily inspired by Markus Benning's
  * script at http://www.w3r3wolf.de/blog/wp-content/uploads/2009/08/check_drupal_update.php.gz
  * 
- * @note This function will be used by if there is a site at sites/default although y 	
+ * @note If there is a site at sites/default, this command runs on site basis, although you have only specified the Drupal installation.
  *  
  * @return MULTI_NAGIOS_OK(0) if monitored site is uptodate
  * or MULTI_NAGIOS_CRITICAL(2) if there are updates available

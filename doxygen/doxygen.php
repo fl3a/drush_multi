@@ -230,7 +230,7 @@
  * 
  * on a the with -l / --uri supplied site to check for core and module updates
  * 
- * @note If there is a site at sites/default, this command runs on site basis, although ou have only specified the Drupal installation.
+ * @note If there is a site at sites/default, this command runs on site basis, although you have only specified the Drupal installation.
  * 
  * @section Aliases
  * @subsection multi_nagios_alias_mna mna
