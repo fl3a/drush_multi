@@ -217,7 +217,7 @@ function _multi_scan_sites($symlinks = TRUE){
   
   $sites = array();	
   $scan_result = drush_scan_directory(
-    drush_get_context('DRUSH_DRUPAL_ROOT') . '/sites', '/^settings.php$/'
+    rtrim(drush_get_context('DRUSH_DRUPAL_ROOT')) . '/sites', '/^settings\.php$/'
   );
   
   foreach($scan_result as $site ) {
@@ -310,8 +310,9 @@ function _multi_scan_links($dir = FALSE, $recurse = TRUE, $min_depth = 0, $depth
  */
 function _multi_available_installations() {
   $scan_result = array();
-  $scan_result = drush_scan_directory(drush_get_context('DRUSH_DRUPAL_ROOT') . '/..', 
-    '^drupal-' . drush_drupal_major_version(), array(), 0, FALSE 
+  $scan_result = drush_scan_directory(
+    rtrim(drush_get_context('DRUSH_DRUPAL_ROOT')) . '/..', 
+    '/^drupal-' . drush_drupal_major_version().'/', array(), 0, FALSE 
   );
   foreach ($scan_result as $install) {
     $installations[] = $install->basename;        
