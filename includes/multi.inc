@@ -510,7 +510,7 @@ function _multi_nagios_site() {
         array(
       	  '!site'     => drush_get_context('DRUSH_URI'),
           '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
-          '!modules'  => explode(',', $modules),
+          '!modules'  => implode(',', $modules),
           '!uri'      =>  drush_get_context('DRUSH_URI')
         )
       )
