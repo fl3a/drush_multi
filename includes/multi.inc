@@ -510,7 +510,7 @@ function _multi_nagios_site() {
 
   if($updates) {
     drush_print(
-      dt('DRUPAL SITE CRITICAL - !uri @ !site_root: there are updates for !modules, see http://!uri?q=admin/reports/updates for datails.',
+      dt('DRUPAL SITE CRITICAL - !uri @ !site_root: there are updates for !modules, see http://!uri/?q=admin/reports/updates for datails.',
         array(
       	  '!uri'      => drush_get_context('DRUSH_URI'),
           '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),

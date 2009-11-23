@@ -67,14 +67,20 @@ function multi_drush_command() {
       'drush -r /path/to/drupal multi nagios' =>
       "We assume that drupal-6.14 is the recommended release.\n" . 
       "With an older version, eg. drupal-6.13 we get:\n" .
-      "DRUPAL 6.x CRITICAL: drupal-6.13 @ /var/www/drupal-6.13\n" .
+      "DRUPAL ROOT CRITICAL: drupal-6.13 @ /var/www/drupal-6.13\n" .
       " - drupal-6.14 (2009-09-16 21:40) available, see http://drupal.org/node/579476 for details.\n" .
       "with exit status 2\n" .
       "Or if we are running the recommended version:\n" .
-      "'DRUPAL 6.x OK: drupal-6.14 @ /path/to/drupal/6.x is uptodate.'\n" .
+      "'DRUPAL ROOT OK: drupal-6.14 @ /path/to/drupal/6.x is uptodate.'\n" .
       "with exit status 0.",
-      'drush -r /path/to/drupal multi nagios --file=/path/to/file' => 'Same as above with a specified file.'
-    ), 
+      'drush -r /path/to/drupal multi nagios --file=/path/to/file' => 'Same as above with a specified file.',
+      'drush -r /path/to/drupal -l example.com multi nagios' => 
+      "If there are no updates available, this will produce to following output:\n" .
+      "DRUPAL SITE OK - example.com @ /path/to/drupal/example.com: All modules are uptodate.\n" .
+      "If there are available updates, it might produce the following output:\n" .
+      "DRUPAL SITE CRITICAL - example.com @ /path/to/drupal/sites/example.com:\n" .
+      'there are updates for admin_menu,drupal,image, see http://example.com/?q=admin/reports/updates for datails.',
+     ), 
     'options' => array(
       '--file' => 'Path to release information file, this could be a (temp) file  to avoid nrpe-socket timeouts. It is also possible to supply path via URI, like http://updates.drupal.org/release-history/drupal/6.x.'
     ),    

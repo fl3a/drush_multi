@@ -272,15 +272,15 @@
  * @code
  * drush -r /path/to/drupal -l example.com multi nagios
  * @endcode
- * If there are no updates available, it will produce to following output:
+ * If there are no updates available, this will produce to following output:
  * @code
  * DRUPAL SITE OK - example.com @ /path/to/drupal/example.com: All modules are uptodate.
  * @endcode
  * 
- * If there updates available, it might produce the following output:
+ * If there are available updates, it might produce the following output:
  * @code
- * DRUPAL SITE CRITICAL - example.com @ /path/to/drupal/sites/example.com: there are updates for admin_menu,drupal,image, see http://example.com?q=admin/reports/updates for datails.
- * @code 
+ * DRUPAL SITE CRITICAL - example.com @ /path/to/drupal/sites/example.com: there are updates for admin_menu,drupal,image, see http://example.com/?q=admin/reports/updates for datails.
+ * @endcode 
  */
 
 /** 
