@@ -490,8 +490,12 @@ function _multi_nagios_site() {
 
   drush_include_engine('update_info', 'drupal', NULL, DRUSH_BASE_PATH . '/commands/pm/update_info');
  
-  $data = array(); 
+  $data = array();
+  
+  // Suppress output of _pm_get_update_info() which calls _pm_refresh()
+  ob_start();
   $data = _pm_get_update_info();
+  ob_end_clean();
   
   $modules = array();
   $updates = FALSE;
