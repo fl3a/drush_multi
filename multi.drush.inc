@@ -79,10 +79,13 @@ function multi_drush_command() {
       "DRUPAL SITE OK - example.com @ /path/to/drupal/example.com: All modules are uptodate.\n" .
       "If there are available updates, it might produce the following output:\n" .
       "DRUPAL SITE CRITICAL - example.com @ /path/to/drupal/sites/example.com:\n" .
-      'there are updates for admin_menu,drupal,image, see http://example.com/?q=admin/reports/updates for datails.',
+      "there are updates for admin_menu,drupal,image, see http://example.com/?q=admin/reports/updates for datails.\n" .
+      "NOTE: If there is a site at sites/default, this command runs on site basis, although ou have only specified the Drupal installation."
      ), 
     'options' => array(
-      '--file' => 'Path to release information file, this could be a (temp) file  to avoid nrpe-socket timeouts. It is also possible to supply path via URI, like http://updates.drupal.org/release-history/drupal/6.x.'
+      '--file' => "Path to release information file, this could be a (temp) file  to avoid nrpe-socket timeouts.\n" .
+      "It is also possible to supply path via URI, like http://updates.drupal.org/release-history/drupal/6.x.\n" .
+      "NOTE: This option is only available for checking the Drupal installation."
     ),    
   );
   $items['multi moo'] = array(
