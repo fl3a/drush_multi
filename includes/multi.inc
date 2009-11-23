@@ -216,8 +216,8 @@ function _multi_check_drupalmajorversion($core, $project = 'drupal') {
 function _multi_scan_sites($symlinks = TRUE){
   
   $sites = array();	
-  $scan_result = drush_scan_directory(drush_get_context('DRUSH_DRUPAL_ROOT') . '/sites', 
-  	'^settings.php$'
+  $scan_result = drush_scan_directory(
+    drush_get_context('DRUSH_DRUPAL_ROOT') . '/sites', '/^settings.php$/'
   );
   
   foreach($scan_result as $site ) {
@@ -479,7 +479,7 @@ function _multi_nagios_root() {
  * This function was heavily inspired by Markus Benning's
  * script at http://www.w3r3wolf.de/blog/wp-content/uploads/2009/08/check_drupal_update.php.gz
  * 
- * This function will be used by default if there is a site at sites/default.
+ * @note This function will be used by if there is a site at sites/default although y 	
  *  
  * @return MULTI_NAGIOS_OK(0) if monitored site is uptodate
  * or MULTI_NAGIOS_CRITICAL(2) if there are updates available
