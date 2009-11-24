@@ -498,16 +498,18 @@ function _multi_nagios_site() {
   $data = _pm_get_update_info();
   ob_end_clean();
   
-  drush_print_r($data);
-  
   $modules = array();
   $updates = FALSE;
 
   foreach($data as $module) {
+    
+    drush_print('module:' . $module['name']);
+    drush_print('version:' . $module['info']['version']);
+    drush_print('recommended:' . $module['info']['recommended']);
 
-    if($module['info']['version'] != $module["recommended"]) {
+    if($module['info']['version'] != $module['recommended']) {
       $updates = TRUE;
-      $modules[] = $module['info']['name'];    
+      $modules[] = $module['name'];    
     }
   }
 
