@@ -504,11 +504,13 @@ function _multi_nagios_site() {
   $updates = FALSE;
 
   foreach($data as $module) {
-      
+    
+    drush_print('module:' . $module['name']);
+    drush_print('version:' . $module['info']['version']);
+    drush_print('recommended:' . $module['recommended']);
+    
     if($module['info']['version'] != $module['recommended']) {
-      drush_print('module:' . $module['name']);
-      drush_print('version:' . $module['info']['version']);
-      drush_print('recommended:' . $module['recommended']);
+      
       $updates = TRUE;
       $modules[] = $module['name'];    
     }
