@@ -498,6 +498,7 @@ function _multi_nagios_site() {
   $data = _pm_get_update_info();
   ob_end_clean();
   
+  // Debug
   drush_print_r($data);
   
   $modules = array();
@@ -505,14 +506,30 @@ function _multi_nagios_site() {
 
   foreach($data as $module) {
     
-    drush_print('module:' . $module['name']);
-    drush_print('version:' . $module['info']['version']);
-    drush_print('recommended:' . $module['recommended']);
-    
-    if($module['info']['version'] != $module['recommended']) {
+    if ($core = drush_drupal_major_version() == 5) {
       
-      $updates = TRUE;
-      $modules[] = $module['name'];    
+      // Debug
+      drush_print('module:' . $module['name']);
+      drush_print('version:' . $module['existing_version']);
+      drush_print('recommended:' . $module['recommended']);
+      
+      if($module['existing_version'] != $module['recommended']) {
+        $updates = TRUE;
+        $modules[] = $module['name'];    
+      }
+    }
+    else if($core == 6) {
+      /** @todo check 7.x's _pm_get_update_info() */ 
+      
+      // Debug
+      drush_print('module:' . $module['name']);
+      drush_print('version:' . $module['info']['version']);
+      drush_print('recommended:' . $module['recommended']);
+      
+      if($module['info']['version'] != $module['recommended']) {
+        $updates = TRUE;
+        $modules[] = $module['name'];    
+      }
     }
   }
 
