@@ -498,6 +498,8 @@ function _multi_nagios_site() {
   $data = _pm_get_update_info();
   ob_end_clean();
   
+  drush_print_r($data);
+  
   $modules = array();
   $updates = FALSE;
 
