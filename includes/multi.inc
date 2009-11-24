@@ -503,9 +503,9 @@ function _multi_nagios_site() {
 
   foreach($data as $module) {
 
-    if($module["info"]["version"] != $module["recommended"]) {
+    if($module['info']['version'] != $module["recommended"]) {
       $updates = TRUE;
-      $modules[] = $module['name'];    
+      $modules[] = $module['info']['project'];    
     }
   }
 
