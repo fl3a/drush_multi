@@ -505,7 +505,7 @@ function _multi_nagios_site() {
 
     if($module['info']['version'] != $module["recommended"]) {
       $updates = TRUE;
-      $modules[] = $module['info']['project'];    
+      $modules[] = $module['info']['name'];    
     }
   }
 
