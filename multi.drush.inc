@@ -660,13 +660,15 @@ function drush_multi_multi_drupalupdate() {
   $dest				= realpath($drupal_root . '/../');  
   $link_name        = 0;
   
-  /** @todo Variable symlink name for DOCUMENT_ROOT, need'nt be 6.x when using drupal-6 */ 
+  /** @todo Variable symlink name for DOCUMENT_ROOT, need'nt be 6.x when using drupal-6 */
+  /* 
   if (is_link($drupal_root)) { 
     $path_pieces = explode('/', $drupal_root);
     $link_name = $path_pieces[count($path_pieces)-1];
     drush_print($link_name);
   }
   return;
+  */
       
   // get release informtion from drupal.org via xml-xpath  
   if (!$recommended_version = _multi_recommended_version($major_version)) {
