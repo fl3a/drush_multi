@@ -720,8 +720,8 @@ function drush_multi_multi_drupalupdate() {
     // 6) unlink document root symlink, here ${MAJOR_VERSION}.x
     if (!drush_op('unlink', $link_name)) {
       return drush_set_error('DRUSH_SM_COULD_NOT_UNLINK_DOKUMENT_ROOT',
-   	  dt('unlink(): Could not unlink !doc_root.', array('!doc_root' => $link_name))
-   	);
+   	    dt('unlink(): Could not unlink !doc_root.', array('!doc_root' => $link_name))
+   	  );
     }              
     // 7) create new symlink for document root/symlink from new drupal to ${MAJOR_VERSION}.x
     if (!drush_op('symlink', $recommended_version, $link_name)) {
@@ -730,13 +730,14 @@ function drush_multi_multi_drupalupdate() {
           array('!drupal' => $recommended_version, '!link' => $link_name)
         )
       );	
-    }    
-    // couldn't chdir() to parent of drupal-root
-    else { 
-      return drush_set_error('DRUSH_SM_COULD_CHANGE_INTO_DRUPAL_PARENT', 
-        dt('chdir(): Could not change to parent of drupal directory.')
-      ); 	
     }
+  }    
+  // couldn't chdir() to parent of drupal-root
+  else { 
+    return drush_set_error('DRUSH_SM_COULD_CHANGE_INTO_DRUPAL_PARENT', 
+      dt('chdir(): Could not change to parent of drupal directory.')
+    ); 	
+  }
   }
   drush_log(dt('Drupalupdate finished, now you should run update.php for each site'), 'completed');
 }
