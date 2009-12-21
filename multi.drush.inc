@@ -737,8 +737,7 @@ function drush_multi_multi_drupalupdate() {
     return drush_set_error('DRUSH_SM_COULD_CHANGE_INTO_DRUPAL_PARENT', 
       dt('chdir(): Could not change to parent of drupal directory.')
     ); 	
-  }
-  }
+  }  
   drush_log(dt('Drupalupdate finished, now you should run update.php for each site'), 'completed');
 }
 
