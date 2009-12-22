@@ -546,7 +546,7 @@ function _multi_nagios_site() {
       	  '!uri'      => drush_get_context('DRUSH_URI'),
           '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
           '!modules'  => implode(',', $modules),   
-          '!update_path' => $updates_path,     
+          '!updates_path' => $updates_path,     
         )
       )
     );
