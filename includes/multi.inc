@@ -502,8 +502,10 @@ function _multi_nagios_site() {
     $data = update_status_calculate_project_data($info);
   }
   else if ($core = 6) {
-    $info = update_get_available(TRUE);
-    $data = update_calculate_project_data($info);;
+    $available = update_get_available(TRUE);
+    module_load_include('inc', 'update', 'update.compare');
+    $data = update_calculate_project_data($available);
+    
   }
   ob_end_clean();
   
