@@ -12,7 +12,7 @@
  * @mainpage 
  * Documentation of drush_multi http://drupal.org/project/drush_multi
  * 
- * Drush_multi is an extension to the Drupal Shell aka drush http://drupal.org/project/drush.
+ * Drush_multi is an extension to the Drupal Shell aka drush http://drupal.org/project/drush which deals with Drupal multisites.
  * 
  * @subpage intro "Introduction"
  * 
@@ -53,6 +53,8 @@
  *    `-- sites  -> ../6.x_sites
  * '
  * @endcode
+ * @note Since commit #305248 (http://drupal.org/cvs?commit=305248), the linkname, here 6.x is free choosable
+ * and need not follow the schema ${core}.x anymore. 
  */
 
 /** 
@@ -182,6 +184,8 @@
  * @page multi_drupalupdate_help "multi drupalupdate"
  * Update your installation if there is a new minor release available,
  * assuming the same structure as in the @ref intro for the installation.
+ * 
+ * @note The Drupal root specified as /path/to/drupal must be a symbolic link.
  * @section Aliases
  * @subsection multi_drupalupdate_alias_mdr mdr
  * @subsection multi_drupalupdate_alias_drupalupdate drupalupdate
