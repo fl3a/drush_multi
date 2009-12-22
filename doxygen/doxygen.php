@@ -10,9 +10,9 @@
   
 /** 
  * @mainpage 
- * Documentation of drush_multi http://drupal.org/project/drush_multi
+ * Documentation of drush_multi - http://drupal.org/project/drush_multi
  * 
- * Drush_multi is an extension to the Drupal Shell aka drush http://drupal.org/project/drush which deals with Drupal multisites.
+ * Drush_multi is an extension to the Drupal Shell aka drush (http://drupal.org/project/drush) which deals with Drupal multisites.
  * 
  * @subpage intro "Introduction"
  * 
@@ -125,7 +125,7 @@
 /** 
  * @page multi_create_help "multi create"
  * Create a Drupal installation with the symbolic link structure as described in the \ref intro.
- * section Aliases
+ * @section Aliases
  * @subsection multi_create_alias_mcr mcr
  * @subsection multi_create_alias_create create
  * @section Arguments
