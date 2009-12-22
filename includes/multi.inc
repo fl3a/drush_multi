@@ -488,8 +488,9 @@ function _multi_nagios_root() {
 function _multi_nagios_site() {
 
   drush_bootstrap_max();
+  $core = drush_drupal_major_version();
 
-  drush_include_engine('update_info', 'drupal', NULL, DRUSH_BASE_PATH . '/commands/pm/update_info');
+  drush_include_engine('update_info', 'drupal', $core, DRUSH_BASE_PATH . '/commands/pm/update_info');
  
   $data = array();
   
@@ -506,7 +507,7 @@ function _multi_nagios_site() {
 
   foreach($data as $module) {
     
-    if ($core = drush_drupal_major_version() == 5) {
+    if ($core == 5) {
       
       // Debug
       drush_print('--');
