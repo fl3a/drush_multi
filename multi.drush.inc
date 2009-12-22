@@ -636,15 +636,30 @@ function drush_multi_multi_create_rollback() {
  */
 
 /**
- * Implementation of drush_hook_pre_command()
+ * Implementation of drush_hook_COMMAND_validate()
  */
-function drush_multi_pre_multi_drupalupdate () {
+function drush_multi_multi_drupalupdate_validate () {
+  
   if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
     return drush_set_error('MULTI_DRUPALUPDATE_DESTINATION_NOT_WRITABLE',
       dt('\'!destination\' is not writable, check permission. Aborting.',
         array('!destination' => $dest)
       )
     );  
+  }
+  $drupal_root = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/');  
+  if (is_link($drupal_root)) { 
+    $path_pieces = explode('/', $drupal_root);
+    $link_name = $path_pieces[count($path_pieces)-1]; 
+    drush_set_context('DRUPAL_ROOT_SYMLINK', $link_name); 
+    drush_set_context('DRUSH_DRUPAL_ROOT', $drupal_root);
+  }
+  else {
+    return drush_set_error('MULTI_DRUPALUPDATE_DRUPAL_ROOT_IS_NO_SYMLINK',
+      dt('Drupal root !drupal_root is not a symbolic link. Aborting.',
+        array('!drupal_root' => $drupal_root)
+      )
+    );
   }
 }
 
@@ -654,19 +669,12 @@ function drush_multi_pre_multi_drupalupdate () {
 function drush_multi_multi_drupalupdate() {
   
   // needed variables: 
-  $drupal_root 		= rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/');
+  $drupal_root 		= drush_get_context('DRUSH_DRUPAL_ROOT');
   $major_version	= drush_drupal_major_version();
   $version 			= drush_drupal_version();  
   $dest				= realpath($drupal_root . '/../');  
-  $link_name        = 0;
+  $link_name        = drush_get_context('DRUPAL_ROOT_SYMLINK');
   
-  /** @todo Variable symlink name for DOCUMENT_ROOT, need'nt be 6.x when using drupal-6 */
-  if (is_link($drupal_root)) { 
-    $path_pieces = explode('/', $drupal_root);
-    $link_name = $path_pieces[count($path_pieces)-1];
-    drush_print($link_name);
-  }
-        
   // get release informtion from drupal.org via xml-xpath  
   if (!$recommended_version = _multi_recommended_version($major_version)) {
     return $recommended_version;
