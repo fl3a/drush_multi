@@ -10,7 +10,7 @@ include 'includes/multi.inc';
 
 /**
  * @defgroup drush_hooks 'Drush hooks'
- * Implementation of drush hooks
+ * Implementation of mandatory drush hooks
  * @{  
  */
 
@@ -289,7 +289,7 @@ function multi_nagios() {
  * Congratulation, you have found an easteregg
  */
 function multi_moo() {
-  $cowsay = "  -----------\n";
+  $cowsay = "  ------------\n";
   $cowsay .= "< i <3 drush >\n";
   $cowsay .= " ------------\n";
   $cowsay .= "        \   ^__^\n";
