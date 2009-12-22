@@ -494,6 +494,9 @@ function _multi_nagios_site() {
  
   $data = array();
   
+  // force refresh
+  _pm_refresh();
+  
   // Suppress output of _pm_get_update_info() which calls _pm_refresh()
   ob_start();
   $data = _pm_get_update_info();
