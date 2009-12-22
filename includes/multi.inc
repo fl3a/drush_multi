@@ -494,12 +494,21 @@ function _multi_nagios_site() {
   
   $data = array();
   
-  // Suppress output of _pm_get_update_info() which calls _pm_refresh()
+  // Suppress output of  _pm_refresh()
   ob_start();
-  $data = _pm_get_update_info();
+  _pm_refresh();
+  if ($core == 5) {
+    $info = update_status_get_available();
+    $data = update_status_calculate_project_data($info);
+  }
+  else if ($core = 6) {
+    $info = update_get_available();
+    $data = update_calculate_project_data($info);;
+  }
   ob_end_clean();
   
   // Debug
+  drush_print($info);
   drush_print_r($data);
   
   $modules = array();
