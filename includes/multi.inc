@@ -490,19 +490,14 @@ function _multi_nagios_site() {
   drush_bootstrap_max();
   $core = drush_drupal_major_version();
 
-  //drush_include_engine('update_info', 'drupal', $core, DRUSH_BASE_PATH . '/commands/pm/update_info');
-  
-  // test for 6.x
-  $available = update_get_available(TRUE);
-  module_load_include('inc', 'update', 'update.compare');
-  $data = update_calculate_project_data($available);
+  drush_include_engine('update_info', 'drupal', NULL, DRUSH_BASE_PATH . '/commands/pm/update_info');
   
   $data = array();
   
   // Suppress output of _pm_get_update_info() which calls _pm_refresh()
-  //ob_start();
-  //$data = _pm_get_update_info();
-  //ob_end_clean();
+  ob_start();
+  $data = _pm_get_update_info();
+  ob_end_clean();
   
   // Debug
   drush_print_r($data);
