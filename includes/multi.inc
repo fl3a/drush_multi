@@ -500,9 +500,9 @@ function _multi_nagios_site() {
   $data = array();
   
   // Suppress output of _pm_get_update_info() which calls _pm_refresh()
-  ob_start();
-  $data = _pm_get_update_info();
-  ob_end_clean();
+  //ob_start();
+  //$data = _pm_get_update_info();
+  //ob_end_clean();
   
   // Debug
   drush_print_r($data);
