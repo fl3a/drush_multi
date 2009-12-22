@@ -508,7 +508,7 @@ function _multi_nagios_site() {
   ob_end_clean();
   
   // Debug
-  drush_print($info);
+  drush_print_r($info);
   drush_print_r($data);
   
   $modules = array();
