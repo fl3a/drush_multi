@@ -509,37 +509,44 @@ function _multi_nagios_site() {
     if ($core = drush_drupal_major_version() == 5) {
       
       // Debug
+      drush_print('--');
       drush_print('module:' . $module['name']);
       drush_print('version:' . $module['existing_version']);
       drush_print('recommended:' . $module['recommended']);
+      drush_print('--');
       
       if($module['existing_version'] != $module['recommended']) {
         $updates = TRUE;
         $modules[] = $module['name'];    
-      }
+        $updates_path = '/?q=admin/logs/updates';
+      }      
     }
     else if($core == 6) {
-      /** @todo check 7.x's _pm_get_update_info() */ 
+      /** @todo check 7.x's _pm_get_update_info() result array */ 
       
       // Debug
+      drush_print('--');
       drush_print('module:' . $module['name']);
       drush_print('version:' . $module['info']['version']);
       drush_print('recommended:' . $module['recommended']);
+      drush_print('--');
       
       if($module['info']['version'] != $module['recommended']) {
         $updates = TRUE;
         $modules[] = $module['name'];    
+        $updates_path = '/?q=admin/reports/updates';
       }
     }
   }
 
   if($updates) {
     drush_print(
-      dt('DRUPAL SITE CRITICAL - !uri @ !site_root: there are updates for !modules, see http://!uri/?q=admin/reports/updates for datails.',
+      dt('DRUPAL SITE CRITICAL - !uri @ !site_root: there are updates for !modules, see http://!uri!updates_path for datails.',
         array(
       	  '!uri'      => drush_get_context('DRUSH_URI'),
           '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
-          '!modules'  => implode(',', $modules),          
+          '!modules'  => implode(',', $modules),   
+          '!update_path' => $updates_path;      
         )
       )
     );
