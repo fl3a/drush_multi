@@ -434,6 +434,12 @@ function _multi_relative_path($target) {
  */
 function _multi_nagios_root() {
   
+  /** 
+   * @todo check core version for url in critical message
+   * (/?q=admin/logs/updates for 5.x, 
+   * (/?q=admin/reports/updates for 6.x) 
+   */
+  
   if ($file = drush_get_option('file')) { 
      if (!is_file($file)) {
        $file = FALSE;
