@@ -194,9 +194,12 @@ function multi_drush_command() {
   
 /** @todo add --exclude-sites option for every batch command */
 
-/** @todo implement multi backup, which create an tar.gz archive of 
- *        1. Whole installation, including sites and sql-dumps. 
- *        2. Site with sql-dump */
+/** 
+ * @todo implement multi backup, which create an tar.gz archive 
+ * of 
+ * 1. Whole installation, including sites and sql-dumps. 
+ * 2. Site with sql-dump 
+ */
 
 /** @todo implement the possibility of using cvs as package handler for 'multi drupalupdate' and 'multi create' */
 
