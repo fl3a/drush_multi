@@ -475,6 +475,8 @@ function _multi_nagios_root() {
 }
 
 /**
+ * EXPERIMENTAL
+ * 
  * Monitores a single Drupal site for module and core updates
  * 
  * This function was heavily inspired by Markus Benning's
@@ -486,7 +488,9 @@ function _multi_nagios_root() {
  * or MULTI_NAGIOS_CRITICAL(2) if there are updates available
  */
 function _multi_nagios_site() {
-
+ 
+  /** @todo investigate why not all updateble modules are listed */
+  /** @todo continue writing. */
   drush_bootstrap_max();
   $core = drush_drupal_major_version();
 
