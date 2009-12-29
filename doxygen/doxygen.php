@@ -89,6 +89,17 @@
 /**
  * @page multi_status_help "multi status"
  * An extended drush core status
+ * 
+ * The core status is extended with 
+ * 
+ * 'Site Counter', number of sites within the installation
+ * 
+ * 'Sites', sites within the installation 
+ * 
+ * 'Prev.Installations', previous installed Drupal versions 
+ * 
+ * 'Drupal Core', Status of Drupal core
+ *  
  * @section Aliases
  * @subsection multi_status_alias_mst mst  
  * @section Examples
