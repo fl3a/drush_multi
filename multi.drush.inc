@@ -725,9 +725,6 @@ function drush_multi_multi_drupalupdate() {
   if (drush_op('chdir', realpath($dest . '/' . $recommended_version))){
     foreach (_multi_scan_links($drupal_root, TRUE) as $link) {        
       
-      drush_print_r($link);
-      
-      
       // if linkname exist as file or directory, rename it 
       if (is_file($link->basename) || is_dir($link->basename)) {      
         if (!drush_op('rename', $link->basename, $link->basename . '-' . date('Y-m-d\TH:i') . '-drupalupdate')) {
