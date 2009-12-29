@@ -278,7 +278,7 @@ function _multi_scan_links($dir = FALSE, $recurse = TRUE, $min_depth = 0, $depth
     while (FALSE !== ($file = readdir($handle))) {
       
       if (!in_array($file, $nomask)) { 
-        if (is_dir("$dir/$file") && $recurse) {
+        if (is_dir("$dir/$file") && $recurse && !is_link("$dir/$file")) {
           // Give priority to files in this folder by merging them in after any subdirectory files.
           $files = array_merge( _multi_scan_links("$dir/$file", $recurse, $min_depth, $depth + 1), $files);
         } 
@@ -289,7 +289,8 @@ function _multi_scan_links($dir = FALSE, $recurse = TRUE, $min_depth = 0, $depth
             $files[$basename] = new stdClass();
             $files[$basename]->filename = $filename;
             $files[$basename]->basename = $basename;
-            $files[$basename]->target = readlink($filename);          
+            $files[$basename]->target = readlink($filename); 
+            $files[$basename]->dirname = dirname($filename);                      
           }
         }        
       }

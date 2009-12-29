@@ -723,8 +723,10 @@ function drush_multi_multi_drupalupdate() {
   //    this also include steps 3) backup sites, 4) symlink sites and 5) symlink backup, if found.
   // change into new drupal directory  
   if (drush_op('chdir', realpath($dest . '/' . $recommended_version))){
-    /** @todo handle recursive link search */
-    foreach (_multi_scan_links($drupal_root, FALSE) as $link) {        
+    foreach (_multi_scan_links($drupal_root, TRUE) as $link) {        
+      
+      drush_print_r($link);
+      
       
       // if linkname exist as file or directory, rename it 
       if (is_file($link->basename) || is_dir($link->basename)) {      
@@ -739,9 +741,12 @@ function drush_multi_multi_drupalupdate() {
           );   
         }     
       }
-      // create relative symlinks to $link->target
+      // Get foldernames for recursive symlinks
       $filename = _multi_relative_path(realpath($link->target));
-      if (!drush_op('symlink', rtrim($filename, '/'), $link->basename)) {
+      $link_dir = ltrim(str_replace($drupal_root, '', $link->dirname), '/');
+      (!empty($link_dir)) ? $link_dir .= '/' : $link_dir;
+      
+      if (!drush_op('symlink', $filename, $link_dir . $link->basename)) {
         drush_set_error('MULTI_COULD_NOT_CREATE_SYMLINK',
           dt('Could not create symbolic link from !target into !pwd.',
             array('!target' => rtrim($filename, '/'), '!cwd' => getcwd())
