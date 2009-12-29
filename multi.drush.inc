@@ -194,8 +194,7 @@ function multi_drush_command() {
   
 /** @todo add --exclude-sites option for every batch command */
 
-/** 
- * @todo implement multi backup, which create an tar.gz archive 
+/** @todo implement multi backup, which create an tar.gz archive 
  * of 
  * 1. Whole installation, including sites and sql-dumps. 
  * 2. Site with sql-dump 
@@ -533,7 +532,7 @@ function drush_multi_multi_create_validate($destination, $core) {
  */
 function drush_multi_multi_create($destination, $core) {
   
-  // Download and  unpack drupal via drush dl to $destination / pwd
+  // Get recommended release of specified core version
   if (!$recommended_version = _multi_recommended_version($core)) {
     return $recommended_version;
   }
@@ -541,8 +540,10 @@ function drush_multi_multi_create($destination, $core) {
   
   // chdir to destination
   if (!drush_op('chdir', $destination)) {
-    return drush_set_error('COULD_NOT_CHANGE_TO_DESTINATION', 
-      dt('Could not change to !destination', array('!destintion' => $destination))
+    return drush_set_error('MULTI_COULD_NOT_CHANGE_TO_DESTINATION', 
+      dt('Could not change to !destination. Aborting.', 
+        array('!destination' => $destination)
+      )
     );
   }
   
@@ -553,12 +554,20 @@ function drush_multi_multi_create($destination, $core) {
     
   // create backup directory  
   if (!drush_op('mkdir', $core . '.x_backup')) {
-    return drush_set_error('', dt(''));
+    return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_DIR', 
+      dt('Could not create backup directory "!pwd/!core.x_backup". Aborting.',
+        array('!pwd' => drush_cwd(), '!core' => $core)
+      )
+    );
   }
   
   // Create sites directory
   if (!drush_op('mkdir', $core . '.x_sites')) {
-    return drush_set_error('', dt(''));
+    return drush_set_error('MULTI_COULD_NOT_CREATE_SITES_DIR', 
+      dt('Could not create sites directory "!pwd/!core.x_sites". Aborting.',
+        array('!pwd' => drush_cwd(), '!core' => $core)
+      )
+    );
   }
   
   $dir = realpath($destination . '/' . $recommended_version . '/sites');
@@ -588,7 +597,7 @@ function drush_multi_multi_create($destination, $core) {
     // 4) create relative symlink for sites-directory into new drupal-root
   	$sites_dir = _multi_relative_path($destination . '/' . $core .'.x_sites');
   	if (!drush_op('symlink', $sites_dir, 'sites')) {
-      return drush_set_error('DRUSH_MULTI_COULD_NOT_CREATE_SITES_SYMLINK', 
+      return drush_set_error('MULTI_COULD_NOT_CREATE_SITES_SYMLINK', 
         dt('symlink(): Unable to create symlink from !source into !target for sites-directory.',
           array('!source' => $sites_dir, '!target' => getcwd() .'/sites')
         )
@@ -597,7 +606,7 @@ function drush_multi_multi_create($destination, $core) {
     // Create relative symlink for backup-directory into new drupal-root
     $backup_dir = _multi_relative_path($destination . '/' . $core .'.x_backup');
     if (!drush_op('symlink', $backup_dir, 'backup')) {
-      return drush_set_error('DRUSH_SM_COULD_NOT_CREATE_BACKUP_SYMLINK', 
+      return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_SYMLINK', 
         dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
           array('!target' => $sites_dir, '!target' => getcwd())          
         )
@@ -605,7 +614,7 @@ function drush_multi_multi_create($destination, $core) {
     }
   }
   else {
-  	return drush_set_error('DRUSH_SM_COULD_NOT_CREATE_SITES_SYMLINK', 
+  	return drush_set_error('MULTI_COULD_NOT_CREATE_SITES_SYMLINK', 
       dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
         array('!source' => $sites_dir, '!target' => getcwd())          
       )
@@ -616,7 +625,7 @@ function drush_multi_multi_create($destination, $core) {
   
   // create new symlink for document root/symlink from new drupal to ${MAJOR_VERSION}.x
   if (!drush_op('symlink', $recommended_version, $core . '.x')) {
-    return drush_set_error('DRUSH_SM_COULD_NOT_SYMLINK_DOKUMENT_ROOT',
+    return drush_set_error('MULTI_COULD_NOT_SYMLINK_DOKUMENT_ROOT',
    	  dt('symlink(): Could not create symlink from !drupal to !major.x for DOCUMENT_ROOT',
    	  	array('!drupal' => $recommended_version, '!major' => $core)
    	  )
@@ -627,7 +636,7 @@ function drush_multi_multi_create($destination, $core) {
 /**
  * Implementation of drush_hook_COMMAND_rollback()
  */
-function drush_multi_multi_create_rollback() {
+function drush_multi_multi_create_rollback($destination, $core) {
 
 }
 /** @} */ /** End of defgroup multi_create */
