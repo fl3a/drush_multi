@@ -89,7 +89,7 @@
 /**
  * @page multi_status_help "multi status"
  * An extended drush core status
- * section Aliases
+ * @section Aliases
  * @subsection multi_status_alias_mst mst  
  * @section Examples
  * @code
