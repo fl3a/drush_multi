@@ -649,21 +649,45 @@ function drush_multi_multi_create_rollback($destination, $core) {
 
 /**
  * Implementation of drush_hook_COMMAND_validate()
+ * 
+ * Performs general checks and set needed variables via drush_set_context()
  */
 function drush_multi_multi_drupalupdate_validate () {
+
+  // Get release informtion from drupal.org via xml-xpath  
+  if (!$recommended_version = _multi_recommended_version(drush_drupal_major_version())) {
+    // return with exit code of _multi_recommended_version() if an error ocurrs
+    return $recommended_version;
+  } 
+  $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
+  // Set recommended version via drush_set_context()
+  drush_set_context('DRUPAL_RECOMMENDED_VERSION', $recommended_version);
   
+  // Check if we need to update by comparing current and recommended version
+  if (_multi_current_version() == $recommended_version) {  
+    drush_print('Your drupal version is uptodate. Aborting');
+    return MULTI_NOTHING_TO_DO; 
+  }
+  
+  // Check if parent directory of DRUSH_DRUPAL_ROOT is writable
   if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
     return drush_set_error('MULTI_DRUPALUPDATE_DESTINATION_NOT_WRITABLE',
       dt('\'!destination\' is not writable, check permission. Aborting.',
         array('!destination' => $dest)
-      )
+      ) 
     );  
   }
-  $drupal_root = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/');  
+  // Get DRUSH_DRUPAL_ROOT without trailing '/'
+  $drupal_root = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/');
+
+  // Check if DRUSH_DRUPAL_ROOT is a symbolic link
   if (is_link($drupal_root)) { 
+    // Get the name of the symbolic link
     $path_pieces = explode('/', $drupal_root);
-    $link_name = $path_pieces[count($path_pieces)-1]; 
-    drush_set_context('DRUPAL_ROOT_SYMLINK', $link_name); 
+    $link_name = $path_pieces[count($path_pieces)-1];
+    // Set  the name of the symbolic link via drush_set_context()
+    drush_set_context('DRUPAL_ROOT_SYMLINK', $link_name);
+    // Set  DRUSH_DRUPAL_ROOT without trailing '/' via drush_set_context()
     drush_set_context('DRUSH_DRUPAL_ROOT', $drupal_root);
   }
   else {
@@ -677,32 +701,24 @@ function drush_multi_multi_drupalupdate_validate () {
 
 /**
  * Implementation of drush_hook_COMMAND()
+ * 
+ * @see drush_multi_multi_drupalupdate_validate() for initialisation of needed variables via drush_set_context() 
  */
 function drush_multi_multi_drupalupdate() {
   
   // needed variables: 
-  $drupal_root 		= drush_get_context('DRUSH_DRUPAL_ROOT');
-  $major_version	= drush_drupal_major_version();
-  $version 			= drush_drupal_version();  
-  $dest				= realpath($drupal_root . '/../');  
-  $link_name        = drush_get_context('DRUPAL_ROOT_SYMLINK');
+  $drupal_root 		    = drush_get_context('DRUSH_DRUPAL_ROOT');
+  $link_name            = drush_get_context('DRUPAL_ROOT_SYMLINK');
+  $recommended_version  = drush_get_context('DRUPAL_RECOMMENDED_VERSION');
+  $major_version	    = drush_drupal_major_version();
+  $version 			    = drush_drupal_version();  
+  $dest				    = realpath($drupal_root . '/../');    
   
-  // get release informtion from drupal.org via xml-xpath  
-  if (!$recommended_version = _multi_recommended_version($major_version)) {
-    return $recommended_version;
-  } 
-  $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
-  
-  if (_multi_current_version() != $recommended_version) {  
-    // 1) download and  2) unpack drupal via drush dl to parent of $drupal_root
-    drush_set_option('destination', $dest);
-    drush_set_option('package-handler', 'wget');
-    drush_invoke('download', $recommended_version);
-  }
-  else {
-    drush_print('Your drupal version is uptodate. Aborting');
-    return MULTI_NOTHING_TO_DO; 
-  }  
+  // 1) download and  2) unpack drupal via drush dl to parent of $drupal_root
+  drush_set_option('destination', $dest);
+  drush_set_option('package-handler', 'wget');
+  drush_invoke('download', $recommended_version);
+    
   // 3) Create all symlinks found in the root of the old installation for the new installation.
   //    this also include steps 3) backup sites, 4) symlink sites and 5) symlink backup, if found.
   // change into new drupal directory  
