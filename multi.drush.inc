@@ -116,7 +116,7 @@ function multi_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'options' => array(
       /** @todo implement --sql-dump option for 'multi drupalupdate //'--sql-dump' => 'Calls multi_sql_dump for all sites before starting the drupalupdate.', */
-      /** @todo implement --updatedb  option for 'multi drupalupdate //'--updatedb' => 'Execute updatedb for all sites after drupalupdate.', */     
+      '--updatedb' => 'Execute updatedb for all sites after drupalupdate.',      
     ),
     'examples' => array(
       'drush -r /path/to/drupal multi drupalupdate' => 'Update your drupal installation to the recommended release.',
@@ -697,6 +697,11 @@ function drush_multi_multi_drupalupdate_validate () {
       )
     );
   }
+  
+  // Set '--updatedb' option, if supplied to TRUE via drush_set_option() 
+  if (in_array('--updatedb', $argv = $GLOBALS['argv'])) {
+    drush_set_option('--updatedb', TRUE);
+  }    
 }
 
 /**
@@ -776,7 +781,13 @@ function drush_multi_multi_drupalupdate() {
       dt('chdir(): Could not change to parent of drupal directory.')
     ); 	
   }  
-  drush_log(dt('Drupalupdate finished, now you should run update.php for each site'), 'completed');
+  /** @todo Test 'multi drupalupdate' with --updatedb option */ 
+  if (drush_get_option('--updatedb')) { 
+    drush_invoke('multi exec', 'updatedb'); 
+  }
+  else {
+    drush_log(dt('Drupalupdate finished, now you should run update.php for each site'), 'completed');
+  }
 }
 
 /**
