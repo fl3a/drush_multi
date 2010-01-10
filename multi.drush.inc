@@ -115,7 +115,7 @@ function multi_drush_command() {
     'description' => 'Update your drupal installation to the current version minor release, if available.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'options' => array(
-      /** @todo implement --sql-dump option for 'multi drupalupdate //'--sql-dump' => 'Calls multi_sql_dump for all sites before starting the drupalupdate.', */
+      '--sql-dump' => 'Calls multi_sql_dump for all sites before starting the drupalupdate.', 
       '--updatedb' => 'Execute updatedb for all sites after drupalupdate.',      
     ),
     'examples' => array(
@@ -639,6 +639,7 @@ function drush_multi_multi_create($destination, $core) {
 function drush_multi_multi_create_rollback($destination, $core) {
 
 }
+
 /** @} */ /** End of defgroup multi_create */
 
 /**
@@ -669,8 +670,8 @@ function drush_multi_multi_drupalupdate_validate () {
     return MULTI_NOTHING_TO_DO; 
   }
   
-  // Check if parent directory of DRUSH_DRUPAL_ROOT is writable
   if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
+  // Check if parent directory of DRUSH_DRUPAL_ROOT is writable
     return drush_set_error('MULTI_DRUPALUPDATE_DESTINATION_NOT_WRITABLE',
       dt('\'!destination\' is not writable, check permission. Aborting.',
         array('!destination' => $dest)
@@ -701,7 +702,24 @@ function drush_multi_multi_drupalupdate_validate () {
   // Set '--updatedb' option, if supplied to TRUE via drush_set_option() 
   if (in_array('--updatedb', $argv = $GLOBALS['argv'])) {
     drush_set_option('--updatedb', TRUE);
-  }    
+  }
+
+  // Set '--sql-dump' option, if supplied to TRUE via drush_set_option() 
+  if (in_array('--sql-dump', $argv = $GLOBALS['argv'])) {
+    drush_set_option('--sql-dump', TRUE);
+  }
+}
+
+/**
+ * Implementation of drush_hook_pre_COMMAND()
+ * 
+ * Execute 'sql dump' if '--sql-dump' option is set
+ */
+function drush_multi_pre_multi_drupalupdate() {
+  
+  if (drush_get_option('--sql-dump')) { 
+    drush_invoke('multi sql dump'); 
+  }  
 }
 
 /**
@@ -781,7 +799,15 @@ function drush_multi_multi_drupalupdate() {
       dt('chdir(): Could not change to parent of drupal directory.')
     ); 	
   }  
-  /** @todo Test 'multi drupalupdate' with --updatedb option */ 
+}
+
+/**
+ * Implementation of drush_hook_post_COMMAND()
+ * 
+ * Executes 'updatedb' on all sites if '--updatedb' option is set
+ */
+function drush_multi_post_multi_drupalupdate() {
+  
   if (drush_get_option('--updatedb')) { 
     drush_invoke('multi exec', 'updatedb'); 
   }
