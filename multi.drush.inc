@@ -323,14 +323,16 @@ function drush_multi_multi_sql_dump_validate() {
     if (!is_dir($target)) {
       return drush_set_error('DESTINATION_IS_NOT_A_DIRECTORY', 'Supplied argument is not a directory. Aborting.');
     }
-    if (!is_writable($target)) {
-      return drush_set_error('DESTINATION_NOT_WRITABLE',
-        dt('Directory !dir is not writable. Aborting.', array('!dir' => $target))
-      );
-    }    
+    else {
+      drush_set_option('target', '/tmp');
+    }
   }
-  else {
-    drush_set_option('destination', '/tmp');
+  
+  // check target for write access 
+  if (!is_writable($target)) {
+    return drush_set_error('TARGET_NOT_WRITABLE',
+      dt('Directory !dir is not writable. Aborting.', array('!dir' => $target))
+    );
   }
    
   $comment = drush_get_option('comment');
@@ -343,16 +345,6 @@ function drush_multi_multi_sql_dump_validate() {
   if (in_array('--bzip2', $argv = $GLOBALS['argv'])) {
     drush_set_option('--bzip2', TRUE);
   }   
-}
-
-/**
- * Implementation of hook_drush_pre_COMMAND()
- */
-function drush_multi_pre_multi_sql_dump() {
-  
-  if(!is_writable(drush_get_option('target'))) {
-    drush_set_error('MULTI_DESTINATION_NOT_WRITABLE'); 
-  }
 }
 
 /**
