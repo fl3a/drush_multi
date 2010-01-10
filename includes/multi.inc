@@ -169,14 +169,14 @@ function _multi_released_versions($core, $project = 'drupal') {
  * @return boolean
  *   TRUE if found on drupal.org else FALSE via drush_set_error() 
  */
-function _multi_check_drupalmajorversion($core, $project = 'drupal') {
+function _multi_check_project($core, $project = 'drupal') {
   
   $url = 'http://updates.drupal.org/release-history/'. $project . '/'. $core . '.x';
   if ($xml = @simplexml_load_file($url)) {
     if ($error = $xml->xpath('/error')) {
   	  return drush_set_error('MULTI_INVALID_PROJECT_OR_MAJOR_VERSION', 
   	    dt('Combination of project !project and major version !$core does not exist.',
-  	      array('!project' => $project, '!core' => $major_version)
+  	      array('!project' => $project, '!core' => $core)
   	    )
   	  );
     }

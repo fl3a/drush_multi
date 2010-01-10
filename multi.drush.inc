@@ -182,12 +182,8 @@ function multi_drush_command() {
 }
 /** @} */ /** End of defgroup drush_hooks */
 
-/** @todo rename all appearance of $major_version to $core */
- 
 /** @todo implement all rollback hooks with making use of drush_cmp_error('${ERROR_CODE}') function to identify the steps for a rollback */
 
-/** @todo rename _multi_check_drupalmajorversion() to _multi_check_project() */
-  
 /** @todo implement "multi update" for updating drush_multi by itself via cvs. */
 
 /** @todo implement "multi maintanance" with state online/offline argument (via vset) */
@@ -293,7 +289,7 @@ function multi_nagios() {
  * Congratulation, you have found an easteregg
  */
 function multi_moo() {
-  $cowsay = "  ------------\n";
+  $cowsay  = " ------------\n";
   $cowsay .= "< i <3 drush >\n";
   $cowsay .= " ------------\n";
   $cowsay .= "        \   ^__^\n";
@@ -304,6 +300,7 @@ function multi_moo() {
   $cowsay .= "This drush has super cow powers!";    
   drush_print($cowsay);
 }
+
 /** @} */ /** End of defgroup callbacks */
 
 /**
@@ -514,7 +511,7 @@ function drush_multi_multi_create_validate($destination, $core) {
     return drush_set_error('MULTI_MISSING_MAJORVERSION', 
       dt('Missing argument for major-version. Aborting'));
   }
-  else if (!_multi_check_drupalmajorversion($core)) {
+  else if (!_multi_check_project($core)) {
     return drush_set_error('MULTI_INVALID_MAJORVERSION', dt('Invalid argument for major-version. Aborting'));
   }   
 }
@@ -727,7 +724,6 @@ function drush_multi_multi_drupalupdate() {
   $drupal_root 		    = drush_get_context('DRUSH_DRUPAL_ROOT');
   $link_name            = drush_get_context('DRUPAL_ROOT_SYMLINK');
   $recommended_version  = drush_get_context('DRUPAL_RECOMMENDED_VERSION');
-  $major_version	    = drush_drupal_major_version();
   $version 			    = drush_drupal_version();  
   $dest				    = realpath($drupal_root . '/../');    
   

@@ -201,12 +201,12 @@
  * @subsection multi_drupalupdate_alias_mdr mdr
  * @subsection multi_drupalupdate_alias_drupalupdate drupalupdate
  * @section Options
- * @subsection multi_sql_dump_option --sql-dump
+ * @subsection multi_drupalupdate_sql_dump_option --sql-dump
  * Executes 'multi sql dump' before running 'multi drupalupdate'. 
  * 
  * See @ref multi_sql_dump_help for usable options and details.
  * 
- * @subsection multi_drupalupdate_option --updatedb
+ * @subsection multi_drupalupdate_updatedb_option --updatedb
  * Executes 'updatedb' after ececution of 'multi drupalupdate' via @ref multi_exec_help.
  * 
  * @section Examples
