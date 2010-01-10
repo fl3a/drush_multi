@@ -200,10 +200,30 @@
  * @section Aliases
  * @subsection multi_drupalupdate_alias_mdr mdr
  * @subsection multi_drupalupdate_alias_drupalupdate drupalupdate
+ * @section Options
+ * @subsection multi_drupalupdate_option --sql-dump
+ * Executes 'multi sql dump' before running 'multi drupalupdate'. 
+ * 
+ * See @ref multi_sql_dump_help for usable options and details.
+ * 
+ * @subsection multi_drupalupdate_option --updatedb
+ * Executes 'updatedb' after ececution of 'multi drupalupdate' via @ref multi_exec_help.
+ * 
  * @section Examples
  * @code
  * drush -r /path/to/drupal multi drupalupdate
- * @endcode 
+ * @endcode
+ * Runs a 'multi drupalupdate'on /path/to/drupal 
+ * 
+ * @code
+ * drush -r /path/to/drupal multi drupalupdate --sql-dump --comment='before drupaldate' --update
+ * @endcode
+ * Runs a 'multi drupalupdate'on /path/to/drupal with
+ * 
+ * making sql dumps of all sites with optional comment 'before drupalupdate' for sql dump filenames
+ * 
+ * and execution of 'updatedb' afterwards 
+ *  
  */
    
 /** 

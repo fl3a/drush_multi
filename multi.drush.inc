@@ -115,11 +115,13 @@ function multi_drush_command() {
     'description' => 'Update your drupal installation to the current version minor release, if available.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'options' => array(
-      '--sql-dump' => 'Calls multi_sql_dump for all sites before starting the drupalupdate.', 
+      '--sql-dump' => 'Calls multi_sql_dump for all sites before starting the drupalupdate. See "drush help multi sql dump" for options and details.', 
       '--updatedb' => 'Execute updatedb for all sites after drupalupdate.',      
     ),
     'examples' => array(
       'drush -r /path/to/drupal multi drupalupdate' => 'Update your drupal installation to the recommended release.',
+      'drush -r /path/to/drupal multi drupalupdate --sql-dump --comment="before drupaldate" --update' =>
+      'Runs a "multi drupalupdate" on /path/to/drupal with making sql dumps of all sites with optional comment "before drupalupdate" for sql dump filenames and execution of "updatedb" afterwards',   
     ),     
   );
   $items['multi site'] = array(
@@ -348,7 +350,7 @@ function drush_multi_multi_sql_dump_validate() {
  */
 function drush_multi_pre_multi_sql_dump() {
   
-  if(!is_writable(drush_get_option('destination'))) {
+  if(!is_writable(drush_get_option('target'))) {
     drush_set_error('MULTI_DESTINATION_NOT_WRITABLE'); 
   }
 }
@@ -655,23 +657,8 @@ function drush_multi_multi_create_rollback($destination, $core) {
  */
 function drush_multi_multi_drupalupdate_validate () {
 
-  // Get release informtion from drupal.org via xml-xpath  
-  if (!$recommended_version = _multi_recommended_version(drush_drupal_major_version())) {
-    // return with exit code of _multi_recommended_version() if an error ocurrs
-    return $recommended_version;
-  } 
-  $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
-  // Set recommended version via drush_set_context()
-  drush_set_context('DRUPAL_RECOMMENDED_VERSION', $recommended_version);
-  
-  // Check if we need to update by comparing current and recommended version
-  if (_multi_current_version() == $recommended_version) {  
-    drush_print('Your drupal version is uptodate. Aborting');
-    return MULTI_NOTHING_TO_DO; 
-  }
-  
-  if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
   // Check if parent directory of DRUSH_DRUPAL_ROOT is writable
+  if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
     return drush_set_error('MULTI_DRUPALUPDATE_DESTINATION_NOT_WRITABLE',
       dt('\'!destination\' is not writable, check permission. Aborting.',
         array('!destination' => $dest)
@@ -697,6 +684,21 @@ function drush_multi_multi_drupalupdate_validate () {
         array('!drupal_root' => $drupal_root)
       )
     );
+  }
+  
+  // Get release informtion from drupal.org via xml-xpath  
+  if (!$recommended_version = _multi_recommended_version(drush_drupal_major_version())) {
+    // return with exit code of _multi_recommended_version() if an error ocurrs
+    return $recommended_version;
+  } 
+  $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
+  // Set recommended version via drush_set_context()
+  drush_set_context('DRUPAL_RECOMMENDED_VERSION', $recommended_version);
+  
+  // Check if we need to update by comparing current and recommended version
+  if (_multi_current_version() == $recommended_version) {  
+    drush_print('Your drupal version is uptodate. Aborting');
+    return MULTI_NOTHING_TO_DO; 
   }
   
   // Set '--updatedb' option, if supplied to TRUE via drush_set_option() 
