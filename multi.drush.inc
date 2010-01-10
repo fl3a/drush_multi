@@ -163,13 +163,13 @@ function multi_drush_command() {
     'description' => 'Exports the Drupal DB as SQL for all sites. File pattern is ${uri} and a \'_date(\'Y-m-d\TH:i\').sql suffix.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'examples' => array(
-      'drush -r /path/to/drupal multi sql dump --bzip2 --comment=before-update-to-6.15 --destination=$HOME/db_backups' => 
+      'drush -r /path/to/drupal multi sql dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups' => 
         'Run \'sql dump\' on all sites with comment \'before-update-to-6.15\' as comment for each result file. ' .
         'The result files are bzip compressed and stored in \'db_backups\' in your home dirctory.' .
         "\nDump name schema:\n'\${uri}'_before-update-to-6.1_{date('Y-m-d\TH:i')}.sql.bz2'."
     ),
     'options' => array(
-      '--destination' => 'Absolute Path to the directory where to store the sql dumps. Default /tmp. Optional.',
+      '--target' => 'Absolute Path to the directory where to store the sql dumps. Default /tmp. Optional.',
       '--comment'     => 'Comment for filename. May contain alphanumics, \'-\' and \'_\'. Optional.',
       '--bzip2' => 'Use bzip2 for compression of each sql dump. Optional',
       /** @todo implement --update option for sql_dump, //'--update' => 'Disable all optional modules (core/contrib), put your sites in maintainance mode and a activate a default theme. Optional', */          
@@ -315,15 +315,15 @@ function multi_moo() {
  */
 function drush_multi_multi_sql_dump_validate() {
   
-  $destination = drush_get_option('destination');
+  $target = drush_get_option('target');
     
-  if (!empty($destination)) {
-    if (!is_dir($destination)) {
+  if (!empty($target)) {
+    if (!is_dir($target)) {
       return drush_set_error('DESTINATION_IS_NOT_A_DIRECTORY', 'Supplied argument is not a directory. Aborting.');
     }
-    if (!is_writable($destination)) {
+    if (!is_writable($target)) {
       return drush_set_error('DESTINATION_NOT_WRITABLE',
-        dt('Directory !dir is not writable. Aborting.', array('!dir' => $destination))
+        dt('Directory !dir is not writable. Aborting.', array('!dir' => $target))
       );
     }    
   }
@@ -358,7 +358,7 @@ function drush_multi_pre_multi_sql_dump() {
  */
 function drush_multi_multi_sql_dump() { 
     
-  $destination = drush_get_option('destination');
+  $target = drush_get_option('target');
   
   $sites = array();
   $sites = _multi_scan_sites();
@@ -375,10 +375,10 @@ function drush_multi_multi_sql_dump() {
     // Building result-file name
     $comment = drush_get_option('comment');
     if (isset($comment)) {
-      $result_file = $destination . '/' . $site . '_' . $comment . $prefix;
+      $result_file = $target . '/' . $site . '_' . $comment . $prefix;
     } 
     else {
-      $result_file = $destination . '/' . $site .  $prefix;
+      $result_file = $target . '/' . $site .  $prefix;
     }
     // for --update
     $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
