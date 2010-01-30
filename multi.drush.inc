@@ -498,13 +498,16 @@ function drush_multi_multi_create_validate($destination, $core) {
     return drush_set_error('MULTI_MISSING_DESTINATION', 
       dt('Missing argument for destination. Aborting'));
   }
-  if (!$core) {
-    return drush_set_error('MULTI_MISSING_CORE', 
-      dt('Missing argument for core. Aborting'));
-  }
   else if (!is_dir($destination)) {
     return drush_set_error('MULTI_INVALID_DESTINATION', 
       dt('Invalid argument for destination, !destination is no directory. Aborting',
+        array('!destination' => $destination)
+      )
+    );
+  }
+  else if (!is_writable($destination)){
+    return drush_set_error('MULTI_DESTINATION_NOT_WRITABLE', 
+      dt('!destination is not writable. Aborting',
         array('!destination' => $destination)
       )
     );
