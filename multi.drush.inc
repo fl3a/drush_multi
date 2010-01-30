@@ -550,7 +550,7 @@ function drush_multi_multi_create($destination, $core) {
   drush_set_option('package-handler', 'wget');
   drush_set_option('destination', $destination);  
   drush_invoke('download', $recommended_version);
-    
+
   // create backup directory  
   if (!drush_op('mkdir', $core . '.x_backup')) {
     return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_DIR', 
@@ -571,8 +571,8 @@ function drush_multi_multi_create($destination, $core) {
   
   $dir = realpath($destination . '/' . $recommended_version . '/sites');
   
-  // Copy sites/default to ${major_version}_sites
-  $exec = 'cp -r ' . $dir . '/default ' . $core . '.x_sites';
+  // Copy content of sites directory to ${major_version}_sites
+  $exec = 'cp -r ' . $dir . '/* ' . $core . '.x_sites';
   if (!drush_shell_exec($exec)) {
     return drush_set_error('MULTI_COULD_NOT_COPY_SITES_DEFAULT_DIR', 
   	  dt('Could not copy !dir to !target',
@@ -590,7 +590,41 @@ function drush_multi_multi_create($destination, $core) {
   	    array('!dir' => $dir, '!target' => $dir . '.bak')
   	  )
   	);
-  }  
+  }
+
+  // create profiles directory
+  if (!drush_op('mkdir', $core . '.x_profiles')) {
+    return drush_set_error('MULTI_COULD_NOT_CREATE_PROFILES_DIR', 
+      dt('Could not create profiles directory "!pwd/!core.x_profiles". Aborting.',
+        array('!pwd' => drush_cwd(), 
+        '!core' => $core)
+      )
+    );
+  }
+  
+  $dir = realpath($destination . '/' . $recommended_version . '/profiles');
+  
+  // Copy content of profiles directory to ${major_version}_profiles
+  $exec = 'cp -r ' . $dir . '/* ' . $core . '.x_profiles';
+  if (!drush_shell_exec($exec)) {
+    return drush_set_error('MULTI_COULD_NOT_COPY_PROFILES_DEFAULT_DIR', 
+  	  dt('Could not copy !dir to !target',
+  	    array('!dir' => $dir . '/default', '!target' => $core . '.x_profiles')
+  	  )
+  	);
+  } 
+  
+  // Rename original profiles-directory from new drupal-root to profiles.bak
+  // for a php rename, the directory must be empty
+  $exec =   'mv ' . $dir . ' ' . $dir . '.bak';
+  if (!drush_shell_exec($exec)) {
+    return drush_set_error('MULTI_COULD_NOT_RENAME_DEFAULT_DIR', 
+  	  dt('Could not rename profiles directory !dir to !target',
+  	    array('!dir' => $dir, '!target' => $dir . '.bak')
+  	  )
+  	);
+  }
+  
   // Change into new drupal directory
   if(drush_op('chdir', realpath($destination . '/' . $recommended_version))) {        
     // 4) create relative symlink for sites-directory into new drupal-root
@@ -608,6 +642,15 @@ function drush_multi_multi_create($destination, $core) {
       return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_SYMLINK', 
         dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
           array('!target' => $sites_dir, '!target' => getcwd())          
+        )
+      );      
+    }
+    // Create relative symlink for profiles-directory into new drupal-root
+    $profiles_dir = _multi_relative_path($destination . '/' . $core .'.x_profiles');
+    if (!drush_op('symlink', $profiles_dir, 'profiles')) {
+      return drush_set_error('MULTI_COULD_NOT_CREATE_PROFILES_SYMLINK', 
+        dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
+          array('!target' => $profiles_dir, '!target' => getcwd())          
         )
       );      
     }
