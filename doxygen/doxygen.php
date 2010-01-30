@@ -32,6 +32,7 @@
  * drupal/
  * |-- 6.x -> drupal-6.14
  * |-- 6.x_backup
+ * |-- 6.x_profiles
  * |-- 6.x_sites
  * |   |-- all   
  * |   |-- default
@@ -48,7 +49,7 @@
  *    |-- includes
  *    |-- misc
  *    |-- modules
- *    |-- profiles
+ *    |-- profiles -> ../6.x_profiles
  *    |-- scripts
  *    `-- sites  -> ../6.x_sites
  * '
@@ -149,9 +150,9 @@
  * drush multi create /var/www 6
  * @endcode
  * Create a drupal 6 installation in /var/www 
- * with creating the directories 6.x_sites, 
- * 6.x_backup in /var/www linked as sites 
- * and backup withing the drupal installation folder.
+ * with creating the directories 6.x_backup, 6.x_profiles 
+ * and 6.x_sites in /var/www link them as backup, profiles and sites  
+ * into the drupal installation folder with a relative path.
  */   
    
 /** 
