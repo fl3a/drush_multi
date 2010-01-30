@@ -507,8 +507,8 @@ function drush_multi_multi_create_validate($destination, $core) {
   }
   else if (!is_writable($destination)){
     return drush_set_error('MULTI_DESTINATION_NOT_WRITABLE', 
-      dt('!destination is not writable. Aborting',
-        array('!destination' => $destination)
+      dt('Destination !destination is not writable. Aborting',
+        array('!destination' => realpath($destination))
       )
     );
   }
