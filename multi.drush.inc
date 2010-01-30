@@ -156,7 +156,7 @@ function multi_drush_command() {
       /** @todo implement --link-dirs option for 'multi create', see drush_multi_multi_site() // --create-directories option //'--link-dirs'			=> 'Comma seperated list of \'directory=linkame\',' . 'where \'directory\' is created in the parent directory of the installation ' .   //'and linked as \'linkname\' into the installation.', */      
     ),            
     'arguments' => array(
-      '/path/to/installation'   => 'Directoy where drupal should be installed. Mandatory',
+      '/path/to/installation'   => 'Path to where drupal should be installed. Mandatory',
       'core' => 'Drupal core compatiblity. Mandatory.', 
     ), 
   );
@@ -183,8 +183,6 @@ function multi_drush_command() {
 /** @} */ /** End of defgroup drush_hooks */
 
 /** @todo implement all rollback hooks with making use of drush_cmp_error('${ERROR_CODE}') function to identify the steps for a rollback */
-
-/** @todo implement "multi update" for updating drush_multi by itself via cvs. */
 
 /** @todo implement "multi maintanance" with state online/offline argument (via vset) */
 
@@ -500,6 +498,10 @@ function drush_multi_multi_create_validate($destination, $core) {
     return drush_set_error('MULTI_MISSING_DESTINATION', 
       dt('Missing argument for destination. Aborting'));
   }
+  if (!$core) {
+    return drush_set_error('MULTI_MISSING_CORE', 
+      dt('Missing argument for core. Aborting'));
+  }
   else if (!is_dir($destination)) {
     return drush_set_error('MULTI_INVALID_DESTINATION', 
       dt('Invalid argument for destination, !destination is no directory. Aborting',
@@ -529,7 +531,10 @@ function drush_multi_multi_create($destination, $core) {
   }
   $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
   
-  // chdir to destination
+  // convert $destination to an absolute path
+  $destination = realpath($destination);
+  
+    // chdir to destination
   if (!drush_op('chdir', $destination)) {
     return drush_set_error('MULTI_COULD_NOT_CHANGE_TO_DESTINATION', 
       dt('Could not change to !destination. Aborting.', 
@@ -946,6 +951,4 @@ function drush_multi_multi_site($site_name) {
     }      
   }        
 }
-/** @} */ /** End of defgroup "multi site" */
-
 /** @} */ /** End of defgroup commands */
