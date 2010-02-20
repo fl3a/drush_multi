@@ -312,34 +312,52 @@ function multi_moo() {
  */
 function drush_multi_multi_sql_dump_validate() {
   
-  $target = drush_get_option('target');
-    
-  if (!empty($target)) {
-    if (!is_dir($target)) {
-      return drush_set_error('DESTINATION_IS_NOT_A_DIRECTORY', 'Supplied argument is not a directory. Aborting.');
-    }
-    else {
-      drush_set_option('target', '/tmp');
-    }
-  }
-  
-  // check target for write access 
-  if (!is_writable($target)) {
-    return drush_set_error('TARGET_NOT_WRITABLE',
-      dt('Directory !dir is not writable. Aborting.', array('!dir' => $target))
-    );
+  // check for --bzip2 option
+  if (in_array('--bzip2', $argv = $GLOBALS['argv'])) {
+    drush_set_option('--bzip2', TRUE);
   }
    
-  $comment = drush_get_option('comment');
+  // check for --date-stamp option
+  if (in_array('--date-stamp', $argv = $GLOBALS['argv'])) {
+    drush_set_option('--date-stamp', TRUE);
+  }
   
+  // check target argument
+  $target = drush_get_option('target');
+  if (!empty($target)) {
+    if (!is_dir($target)) {
+      return drush_set_error('MULTI_TARGET_IS_NOT_A_DIRECTORY', 'Supplied argument for target is not a directory. Aborting.');
+    }
+    
+    // check target for write access 
+    if (!is_writable($target)) {
+      return drush_set_error('MULTI_TARGET_NOT_WRITABLE',
+        dt('Directory !dir is not writable. Aborting.', array('!dir' => $target))
+      );
+    }    
+  }
+  else {
+    // set /tmp as default
+    drush_set_option('target', '/tmp');
+  }
+  
+  // check --comment argument
+  $comment = drush_get_option('comment');  
   if (isset($comment) && !preg_match("/^[a-zA-Z0-9\-_]{1,}$/", $comment)) {
     return drush_set_error('MULTI_INVALID_COMMENT_ARGUMENT',
       dt('Invalid argument for comment. Aborting.')
     );
   }
-  if (in_array('--bzip2', $argv = $GLOBALS['argv'])) {
-    drush_set_option('--bzip2', TRUE);
-  }   
+  
+  // check --dump-type argument
+  $dump_type = drush_get_option('dump-type','full');
+  // list of allowed dump type arguments 
+  $dump_types = array('full','tables');
+  if (!in_array($dump_type, $dump_types )) {
+    return drush_set_error('MULTI_INVALID_DUMP_TYPE_ARGUMENT',
+      dt('Invalid argument for dump-type. Aborting.')
+    );
+  }
 }
 
 /**
@@ -349,48 +367,61 @@ function drush_multi_multi_sql_dump() {
     
   $target = drush_get_option('target');
   
+  // Result-file date
+  if (isset(drush_get_option('datestamp'))) {
+    $date = '_' . date('Y-m-d\TH:i') ;
+  }
+  
+  // Result file comment
+  $comment = drush_get_option('comment');
+  if (isset($comment)) {
+    $comment =  '_' . $comment;      
+  }
+  
+  // File extension
+  $extension = '.sql';
+    
   $sites = array();
   $sites = _multi_scan_sites();
   
-  foreach ($sites as $site) {
-    drush_set_option('uri', $site);
-    $db_spec = _drush_sql_get_spec_from_settings(
-      rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/' . $site . '/settings.php', ''
-    );
-        
-    // Result-file prefix
-    $prefix = '_' . date('Y-m-d\TH:i') . '.sql';
-    
-    // Building result-file name
-    $comment = drush_get_option('comment');
-    if (isset($comment)) {
-      $result_file = $target . '/' . $site . '_' . $comment . $prefix;
-    } 
-    else {
-      $result_file = $target . '/' . $site .  $prefix;
+  $dump = drush_get_option('dump-type', 'full'); 
+  // full sql dump
+  if ($dump == 'full') {
+    foreach ($sites as $site) {
+      drush_set_option('uri', $site);
+      $db_spec = _drush_sql_get_spec_from_settings(
+        rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/' . $site . '/settings.php', ''
+      );
+          
+      // Building result-file name 
+      $result_file = $target . '/' . $site . $date . $comment . $extension;
+      
+      // preperation for --update option
+      $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
+      $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
+      $disable_optional_modules_sql = "";
+      $enable_optional_modules_sql = "";
+      
+      $exec = drush_sql_dump($db_spec);        
+      if (drush_op('system', $exec) == 0) {
+        drush_log(dt('SQL dump for !site saved in !file.', 
+          array('!site' => $site, '!file' => $result_file)),
+          'success'        
+        );      
+        if (drush_get_option('--bzip2')) {        
+          if (drush_shell_exec("bzip2 \"$result_file\"")) {
+            drush_log(dt('Compressed !file using bzip2.', 
+              array('!file' => $result_file)),
+            	'success'        
+            );
+          }                
+        } 		  
+      }    
     }
-    // for --update
-    $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
-    $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
-    $disable_optional_modules_sql = "";
-    $enable_optional_modules_sql = "";
+  }
+  // table wise sql dump
+  else {
     
-    drush_set_option('result-file', $result_file);
-    $exec = drush_sql_dump($db_spec);        
-    if (drush_op('system', $exec) == 0) {
-      drush_log(dt('SQL dump for !site saved in !file.', 
-        array('!site' => $site, '!file' => $result_file)),
-        'success'        
-      );      
-      if (drush_get_option('--bzip2')) {        
-        if (drush_shell_exec("bzip2 \"$result_file\"")) {
-          drush_log(dt('Compressed !file using bzip2.', 
-            array('!file' => $result_file)),
-          	'success'        
-          );
-        }                
-      } 		  
-    }    
   }    
 }
 /** @} */ /** 	End of defgroup multi_sql_dump */
