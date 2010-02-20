@@ -54,8 +54,9 @@
  *    `-- sites  -> ../6.x_sites
  * '
  * @endcode
- * @note Since commit #305248 (http://drupal.org/cvs?commit=305248), the linkname, here 6.x is free choosable
- * and need not follow the schema ${core}.x anymore. 
+ * @note Since commit #305248 (http://drupal.org/cvs?commit=305248), @ref multi_drupalupdate_help could handle 
+ * other linknames then schema ${core}.x. pointing to drupal root.
+ * Drush multi detects and preserves symbolic links within old drupal root automaticly during drupalupdate since commit #307916 (http://drupal.org/cvs?commit=307916). 
  */
 
 /** 
@@ -197,6 +198,9 @@
  * Update your installation if there is a new minor release available,
  * assuming the same structure as in the @ref intro for the installation.
  * 
+ * All symbolic links within the original drupal installation are detected automatically
+ * due _multi_scan_links() and will be preserved with an relative path due _multi_relative_path().
+ * 
  * @note The Drupal root specified as /path/to/drupal must be a symbolic link.
  * @section Aliases
  * @subsection multi_drupalupdate_alias_mdr mdr
@@ -217,7 +221,7 @@
  * Runs a 'multi drupalupdate'on /path/to/drupal 
  * 
  * @code
- * drush -r /path/to/drupal multi drupalupdate --sql-dump --comment='before drupaldate' --update
+ * drush -r /path/to/drupal multi drupalupdate --sql-dump --comment='before drupaldate' --updatedb
  * @endcode
  * Runs a 'multi drupalupdate'on /path/to/drupal with
  * 
