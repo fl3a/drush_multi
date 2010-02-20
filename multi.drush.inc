@@ -172,10 +172,15 @@ function multi_drush_command() {
     ),
     'options' => array(
       '--target' => 'Absolute Path to the directory where to store the sql dumps. Default /tmp. Optional.',
+      /** @todo implement --dump-type option for sql_dump*/ 
+      // '--dump-type' => "Arguments:\n" .
+      // "\"full\" Creates one file for all tables (default).\n' .
+      // '"tables" Creates for each table a seperate file.',
       '--comment'     => 'Comment for filename. May contain alphanumics, \'-\' and \'_\'. Optional.',
-      '--bzip2' => 'Use bzip2 for compression of each sql dump. Optional',
+      '--datetime' => 'Adds an optional datetime string to each result file. Format YYYY-MM-DDThh:mm',
       /** @todo implement --update option for sql_dump, //'--update' => 'Disable all optional modules (core/contrib), put your sites in maintainance mode and a activate a default theme. Optional', */          
       /** @todo implement --maintance option for sql_dump, //'--maintanace' => 'Put your sites in maintainance mode. Optional', */
+      '--bzip2' => 'Use bzip2 for compression of each sql dump. Optional',
     ),    
   );  
   return $items;
@@ -318,8 +323,8 @@ function drush_multi_multi_sql_dump_validate() {
   }
    
   // check for --date-stamp option
-  if (in_array('--date-stamp', $argv = $GLOBALS['argv'])) {
-    drush_set_option('--date-stamp', TRUE);
+  if (in_array('--datetime', $argv = $GLOBALS['argv'])) {
+    drush_set_option('--datetime', TRUE);
   }
   
   // check target argument
@@ -367,12 +372,12 @@ function drush_multi_multi_sql_dump() {
     
   $target = drush_get_option('target');
   
-  // Result-file date
-  if (isset(drush_get_option('datestamp'))) {
-    $date = '_' . date('Y-m-d\TH:i') ;
+  // Optional result-file datetime
+  if (isset(drush_get_option('datetime'))) {
+    $datetime = '_' . date('Y-m-d\TH:i') ;
   }
   
-  // Result file comment
+  // Optional result file comment
   $comment = drush_get_option('comment');
   if (isset($comment)) {
     $comment =  '_' . $comment;      
@@ -394,9 +399,9 @@ function drush_multi_multi_sql_dump() {
       );
           
       // Building result-file name 
-      $result_file = $target . '/' . $site . $date . $comment . $extension;
+      $result_file = $target . '/' . $site . $datetime . $comment . $extension;
       
-      // preperation for --update option
+      // preperation for --update
       $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
       $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
       $disable_optional_modules_sql = "";

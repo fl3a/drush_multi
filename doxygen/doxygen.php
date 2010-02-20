@@ -54,9 +54,6 @@
  *    `-- sites  -> ../6.x_sites
  * '
  * @endcode
- * @note Since commit #305248 (http://drupal.org/cvs?commit=305248), @ref multi_drupalupdate_help could handle 
- * other linknames then schema ${core}.x. pointing to drupal root.
- * Drush multi detects and preserves symbolic links within old drupal root automaticly during drupalupdate since commit #307916 (http://drupal.org/cvs?commit=307916). 
  */
 
 /** 
@@ -240,6 +237,8 @@
  * @subsection multi_sql_dump_destination --target
  * Absolute Path to the directory where to store the sql dumps. 
  * Default /tmp.
+ * @subsection multi_sql_dump_datetime --datetime
+ * Adds a datetime to resultfiles. (YYYY-MM-DDThh:mm) 
  * @subsection multi_sql_dump_comment --comment
  * Comment for filename. May contain alphanumics, '-' and '_'.
  * @subsection multi_sql_dump_bzip2 --bzip2
@@ -253,9 +252,9 @@
  *
  * The result files are bzip2 compressed and stored in 'db_backups' in your home dirctory. 
  * 
- * Dump name schema for the command as executed above:
+ * Dump name schema for the command as executed above. 
  * 
- * '${uri}'_before-update-to-6.1_{date('Y-m-d\TH:i')}.sql.bz2', where ${uri} is a site name.
+ * 'example.com_before-update-to-6.15.sql.bz2', where example.com is one of your sites.
  */
 
 /**
