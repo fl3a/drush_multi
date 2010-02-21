@@ -369,7 +369,8 @@ function drush_multi_multi_sql_dump() {
   $target = drush_get_option('target');
   
   // Optional result-file datetime
-  if (isset(drush_get_option('datetime'))) {
+  $datetime = drush_get_option('datetime');
+  if (isset($datetime)) {
     $datetime = '_' . date('Y-m-d\TH:i') ;
   }
   
