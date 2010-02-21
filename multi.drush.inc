@@ -172,10 +172,9 @@ function multi_drush_command() {
     ),
     'options' => array(
       '--target' => 'Absolute Path to the directory where to store the sql dumps. Default /tmp. Optional.',
-      /** @todo implement --dump-type option for sql_dump*/ 
-      // '--dump-type' => "Arguments:\n" .
-      // "\"full\" Creates one file for all tables (default).\n' .
-      // '"tables" Creates for each table a seperate file.',
+      '--dump-type' => "Arguments:\n" .
+      "\"full\" Creates one file for all tables (default).\n" .
+      '"tables" Creates for each table within each database a seperate file.',
       '--comment'     => 'Comment for filename. May contain alphanumics, \'-\' and \'_\'. Optional.',
       '--datetime' => 'Adds an optional datetime string to each result file. Format YYYY-MM-DDThh:mm',
       /** @todo implement --update option for sql_dump, */ //'--update' => 'Disable all optional modules (core/contrib), put your sites in maintainance mode and a activate a default theme. Optional',           
@@ -386,9 +385,10 @@ function drush_multi_multi_sql_dump() {
   $sites = array();
   $sites = _multi_scan_sites();
   
-  $dump = drush_get_option('dump-type', 'full'); 
-  // full sql dump
-  if ($dump == 'full') {
+  $dump_type = drush_get_option('dump-type', 'full'); 
+  // full: full sql dump
+  if ($dump_type == 'full') {
+    // iterates site databases
     foreach ($sites as $site) {
       drush_set_option('uri', $site);
       $db_spec = _drush_sql_get_spec_from_settings(
@@ -410,11 +410,27 @@ function drush_multi_multi_sql_dump() {
       
       $exec = drush_sql_dump($db_spec);        
       if (drush_op('system', $exec) == 0) {
-        drush_log(dt('SQL dump for !site saved in !file.', 
-          array('!site' => $site, '!file' => $result_file)),
+        drush_log(
+          dt('SQL dump for site !site, database !database saved in !file.', 
+            array(
+              '!site'     => $site,
+              '!database' => $db_spec['database'],
+              '!file'     => $result_file
+            )
+          ),
           'success'        
         );      
-        if (drush_get_option('--bzip2')) {        
+        if (drush_get_option('--bzip2')) {
+          // delete $result_file if it already exists 
+          if (is_file($result_file . '.bz2')){
+            drush_shell_exec('rm '. $result_file . '.bz2');
+            drush_log(
+              dt('Overwriting existing file !file',
+                array('!file' => $result_file . '.bz2')
+              ),
+              'notice'
+            );               
+          }        
           if (drush_shell_exec("bzip2 \"$result_file\"")) {
             drush_log(dt('Compressed !file using bzip2.', 
               array('!file' => $result_file)),
@@ -425,9 +441,74 @@ function drush_multi_multi_sql_dump() {
       }    
     }
   }
-  // table wise sql dump
+  // tables: table wise sql dump
   else {
-    
+    // iterates site databases
+    foreach ($sites as $site) {
+      drush_set_option('uri', $site);
+      $db_spec = _drush_sql_get_spec_from_settings(
+        rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/' . $site . '/settings.php', ''
+      );
+
+      drush_sql_connect();
+      $tables = array();
+            
+      // get available tables from current database (site)      
+      $exec = 'echo "SHOW TABLES"|';
+      $exec.= 'mysql -u' . $db_spec['username'];
+      $exec.= ' -p'. $db_spec['password'];
+      $exec.= ' '. $db_spec['database'];
+      $output = shell_exec($exec);
+      $tables = explode("\n", $output);
+      // remove "Tables_in_database" from array
+      unset($tables[0]);
+      // remove last element which contains the databasename
+      unset($tables[sizeof($tables)]);
+
+       // iterate tables
+      foreach($tables as $table) {
+      
+        // Building result-file name 
+        $result_file = $target . '/' . $site . '.' . $table . $datetime . $comment . $extension;
+               
+        // build mysqldump statement
+        $exec = 'mysqldump -u' . $db_spec['username'];
+        $exec.= ' -p'. $db_spec['password'];
+        $exec.= ' '. $db_spec['database'] .' ' . $table;
+        //drush_print($exec . '>' . $result_file);
+        if (drush_shell_exec($exec . '>' . $result_file)) {
+          drush_log(
+            dt('SQL dump for site !site, datebase !database, table !table saved in !file.', 
+              array(
+                '!site'      => $site,
+                '!database'  => $db_spec['database'],
+                '!table'     => $table, 
+                '!file'      => $result_file
+              )
+            ),
+          	'success'        
+          );
+          if (drush_get_option('--bzip2')) {
+            // delete $result_file if it already exists
+            if (is_file($result_file . '.bz2')){
+              drush_shell_exec('rm '. $result_file . '.bz2');
+              drush_log(
+                dt('Overwriting existing file !file',
+                  array('!file' => $result_file . '.bz2')
+                ),
+                'notice'
+              );               
+            }        
+            if (drush_shell_exec("bzip2 \"$result_file\"")) {
+              drush_log(dt('Compressed !file using bzip2.', 
+                array('!file' => $result_file)),
+              	'success'        
+              );
+            }
+          }                
+        }                 
+      }
+    }
   }    
 }
 /** @} */ /** 	End of defgroup multi_sql_dump */

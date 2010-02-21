@@ -247,6 +247,13 @@
  * @subsection multi_sql_dump_destination --target
  * Absolute Path to the directory where to store the sql dumps. 
  * Default /tmp.
+ * @subsection multi_sql_dump_dump_type --dump-type
+ * Arguments:
+ * 
+ * "full" Creates one file for all tables (default).
+ * 
+ * "tables" Creates for each table within each database a seperate file.
+ * 
  * @subsection multi_sql_dump_datetime --datetime
  * Adds a datetime to resultfiles. (YYYY-MM-DDThh:mm) 
  * @subsection multi_sql_dump_comment --comment
