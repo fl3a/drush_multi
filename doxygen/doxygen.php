@@ -10,10 +10,20 @@
   
 /** 
  * @mainpage 
- * Documentation of drush_multi - http://drupal.org/project/drush_multi
  * 
- * Drush_multi is an extension to the Drupal Shell aka drush (http://drupal.org/project/drush) which deals with Drupal multisites.
+ * <img src="drush_logo-black.png" alt="drush logo" title="drush logo" /> 
+ * Documentation of <a href="http://drupal.org/project/drush_multi"> drush_multi</a>
  * 
+ * Drush_multi is an  an extension to <a href="http://drupal.org/project/drush">drush</a> aka <a href="http://drupal.org">Drupal</a> Shell</a> which deals with Drupal multisites.
+ * 
+ * Drush Multi requires drush >= v.2.1.
+ * 
+ * This documentation was generated with <a href="http://doxygen.org">Doxygen</a>.
+ *  
+ * Each of these called softwares including drush_multi itself are released under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
+ * 
+ * Drupal is a registered trademark of <a href="http://buytaert.net">Dries Buytaert</a>. 
+ *  
  * @subpage intro "Introduction"
  * 
  * @subpage install "Installation"

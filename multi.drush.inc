@@ -10,7 +10,7 @@ include 'includes/multi.inc';
 
 /**
  * @defgroup drush_hooks 'Drush hooks'
- * Implementation of mandatory drush hooks
+ * Implementation of general drush hooks
  * @{  
  */
 
@@ -152,8 +152,8 @@ function multi_drush_command() {
       'linked as sites and backup withing the drupal installation folder.',      
     ),
     'options' => array(
-      /** @todo implement --document-root option for 'multi create' //'--document-root' => "Specify a custom name for DOCUMENT_ROOT. \nDefault \${major_version}.x,\neg. 6.x for a drupal 6 release." */
-      /** @todo implement --link-dirs option for 'multi create', see drush_multi_multi_site() // --create-directories option //'--link-dirs'			=> 'Comma seperated list of \'directory=linkame\',' . 'where \'directory\' is created in the parent directory of the installation ' .   //'and linked as \'linkname\' into the installation.', */      
+      /** @todo implement --document-root option for 'multi create' */ //'--document-root' => "Specify a custom name for DOCUMENT_ROOT. \nDefault \${major_version}.x,\neg. 6.x for a drupal 6 release." 
+      /** @todo implement --link-dirs option for 'multi create', see drush_multi_multi_site() */ // --create-directories option //'--link-dirs'			=> 'Comma seperated list of \'directory=linkame\',' . 'where \'directory\' is created in the parent directory of the installation ' .   //'and linked as \'linkname\' into the installation.',       
     ),            
     'arguments' => array(
       '/path/to/installation'   => 'Path to where drupal should be installed. Mandatory',
@@ -178,45 +178,22 @@ function multi_drush_command() {
       // '"tables" Creates for each table a seperate file.',
       '--comment'     => 'Comment for filename. May contain alphanumics, \'-\' and \'_\'. Optional.',
       '--datetime' => 'Adds an optional datetime string to each result file. Format YYYY-MM-DDThh:mm',
-      /** @todo implement --update option for sql_dump, //'--update' => 'Disable all optional modules (core/contrib), put your sites in maintainance mode and a activate a default theme. Optional', */          
-      /** @todo implement --maintance option for sql_dump, //'--maintanace' => 'Put your sites in maintainance mode. Optional', */
+      /** @todo implement --update option for sql_dump, */ //'--update' => 'Disable all optional modules (core/contrib), put your sites in maintainance mode and a activate a default theme. Optional',           
+      /** @todo implement --maintance option for sql_dump, */ //'--maintanace' => 'Put your sites in maintainance mode. Optional', 
       '--bzip2' => 'Use bzip2 for compression of each sql dump. Optional',
     ),    
   );  
   return $items;
 }
 /** @} */ /** End of defgroup drush_hooks */
-
-/** @todo implement all rollback hooks with making use of drush_cmp_error('${ERROR_CODE}') function to identify the steps for a rollback */
-
-/** @todo implement "multi maintanance" with state online/offline argument (via vset) */
-
-/** @todo add --include-sites option for every batch command */
-  
-/** @todo add --exclude-sites option for every batch command */
-
-/** @todo implement 'multi backup', which create an tar.gz archive 
- * of 
- * 1. Whole installation, including sites and sql-dumps. 
- * 2. Site with sql-dump 
- */
-
-/** @todo implement the possibility of using cvs as package handler for 'multi drupalupdate' and 'multi create' */
-
-/**
- * @defgroup commands
- * Commands as defined in multi_drush_command()
- * @{  
- */
-
-/**
+ /**
  * @defgroup callbacks
  * Command callbacks, see multi_drush_command() for definitions
  * @{
  */
 
 /**
- * Commannd callback for @ref multi_status_help
+ * Command callback for @ref multi_status_help
  */
 function multi_status() {
   
@@ -287,7 +264,7 @@ function multi_nagios() {
 }
 
 /**
- * Commannd callback for "multi moo"
+ * Command callback for "multi moo"
  * 
  * Congratulation, you have found an easteregg
  */
@@ -305,6 +282,25 @@ function multi_moo() {
 }
 
 /** @} */ /** End of defgroup callbacks */
+
+/** @todo implement all rollback hooks with making use of drush_cmp_error('${ERROR_CODE}') function to identify the steps for a rollback */
+
+/** @todo implement "multi maintanance" with state online/offline argument (via vset) */
+
+/** @todo implement 'multi backup', which create an tar.gz archive 
+ * of 
+ * 1. Whole installation, including sites and sql-dumps. 
+ * 2. Site with sql-dump 
+ */
+
+/** @todo implement the possibility of using cvs as package handler for 'multi drupalupdate' and 'multi create' */
+
+/**
+ * @defgroup commands
+ * Commands as defined in multi_drush_command()
+ * @{  
+ */
+
 
 /**
  * @defgroup multi_sql_dump 'multi sql dump'

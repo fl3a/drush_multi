@@ -61,29 +61,19 @@ define('MULTI_NAGIOS_CRITICAL', 2);
  *   combined with supplied $project,  '/', supplied  $core and '.x'.
  * @return
  *   An array with the following keys, we assume 6 was supplied for core, 'drupal' for project and v. 6.14 is recommended version:
- *   
- *   [name] => drupal 6.14
- *   
- *   [version] => 6.14
- *   
- *   [tag] => DRUPAL-6-14
- *   
- *   [version_major] => 6
- *   
- *   [version_patch] => 14
- *   
- *   [status] => published
- *   
- *   [release_link] => http://drupal.org/node/579476
- *   
- *   [download_link] => http://ftp.drupal.org/files/projects/drupal-6.14.tar.gz
- *   
- *   [date] => 1253130028
- *   
- *   [mdhash] => 014bb453a8d0adb0233c763e40d63859
- *   
+ * @code  
+ *   [name] => drupal 6.14   
+ *   [version] => 6.14   
+ *   [tag] => DRUPAL-6-14   
+ *   [version_major] => 6   
+ *   [version_patch] => 14   
+ *   [status] => published   
+ *   [release_link] => http://drupal.org/node/579476   
+ *   [download_link] => http://ftp.drupal.org/files/projects/drupal-6.14.tar.gz   
+ *   [date] => 1253130028   
+ *   [mdhash] => 014bb453a8d0adb0233c763e40d63859   
  *   [filesize] => 1082687
- *   
+ * @endcode   
  *  or the recommended version as float, if float is set to TRUE, 
  *  
  *  or FALSE via drush_set_error() if $core $project combination does 
@@ -163,7 +153,7 @@ function _multi_released_versions($core, $project = 'drupal') {
  *  
  * @param $core 
  *   Core compatibility / drupal major version (5, 6, 7 and so forth)
- *   but also possible for versions before drupal 5 like drupal/4.7.x or image/4.7.x etc without error  
+ *   but also possible for versions before drupal 5 like drupal-4.7.x or image-4.7.x etc without error  
  * @param $project 
  * 	Name of the project. Default 'drupal' 
  * @return boolean
