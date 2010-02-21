@@ -398,7 +398,11 @@ function drush_multi_multi_sql_dump() {
       // Building result-file name 
       $result_file = $target . '/' . $site . $datetime . $comment . $extension;
       
+      // set --result-file argument for drush_sql_dump()
+      drush_set_option('result-file', $result_file);
+      
       // preperation for --update
+      /** @todo implement --update for dumps with only required activated */ 
       $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
       $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
       $disable_optional_modules_sql = "";
