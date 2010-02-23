@@ -618,66 +618,17 @@ function _multi_check_site($site) {
  * @return TRUE if the connection was established succesfull else FALSE
  */
 function _multi_check_db_url($site) {
-  /** @todo more tests */
+  
   $db_spec = array();
   
   $db_spec = _drush_sql_get_spec_from_settings(
     rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/' . $site . '/settings.php', ''
   );  
   
-  // connect via database specific functions
-  switch ($db_spec['driver']) {
-    case 'mysql':
-      $link = @mysql_connect(
-        $db_spec['host'] . ':' . $db_spec['port'],
-        $db_spec['username'],
-        $db_spec['password'],
-        $db_spec['database']        
-      );
-      break;
-    case 'mysqli':
-      /** @todo check mysqli_connect(), not tested */      
-      $link = mysqli_connect(
-        $db_spec['host'],
-        $db_spec['username'],
-        $db_spec['password'],
-        $db_spec['database'],
-        $db_spec['port']
-      );
-      break;
-    case 'pgsql':
-      /** @todo check pg_connect(), not tested */
-      // creating postgresql connection string
-      $connection_string  = 'host=' . $db_spec['host'] .' ';
-      $connection_string .= 'user=' . $db_spec['user'] .' ';
-      $connection_string .= 'password=' . $db_spec['password'] .' ';
-      $connection_string .= 'dbname=' . $db_spec['database'];
-      if (!empty($db_spec['port'])) {
-        $connection_string .= ' port=' . $db_spec['port'];
-      }      
-      $link = pg_connect($connection_string);
-      break;
-  }
-  
-  // check the database connection
-  if (!$link) {
-    return FALSE;
-  }
-  else {
-    // close the established database connection
-    switch ($db_spec['driver']) {
-      case 'mysql':
-        mysql_close($link);
-        break;
-      case 'mysqli':
-        mysqli_close($link);
-        break;
-      case 'pgsql':
-        pg_close($link);
-        break;           
-    }
-    return TRUE;   
-  }   
+  if (@drush_sql_query('SHOW TABLES')) {
+    return TRUE;
+  } 
+  return FALSE;  
 }
 
 /** @} */ /** End of defgroup misc */ 
