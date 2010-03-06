@@ -236,6 +236,12 @@ function _multi_scan_sites($symlinks = TRUE){
 }
 
 /**
+ * @defgroup symlinks 'Symlink functions'
+ * Functions for handling and preserving symbolic links within the Drupal installation.
+ * @{  
+ */
+
+/**
  * Finds symbolic links (also hidden) in the drupal installation.
  * 
  * @param $dir
@@ -252,7 +258,7 @@ function _multi_scan_sites($symlinks = TRUE){
  *   "filename", "basename", and "target" (target of the symbolic link)
  *   members corresponding to found symbolic links 
  */
-function _multi_scan_links($dir = FALSE, $recurse = TRUE, $min_depth = 0, $depth = 0 ) {
+function _multi_scan_symlinks($dir = FALSE, $recurse = TRUE, $min_depth = 0, $depth = 0 ) {
   
   if (!$dir) {
     $dir = (string) drush_get_context('DRUSH_DRUPAL_ROOT');        
@@ -288,7 +294,13 @@ function _multi_scan_links($dir = FALSE, $recurse = TRUE, $min_depth = 0, $depth
     closedir($handle);
   }
   return $files;
-} 
+}
+
+function _multi_preserve_symlinks() {
+  
+}
+/** @} */ /** End of defgroup symlinks */
+
 
 /**
  * Returns all available drupal installations of your major release 
@@ -410,7 +422,7 @@ function _multi_relative_path($target) {
 
   return $path;
 }
-/** @} */ /** End of defgroup filesystemm */
+/** @} */ /** End of defgroup filesystem */
 
 /**
  * @defgroup nagios 'Nagios functions'

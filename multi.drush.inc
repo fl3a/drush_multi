@@ -903,9 +903,10 @@ function drush_multi_multi_drupalupdate() {
     
   // 3) Create all symlinks found in the root of the old installation for the new installation.
   //    this also include steps 3) backup sites, 4) symlink sites and 5) symlink backup, if found.
+  
   // change into new drupal directory  
   if (drush_op('chdir', realpath($dest . '/' . $recommended_version))){
-    foreach (_multi_scan_links($drupal_root, TRUE) as $link) {        
+    foreach (_multi_scan_symlinks($drupal_root, TRUE) as $link) {        
       
       // if linkname exist as file or directory, rename it 
       if (is_file($link->basename) || is_dir($link->basename)) {      
