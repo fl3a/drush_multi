@@ -23,19 +23,19 @@ include 'includes/multi.inc';
  */
 function multi_drush_help($section) {
   switch ($section) {
-    case 'drush:multi status':
+    case 'drush:multi-status':
       return dt("Status of your multisite installation.");    
-    case 'drush:multi exec':
+    case 'drush:multi-exec':
       return dt('Execute a drush command for all sites in your multisite installation.');
-    case 'drush:multi drupalupdate':
+    case 'drush:multi-drupalupdate':
       return dt('Run a drupal minor update on your multisite installation.');
-    case 'drush:multi site':
+    case 'drush:multi-site':
       return dt('Create a new site in your your multisite installation within a files, modules and themes directory.');
-    case 'drush:multi create':
+    case 'drush:multi-create':
       return dt('Create a multisite installation.');
-    case 'drush:multi sql dump':
+    case 'drush:multi-sql-dump':
       return dt('Execute \'sql dump\' for all sites in your your multisite installation. The default pattern for the result-file is $uri . \'_\' . date(\'Y-m-d\TH:i\').sql, where $uri is the foldername of a site.');
-    case 'drush:multi nagios':
+    case 'drush:multi-nagios':
       return 'For the use as nagios plugin. Print a message and returns with exit status 2 (Critical) if there is a drupal update available.';      
   }
 }
@@ -49,7 +49,7 @@ function multi_drush_help($section) {
 function multi_drush_command() {
   $items = array();
 
-  $items['multi status'] = array(
+  $items['multi-status'] = array(
     'callback' => 'multi_status',
     'aliases' => array('mst'),
     'description' => 'Status of your drupal multisite installation',
@@ -58,7 +58,7 @@ function multi_drush_command() {
       'drush -r /path/to/drupal multi status' => 'Displays the status.',
     ),      	
   );
-  $items['multi nagios'] = array(
+  $items['multi-nagios'] = array(
     'callback' => 'multi_nagios',
     'aliases' => array('mna', 'nagios'), 
     'description' => 'Message and exit code for nagios.',
@@ -88,12 +88,12 @@ function multi_drush_command() {
       "NOTE: This option is only available for checking the Drupal installation."
     ),    
   );
-  $items['multi moo'] = array(
+  $items['multi-moo'] = array(
     'aliases' => array('moo'),
     'callback' => 'multi_moo',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, // No bootstrap at all.
   );
-  $items['multi exec'] = array(
+  $items['multi-exec'] = array(
     'aliases' => array('mex'),
     'description' => 'Run a drush command on all sites in your multisite installation. Implemented drush commands are: \'cache clear\', \'cron\', \'update\', \'updatecode\', \'updatedb\', \'watchdog delete\', \'watchdog show\' and \'refresh\'.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
@@ -110,7 +110,7 @@ function multi_drush_command() {
       'command' => 'The drush command to execute. For drush commands with blanks like \'watchdog show\' make sure to use single or double quotes. Mandatory.',             
     ),
   );
-  $items['multi drupalupdate'] = array(
+  $items['multi-drupalupdate'] = array(
     'aliases' => array('mdr', 'drupalupdate'),
     'description' => 'Update your drupal installation to the current version minor release, if available.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
@@ -124,7 +124,7 @@ function multi_drush_command() {
       'Runs a "multi drupalupdate" on /path/to/drupal with making sql dumps of all sites with optional comment "before drupalupdate" for sql dump filenames and execution of "updatedb" afterwards',   
     ),     
   );
-  $items['multi site'] = array(
+  $items['multi-site'] = array(
     'aliases' => array('msi', 'site'),
     'description' => 'Create a site in your drupal installation',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
@@ -141,7 +141,7 @@ function multi_drush_command() {
       'site-name'  => 'Name of the site. Mandatory.',
     ),
   );
-  $items['multi create'] = array(
+  $items['multi-create'] = array(
     'aliases' => array('mcr', 'create'),
     'description' => 'Create a multisite installation',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, // No bootstrap at all.
@@ -152,15 +152,14 @@ function multi_drush_command() {
       'linked as sites and backup withing the drupal installation folder.',      
     ),
     'options' => array(
-      /** @todo implement --document-root option for 'multi create' */ //'--document-root' => "Specify a custom name for DOCUMENT_ROOT. \nDefault \${major_version}.x,\neg. 6.x for a drupal 6 release." 
-      /** @todo implement --link-dirs option for 'multi create', see drush_multi_multi_site() */ // --create-directories option //'--link-dirs'			=> 'Comma seperated list of \'directory=linkame\',' . 'where \'directory\' is created in the parent directory of the installation ' .   //'and linked as \'linkname\' into the installation.',       
+      /** @todo implement --document-root option for 'multi create' */ //'--document-root' => "Specify a custom name for DOCUMENT_ROOT. \nDefault \${major_version}.x,\neg. 6.x for a drupal 6 release.",      
     ),            
     'arguments' => array(
       '/path/to/installation'   => 'Path to where drupal should be installed. Mandatory',
       'core' => 'Drupal core compatiblity. Mandatory.', 
     ), 
   );
-  $items['multi sql dump'] = array(
+  $items['multi-sql-dump'] = array(
     'aliases' => array('msq'),
     'description' => 'Exports the Drupal DB as SQL for all sites. File pattern is ${uri} and a \'_date(\'Y-m-d\TH:i\').sql suffix.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
@@ -198,7 +197,7 @@ function multi_status() {
   
   // Prepend additional information to drush's core status
   $status = drush_core_status();	
-  
+   
   // get sites in that installation
   $sites = array();
   $sites = _multi_scan_sites(); 
@@ -282,18 +281,6 @@ function multi_moo() {
 
 /** @} */ /** End of defgroup callbacks */
 
-/** @todo implement all rollback hooks with making use of drush_cmp_error('${ERROR_CODE}') function to identify the steps for a rollback */
-
-/** @todo implement "multi maintanance" with state online/offline argument (via vset) */
-
-/** @todo implement 'multi backup', which create an tar.gz archive 
- * of 
- * 1. Whole installation, including sites and sql-dumps. 
- * 2. Site with sql-dump 
- */
-
-/** @todo implement the possibility of using cvs as package handler for 'multi drupalupdate' and 'multi create' */
-
 /**
  * @defgroup commands
  * Commands as defined in multi_drush_command()
@@ -302,7 +289,7 @@ function multi_moo() {
 
 
 /**
- * @defgroup multi_sql_dump 'multi sql dump'
+ * @defgroup multi_sql_dump multi-sql-dump
  * Hooks for the invocation of @ref multi_sql_dump_help, see multi_drush_command() for definitions
  * @{  
  */
@@ -310,7 +297,7 @@ function multi_moo() {
 /**
  * Implementation of drush_hook_COMMAND_validate 
  */
-function drush_multi_multi_sql_dump_validate() {
+function drush_multi_sql_dump_validate() {
   
   // check for --bzip2 option
   if (in_array('--bzip2', $argv = $GLOBALS['argv'])) {
@@ -363,7 +350,7 @@ function drush_multi_multi_sql_dump_validate() {
 /**
  * Implementation of drush_hook_COMMAND()
  */
-function drush_multi_multi_sql_dump() { 
+function drush_multi_sql_dump() { 
     
   $target = drush_get_option('target');
   
@@ -402,7 +389,6 @@ function drush_multi_multi_sql_dump() {
       drush_set_option('result-file', $result_file);
       
       // preperation for --update
-      /** @todo implement --update for dumps with only required activated */ 
       $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
       $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
       $disable_optional_modules_sql = "";
@@ -514,7 +500,7 @@ function drush_multi_multi_sql_dump() {
 /** @} */ /** 	End of defgroup multi_sql_dump */
 
 /**
- * @defgroup multi_exec 'multi_exec'
+ * @defgroup multi_exec multi-exec
  * Hooks for invocation of @ref multi_exec_help, see multi_drush_command() for definition
  * @{
  */
@@ -523,7 +509,7 @@ function drush_multi_multi_sql_dump() {
  * Implementation of drush_hook_COMMAND_validate 
  * @param $command
  */
-function drush_multi_multi_exec_validate ($command) {
+function drush_multi_exec_validate ($command) {
   
   if (empty($command)) {
     return drush_set_error('MULTI_DRUSH_EXEC_MISSING_DRUSH_COMMAND',
@@ -559,7 +545,7 @@ function drush_multi_multi_exec_validate ($command) {
  * Implementation of drush_hook_COMMAND()
  * @param $command 
  */
-function drush_multi_multi_exec($command) {  
+function drush_multi_exec($command) {  
   
   // drush's executable with absolute path
   $drush = DRUSH_COMMAND; // defined in drush.php  
@@ -600,7 +586,7 @@ function drush_multi_multi_exec($command) {
 /** @} */ /** End of defgroup multi_exec */
 
 /**
- * @defgroup multi_create 'multi_create'
+ * @defgroup multi_create multi-create
  * Hooks for invocation of @ref multi_create_help, see multi_drush_command() for definition
  * @{  
  */
@@ -610,7 +596,7 @@ function drush_multi_multi_exec($command) {
  * @param $destination
  * @param $core
  */
-function drush_multi_multi_create_validate($destination, $core) {
+function drush_multi_create_validate($destination, $core) {
   
   if (!$destination) {
     return drush_set_error('MULTI_MISSING_DESTINATION', 
@@ -644,7 +630,7 @@ function drush_multi_multi_create_validate($destination, $core) {
  * @param $destination
  * @param $core
  */
-function drush_multi_multi_create($destination, $core) {
+function drush_multi_create($destination, $core) {
   
   // Get recommended release of specified core version
   if (!$recommended_version = _multi_recommended_version($core)) {
@@ -796,14 +782,14 @@ function drush_multi_multi_create($destination, $core) {
 /**
  * Implementation of drush_hook_COMMAND_rollback()
  */
-function drush_multi_multi_create_rollback($destination, $core) {
-
+function drush_multi_create_rollback($destination, $core) {
+  /** @todo implement drush_multi_create_rollback() */
 }
 
 /** @} */ /** End of defgroup multi_create */
 
 /**
- * @defgroup multi_drupalupdate 'multi_drupalupdate'
+ * @defgroup multi_drupalupdate multi-drupalupdate
  * Hooks for invocation of @ref multi_drupalupdate_help, see multi_drush_command() for definition
  * @{  
  */
@@ -813,7 +799,7 @@ function drush_multi_multi_create_rollback($destination, $core) {
  * 
  * Performs general checks and set needed variables via drush_set_context()
  */
-function drush_multi_multi_drupalupdate_validate () {
+function drush_multi_drupalupdate_validate () {
 
   // Check if parent directory of DRUSH_DRUPAL_ROOT is writable
   if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
@@ -885,11 +871,11 @@ function drush_multi_pre_multi_drupalupdate() {
 /**
  * Implementation of drush_hook_COMMAND()
  * 
- * @see drush_multi_multi_drupalupdate_validate() for initialisation of needed variables via drush_set_context()
+ * @see drush_multi_drupalupdate_validate() for initialisation of needed variables via drush_set_context()
  * @see <a href="http://netzaffe.de/drupal-6-multisiteumgebung-mit-postgresql-unter-debian-4/drupal-update-in-8-schritten.html">Drupal Update in 8 Steps (Drupal Update in 8 Schritten (german))</a>
  * for the corresponding steps.  
  */
-function drush_multi_multi_drupalupdate() {
+function drush_multi_drupalupdate() {
   
   // needed variables: 
   $drupal_root 		    = drush_get_context('DRUSH_DRUPAL_ROOT');
@@ -934,6 +920,13 @@ function drush_multi_multi_drupalupdate() {
 }
 
 /**
+ * Implementation of drush_hook_COMMAND_rollback()
+ */
+function drush_multi_drupalupdate_rollback() {
+  /** @todo implement drush_multi_drupalupdate_rollback() */
+}
+
+/**
  * Implementation of drush_hook_post_COMMAND()
  * 
  * Executes 'updatedb' on all sites if '--updatedb' option is set
@@ -948,16 +941,10 @@ function drush_multi_post_multi_drupalupdate() {
   }
 }
 
-/**
- * Implementation of drush_hook_COMMAND_rollback()
- */
-function drush_multi_multi_drupalupdate_rollback() {
-  
-}
 /** @} */ /** End of defgroup multi_drupalupdate */
  
 /**
- * @defgroup multi_site 'multi site'
+ * @defgroup multi_site multi-site
  * Hooks for invocation of @ref multi_site_help	, see multi_drush_command() for definition
  * @{
  */
@@ -966,11 +953,11 @@ function drush_multi_multi_drupalupdate_rollback() {
  * Implementation of drush_hook_COMMAND_validate()
  * @param $site_name
  */
-function drush_multi_multi_site_validate($site_name) {
+function drush_multi_site_validate($site_name) {
 
   if (!$site_name) {
-    return drush_set_error('MULTI_SITE_SITE_NOT_SPECIFIED', 
-      dt('No site specified.')
+    return drush_set_error('MULTI_SITE_MISSING_SITE_ARGUMENT', 
+      dt('Missing site argument.')
     );
   }
   else {
@@ -981,8 +968,8 @@ function drush_multi_multi_site_validate($site_name) {
     $directories = array();    
     $directories = explode(',', $directories_option);
     foreach ($directories as $directory) {
-      /** @todo check if the files, themes and modules folder exists */
-      /** @todo check each directory name with regex, check path -> must be in the same directory */
+      /** @todo check each directory name with regex */
+      /** @todo check path, must be in within $drupal_root */
     }
   }  
 }
@@ -995,8 +982,18 @@ function drush_multi_pre_multi_site($site_name) {
   
   $sites_dir = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/';
   if (!is_writable($sites_dir)) {
-    drush_set_error('MULTI_SITE_SITES_DIR_NOT_WRITABLE',
-      dt('Site directory \'!sites\' is not writable.', array('!sites_dir' => $sites_dir))
+    return drush_set_error('MULTI_SITE_SITES_DIR_NOT_WRITABLE',
+      dt('Site directory \'!sites_dir\' is not writable.', array('!sites_dir' => $sites_dir))
+    );
+  }
+  if (is_dir($sites_dir .'/' . $site_name)) {
+    return drush_set_error('MULTI_SITE_SITE_DIR_ALREADY_EXISTS',
+      dt('The supplied sitename !site_name already exists within !sites_dir. Aborting.', 
+        array(
+        '!site_name' => $site_name, 
+        '!sites_dir' => $sites_dir
+        )
+      )
     );
   }  
 }  
@@ -1005,28 +1002,21 @@ function drush_multi_pre_multi_site($site_name) {
  * Implementation of drush_hook_COMMAND()
  * @param $site_name
  */
-function drush_multi_multi_site($site_name) {
+function drush_multi_site($site_name) {
   
   $sites_dir = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/';
   $site = $sites_dir . $site_name;
   
   // create $site_dir
-  if (drush_op('mkdir', $site)) {
-    drush_log(dt('Created site directory !dir.', array('!dir' => $site)), 'success');
-    
-  } 
-  else {
-    return drush_set_error('MULTI_SITE_COULD_NOT_CREATE_SITE_DIR',
+  if (!drush_op('mkdir', $site)) {
+    drush_set_error('MULTI_SITE_COULD_NOT_CREATE_SITE_DIR',
       dt('Could not create site directory !dir.', array('!dir' => $site))
     );
   }  
   
   // change into $site_dir
-  if (drush_op('chdir', $site)) {
-    drush_log(dt('Changed into site directory !dir',array('!dir' => $site)), 'success');
-  }
-  else {
-    return drush_set_error('MULTI_SITE_COULD_NOT_CWD',
+  if (!drush_op('chdir', $site)) {
+    drush_set_error('MULTI_SITE_COULD_NOT_CWD',
        dt('Could not change to !dir.', array('!dir' => $site))
     );
   } 
@@ -1036,15 +1026,8 @@ function drush_multi_multi_site($site_name) {
     case '5':  
       // copy sites/default/settings.php to settings.php for 5.x
       $settings_src = $sites_dir . 'default/settings.php';
-      if (drush_op('copy', $settings_src, 'settings.php')) { 
-        drush_log(
-          dt('Copied !src to !target.', 
-            array('!src' => $settings_src, '!target' => $site . '/settings.php')
-          ), 'success'
-        );
-      }
-      else {
-        return drush_set_error('MULTI_SITE_COULD_NOT_COPY_DEFAULT_SETTINGS',
+      if (!drush_op('copy', $settings_src, 'settings.php')) { 
+        drush_set_error('MULTI_SITE_COULD_NOT_COPY_DEFAULT_SETTINGS',
           dt('Could not copy !src to settings.php.', array('!src' => $settings_src))      
         );
       }
@@ -1053,39 +1036,44 @@ function drush_multi_multi_site($site_name) {
     case '7':
       // copy sites/default.settings.php to settings.php for 6.x and 7.x
       $settings_src = $sites_dir . 'default/default.settings.php';
-      if (drush_op('copy', $settings_src, 'settings.php')) { 
-        drush_log(
-          dt('Copied !src to !target.', 
-            array('!src' => $settings_src, '!target' => $site . '/settings.php')
-          ), 'success'
-        );
-      }
-      else {
-        return drush_set_error('MULTI_SITE_COULD_NOT_COPY_DEFAULT_SETTINGS',
+      if (!drush_op('copy', $settings_src, 'settings.php')) { 
+        drush_set_error('MULTI_SITE_COULD_NOT_COPY_DEFAULT_SETTINGS',
           dt('Could not copy !src to settings.php.', array('!src' => $settings_src))      
         );
       }
       break;
   }      
   
-  // get additional directories from create-directories option
-  if($directories_option = drush_get_option('create-directories')) {
-    $directories = array();    
-    $directories = explode(',', $directories_option);        
-  } 
+  $directories = array();
   
   // add standard directories  
   $directories[] = 'files';
   $directories[] = 'modules';  
   $directories[] = 'themes';   
   
+  // get additional directories from create-directories option
+  if($directories_option = drush_get_option('create-directories')) {
+    array_push($directories, $directories_option);        
+  } 
+  
   // create directories
   foreach ($directories as $directory) {
-    if (!drush_op('mkdir', $directory)) {
+    if (!drush_op('mkdir', $directory, 0755, TRUE)) {
       drush_set_error('MULTI_SITE_COULD_NOT_DIRECTORY',
         dt('Could not create directory \'!dir\'', array('!dir' => $directory))
       );
     }      
   }        
 }
+
+/**
+ * Implementation of drush_hook_COMMAND_rollback()
+ * @param $site_name
+ */
+function drush_multi_site_rollback($site_name) {
+  if (!drush_cmp_error('MULTI_SITE_COULD_NOT_CREATE_SITE_DIR')) {
+    delete_dir(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/'. $site_name);
+  }
+}
+/** @} */ /** End of defgroup multi_sql_dump */
 /** @} */ /** End of defgroup commands */

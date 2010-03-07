@@ -89,19 +89,19 @@
  * @page cmds Commands  
  * Drush_multi provides the following commands:
  * 
- * @subpage multi_status_help "multi status"
+ * @subpage multi_status_help "multi-status"
  * 
- * @subpage multi_create_help "multi create"
+ * @subpage multi_create_help "multi-create"
  * 
- * @subpage multi_exec_help "multi exec"
+ * @subpage multi_exec_help "multi-exec"
  * 
- * @subpage multi_drupalupdate_help "multi drupalupdate"
+ * @subpage multi_drupalupdate_help "multi-drupalupdate"
  * 
- * @subpage multi_sql_dump_help "multi sql dump"
+ * @subpage multi_sql_dump_help "multi-sql-dump"
  * 
- * @subpage multi_nagios_help "multi nagios"
+ * @subpage multi_nagios_help "multi-nagios"
  * 
- * @subpage multi_site_help "multi site"
+ * @subpage multi_site_help "multi-site"
  */
  
 /**
@@ -129,7 +129,7 @@
  */
 
 /**
- * @page multi_status_help "multi status"
+ * @page multi_status_help "multi-status"
  * An extended drush core status
  * 
  * The core status is extended with 
@@ -146,7 +146,7 @@
  * @subsection multi_status_alias_mst mst  
  * @section Examples
  * @code
- * drush -r /path/to/drupal multi status
+ * drush -r /path/to/drupal multi-status
  * @endcode
  * We asume that we are running drupal-6-14 with the 2 sites, default and foobar.com
  * and drupal-6.11, drupal-6.12 and drupal-6.13 before drupal-6.14.
@@ -176,7 +176,7 @@
  */
 
 /** 
- * @page multi_create_help "multi create"
+ * @page multi_create_help "multi-create"
  * Create a Drupal installation with the symbolic link structure as described in the \ref intro.
  * @section Aliases
  * @subsection multi_create_alias_mcr mcr
@@ -188,7 +188,7 @@
  * Core compatibility e.g. 6 for drupal 6
  * @section Examples
  * @code
- * drush multi create /var/www 6
+ * drush multi-create /var/www 6
  * @endcode
  * Create a drupal 6 installation in /var/www 
  * with creating the directories 6.x_backup, 6.x_profiles 
@@ -197,7 +197,7 @@
  */   
    
 /** 
- * @page multi_exec_help "multi exec"
+ * @page multi_exec_help "multi-exec"
  * Perform a drush core command on all sites (batch mode).
  * @section Aliases
  * @subsection multi_exec_alias mex
@@ -216,25 +216,25 @@
  * as type for 'watchdog delete' and  'watchdog show'. Optional.
  * @section Examples
  * @code
- * drush -r /path/to/drupal multi exec cron
+ * drush -r /path/to/drupal multi-exec cron
  * @endcode
  * Run all cron hooks on all sites in your multisite installation.  
  * @code 
- * drush -r /path/to/drupal multi exec 'watchdog show' --option='--limit=30' --argument=php
+ * drush -r /path/to/drupal multi-exec 'watchdog show' --option='--limit=30' --argument=php
  * @endcode
  * Shows the 30 newest log entries with facility 'php' 
  * @code
- * drush -r /path/to/drupal multi exec updatedb
+ * drush -r /path/to/drupal multi-exec updatedb
  * @endcode
  * Execute the update.php process for all sites.
  * @code
- * drush -r /path/to/drupal multi cache clear
+ * drush -r /path/to/drupal multi-exec cache clear
  * @endcode
  * Flushes the cache for all sites
  */ 
 
 /**
- * @page multi_drupalupdate_help "multi drupalupdate"
+ * @page multi_drupalupdate_help "multi-drupalupdate"
  * Update your installation if there is a new minor release available,
  * assuming the same structure as in the @ref intro for the installation.
  * 
@@ -257,12 +257,12 @@
  * @code
  * drush -r /path/to/drupal multi drupalupdate
  * @endcode
- * Runs a 'multi drupalupdate'on /path/to/drupal
+ * Runs a 'multi-drupalupdate'on /path/to/drupal
  *  
  * @code
- * drush -r /path/to/drupal multi drupalupdate --sql-dump --comment='before drupaldate' --updatedb
+ * drush -r /path/to/drupal multi-drupalupdate --sql-dump --comment='before drupaldate' --updatedb
  * @endcode
- * Runs a 'multi drupalupdate'on /path/to/drupal with
+ * Runs a 'multi-drupalupdate'on /path/to/drupal with
  * 
  * making sql dumps of all sites with optional comment 'before drupalupdate' for sql dump filenames
  * 
@@ -271,7 +271,7 @@
  */
    
 /** 
- * @page multi_sql_dump_help "multi sql dump"
+ * @page multi_sql_dump_help "multi-sql-dump"
  * Perform an sql dump on all sites (batch mode).
  * @section Aliases
  * @subsection multi_sql_dump_alias_msd msd
@@ -294,7 +294,7 @@
  * Use bzip2 for compression of each sql dump.
  * @section Examples
  * @code
- * drush -r /path/to/drupal multi sql dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups
+ * drush -r /path/to/drupal multi-sql-dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups
  * @endcode
  * Run 'sql dump' on all sites with comment 
  * 'before-update-to-6.15' as comment for each  result file.
@@ -307,7 +307,7 @@
  */
 
 /**
- * @page multi_nagios_help "multi nagios"
+ * @page multi_nagios_help "multi-nagios"
  * For the use as nagios plugin. Print a message and returns with exit status 2 (Critical)
  * if updates available.
  * 
@@ -334,7 +334,7 @@
  * @section Examples
  * @subsection nagios_root Checking the Drupal installation for core updates
  * @code
- * drush -r /path/to/drupal multi nagios
+ * drush -r /path/to/drupal multi-nagios
  * @endcode
  * We assume that drupal-6.14 is the recommended release.
  * With an older version, eg. drupal-6.13 we get:
@@ -351,14 +351,14 @@
  * with exit status 0.
  * 
  * @code
- * drush -r /path/to/drupal multi nagios --file=/path/to/file
+ * drush -r /path/to/drupal multi-nagios --file=/path/to/file
  * @endcode
  * Same as above with a specified file.
  * 
  * 
  * @subsection nagios_site Checking a site on core and module updates
  * @code
- * drush -r /path/to/drupal -l example.com multi nagios
+ * drush -r /path/to/drupal -l example.com multi-nagios
  * @endcode
  * If there are no updates available, this will produce to following output:
  * @code
@@ -372,7 +372,7 @@
  */
 
 /** 
- * @page multi_site_help "multi site"
+ * @page multi_site_help "multi-site"
  * Create a new site in your your multisite installation within a files, modules and themes directory.
  * @section Aliases 
  * @subsection multi_nagios_site_alias_msi msi
@@ -385,7 +385,7 @@
  * Comma seperated list of aditional directories.
  * @section Examples
  * @code
- * drush -r /path/to/drupal multi site example.com --create-directories=dir1,dir2,dir3
+ * drush -r /path/to/drupal multi-site example.com --create-directories=dir1,dir2,dir3
  * @endcode
  * Create the site 'example.com' within a settings.php, a 'files', 'themes', 'modules' directory
  * and the additional directories 'dir1', 'dir2' and 'dir3' in /path/to/drupal/sites.
