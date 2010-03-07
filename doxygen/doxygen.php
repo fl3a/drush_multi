@@ -12,30 +12,39 @@
  * @mainpage 
  * 
  * <img src="drush_logo-black.png" alt="drush logo" title="drush logo" /> 
- * Documentation of <a href="http://drupal.org/project/drush_multi"> drush_multi</a>
  * 
- * Drush_multi is an  an extension to <a href="http://drupal.org/project/drush">drush</a> aka <a href="http://drupal.org">Drupal</a> Shell</a> which deals with Drupal multisites.
+ * <a href="http://drupal.org/project/drush_multi">Drush Multi</a> is an  an extension to <a href="http://drupal.org/project/drush">drush</a> aka <a href="http://drupal.org">Drupal</a> Shell</a> which deals with Drupal multisites.
  * 
  * Drush Multi requires drush >= v.2.1.
  * 
- * This documentation was generated with <a href="http://doxygen.org">Doxygen</a>.
- *  
- * Each of these called softwares including drush_multi itself are released under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
- * 
- * Drupal is a registered trademark of <a href="http://buytaert.net">Dries Buytaert</a>. 
- *  
  * @subpage intro "Introduction"
  * 
  * @subpage install "Installation"
  * 
  * @subpage cmds "Commands"
+ * 
+ * @subpage credits 
+ * 
+ * @subpage feedback
+ * 
+ * <small>
+ * This documentation was generated with <a href="http://doxygen.org">Doxygen</a>.
+ *  
+ * Each of these called softwares including drush_multi itself are released under the terms of <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
+ * 
+ * Drupal is a registered trademark of <a href="http://buytaert.net">Dries Buytaert</a>.
+ * </small> 
  */ 
 
 /** 
  * @page intro Introduction
- * Within this structure and this drush command, it is now possible to do that via drush.
- * Now can drush update drupal.
  * 
+ * I use the following symbolic links structure on our servers and wrote a bash script for handling Drupal updates years ago.
+ * 
+ * Within this structure and this drush command, it is now possible to do that via drush.
+ * 
+ * Now drush can update Drupal. 
+ *  
  * Here is the very specific structure this command deals with for @ref multi_drupalupdate_help and @ref multi_create_help :
  * @code
  * '
@@ -95,6 +104,30 @@
  * @subpage multi_site_help "multi site"
  */
  
+/**
+ * @page credits Credits
+ * Thanks to the mighty hundfred, friend and Bastard Operator from Hell.
+ * 
+ * This module was sponsored by <a href="http://is-loesungen.de">ISL Individuelle System Lösungen</a>.
+ * 
+ * Maintainer of this module is <a href="http://netzaffe.de">Florian "fl3a" Latzel</a>.
+ */
+
+/**
+ * @page feedback Feedback
+ * <strong>Share your thoughts!</strong>
+ * 
+ * Since this project is open source and mostly written in my spare time, 
+ *
+ * i would encourage you to give me some feedback.    
+ * 
+ * <strong>You are welcome to contribute!</strong>
+ *  
+ * For feature requests, bug reports, bugfixes, and patches please <a href="http://drupal.org/node/add/project-issue/drush_multi">create a new issue</a> at the <a href="http://drupal.org/project/issues/drush_multi?categories=All">issue queue</a> within the <a href="http://drupal.org/project/drush_multi">project page</a>.
+ * 
+ * If you want to comtribute, please take a look at the @ref todo.  
+ */
+
 /**
  * @page multi_status_help "multi status"
  * An extended drush core status
@@ -205,10 +238,9 @@
  * Update your installation if there is a new minor release available,
  * assuming the same structure as in the @ref intro for the installation.
  * 
- * All symbolic links within the original drupal installation are detected automatically
- * due _multi_scan_links() and will be preserved with an relative path due _multi_relative_path().
+ * All symbolic links within the original drupal installation are detected automatically.
+ * @see @ref symlinks for handling and preserving symbolic links.
  * 
- * @note The Drupal root specified as /path/to/drupal must be a symbolic link.
  * @section Aliases
  * @subsection multi_drupalupdate_alias_mdr mdr
  * @subsection multi_drupalupdate_alias_drupalupdate drupalupdate
@@ -225,8 +257,8 @@
  * @code
  * drush -r /path/to/drupal multi drupalupdate
  * @endcode
- * Runs a 'multi drupalupdate'on /path/to/drupal 
- * 
+ * Runs a 'multi drupalupdate'on /path/to/drupal
+ *  
  * @code
  * drush -r /path/to/drupal multi drupalupdate --sql-dump --comment='before drupaldate' --updatedb
  * @endcode
@@ -235,7 +267,7 @@
  * making sql dumps of all sites with optional comment 'before drupalupdate' for sql dump filenames
  * 
  * and execution of 'updatedb' afterwards 
- *  
+ * @note The Drupal root specified as /path/to/drupal must be a symbolic link. 
  */
    
 /** 

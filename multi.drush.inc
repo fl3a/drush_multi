@@ -885,7 +885,9 @@ function drush_multi_pre_multi_drupalupdate() {
 /**
  * Implementation of drush_hook_COMMAND()
  * 
- * @see drush_multi_multi_drupalupdate_validate() for initialisation of needed variables via drush_set_context() 
+ * @see drush_multi_multi_drupalupdate_validate() for initialisation of needed variables via drush_set_context()
+ * @see <a href="http://netzaffe.de/drupal-6-multisiteumgebung-mit-postgresql-unter-debian-4/drupal-update-in-8-schritten.html">Drupal Update in 8 Steps (Drupal Update in 8 Schritten (german))</a>
+ * for the corresponding steps.  
  */
 function drush_multi_multi_drupalupdate() {
   
@@ -904,47 +906,17 @@ function drush_multi_multi_drupalupdate() {
   // 3) Create all symlinks found in the root of the old installation for the new installation.
   //    this also include steps 3) backup sites, 4) symlink sites and 5) symlink backup, if found.
   
-  // change into new drupal directory  
-  if (drush_op('chdir', realpath($dest . '/' . $recommended_version))){
-    foreach (_multi_scan_symlinks($drupal_root, TRUE) as $link) {        
-      
-      // if linkname exist as file or directory, rename it 
-      if (is_file($link->basename) || is_dir($link->basename)) {      
-        if (!drush_op('rename', $link->basename, $link->basename . '-' . date('Y-m-d\TH:i') . '-drupalupdate')) {
-          drush_set_error('MULTI_COULD_NOT_RENAME',
-            dt('Could not rename !existing to !backup', 
-            array(
-              	'!existing' => $link->basename, 
-              	'!backup' =>  $link->basename . '-' . date('Y-m-d\TH:i') . '-drupalupdate'
-              )
-            )
-          );   
-        }     
-      }
-      // Get foldernames for recursive symlinks
-      $filename = _multi_relative_path(realpath($link->target));
-      $link_dir = ltrim(str_replace($drupal_root, '', $link->dirname), '/');
-      (!empty($link_dir)) ? $link_dir .= '/' : $link_dir;
-      
-      if (!drush_op('symlink', $filename, $link_dir . $link->basename)) {
-        drush_set_error('MULTI_COULD_NOT_CREATE_SYMLINK',
-          dt('Could not create symbolic link from !target into !pwd.',
-            array('!target' => rtrim($filename, '/'), '!cwd' => getcwd())
-          )
-        );  
-      }         
-    }
-  }     
-
+  _multi_preserve_symlinks($drupal_root, $dest . '/' . $recommended_version);
+  
   // chdir() to parent of drupal-root  
   if (drush_op('chdir', '..')) {    
-    // 6) unlink document root symlink, here ${MAJOR_VERSION}.x
+    // 6) unlink document root / old Drupal version
     if (!drush_op('unlink', $link_name)) {
       return drush_set_error('DRUSH_SM_COULD_NOT_UNLINK_DOKUMENT_ROOT',
    	    dt('unlink(): Could not unlink !doc_root.', array('!doc_root' => $link_name))
    	  );
     }              
-    // 7) create new symlink for document root/symlink from new drupal to ${MAJOR_VERSION}.x
+    // 7) create symbolic link for document root / new Drupal version
     if (!drush_op('symlink', $recommended_version, $link_name)) {
       return drush_set_error('DRUSH_SM_COULD_NOT_SYMLINK_DOKUMENT_ROOT',
         dt('symlink(): Could not create symlink from !drupal to !link for DOCUMENT_ROOT.',

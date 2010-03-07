@@ -237,7 +237,7 @@ function _multi_scan_sites($symlinks = TRUE){
 
 /**
  * @defgroup symlinks 'Symlink functions'
- * Functions for handling and preserving symbolic links within the Drupal installation.
+ * Functions for handling and preserving symbolic links for @ref multi_drupalupdate_help.
  * @{  
  */
 
@@ -254,9 +254,35 @@ function _multi_scan_sites($symlinks = TRUE){
  * @param $depth
  *   Current depth of recursion. This parameter is only used internally and should not be passed.
  * @return
- *   An associative array of objects keyed basename  with
- *   "filename", "basename", and "target" (target of the symbolic link)
- *   members corresponding to found symbolic links 
+ *   An array of objects keyed on basename corresponding to the symbolic links found in $dir
+ * @code
+ * Array                                                                                                                                                         
+ * (
+ *       [sites] => stdClass Object
+ *           (
+ *               [filename] => /var/www/6.x/sites
+ *               [basename] => sites
+ *               [target] => ../6.x_sites/
+ *               [dirname] => /var/www/drupal6
+ *           )
+ *       
+ *       [backup] => stdClass Object
+ *           (
+ *               [filename] => /var/www/6.x/backup
+ *               [basename] => backup
+ *               [target] => ../6.x_backup/
+ *               [dirname] => /var/www/drupal6
+ *           )
+ *           
+ *       [profiles] => stdClass Object
+ *           (
+ *               [filename] => /var/www/6.x/profiles
+ *               [basename] => profiles
+ *               [target] => ../6.x_profiles/
+ *               [dirname] => /var/www/drupal6
+ *           )           
+ * )
+ * @endcode    
  */
 function _multi_scan_symlinks($dir = FALSE, $recurse = TRUE, $min_depth = 0, $depth = 0 ) {
   
@@ -276,7 +302,7 @@ function _multi_scan_symlinks($dir = FALSE, $recurse = TRUE, $min_depth = 0, $de
       if (!in_array($file, $nomask)) { 
         if (is_dir("$dir/$file") && $recurse && !is_link("$dir/$file")) {
           // Give priority to files in this folder by merging them in after any subdirectory files.
-          $files = array_merge( _multi_scan_links("$dir/$file", $recurse, $min_depth, $depth + 1), $files);
+          $files = array_merge( _multi_scan_symlinks("$dir/$file", $recurse, $min_depth, $depth + 1), $files);
         } 
         elseif ($depth >= $min_depth) {
           $filename = "$dir/$file";
@@ -296,11 +322,72 @@ function _multi_scan_symlinks($dir = FALSE, $recurse = TRUE, $min_depth = 0, $de
   return $files;
 }
 
-function _multi_preserve_symlinks() {
+/**
+ * Preserves all symbolic links of the current Drupal root
+ * within the future Drupal root with a relative path.
+ * 
+ * If linkname already exists as file or directory within the provided path to $new_drupal_root, 
+ * it will be renamed to ${linkname}-${datestamp}-drupalupdate to avoid loss.
+ * 
+ * @param $drupal_root Path to the current Drupal root
+ * @param $new_drupal_root Path to the future Drupal root
+ * @return FALSE via drush_set_error() if any error occurs
+ */
+function _multi_preserve_symlinks($drupal_root, $new_drupal_root) {
   
+  // Change pwd to $new_drupal_root
+  if (drush_op('chdir', realpath($new_drupal_root))) {
+    
+    // Search for symbolic links within the old installation ($drupal_root)
+    $symlinks = array();
+    $symlinks = _multi_scan_symlinks($drupal_root, TRUE);
+    
+    // traverse found symbolic links
+    foreach ($symlinks as $symlink) {        
+      
+      // if linkname exist as file or directory, rename it 
+      if (is_file($symlink->basename) || is_dir($symlink->basename)) {      
+        if (!drush_op('rename', $symlink->basename, $symlink->basename . '-' . date('Y-m-d\TH:i') . '-drupalupdate')) {
+          return drush_set_error('MULTI_COULD_NOT_RENAME',
+            dt('Could not rename !existing to !backup', 
+            array(
+              	'!existing' => $symlink->basename, 
+              	'!backup' =>  $symlink->basename . '-' . date('Y-m-d\TH:i') . '-drupalupdate'
+              )
+            )
+          );   
+        }     
+      }
+      // get $symlink_target as an relative path to our pwd ($new_drupal_root=
+      $symlink_target = _multi_relative_path(realpath($symlink->target));
+      
+      // remove $drupal_root and trailing slash for handlind of symbolic links 
+      // that are deeper than first level within $drupal_root   
+      $symlink_dir = ltrim(str_replace($drupal_root, '', $symlink->dirname), '/');
+      (!empty($symlink_dir)) ? $symlink_dir .= '/' : $symlink_dir;
+      
+      if (!drush_op('symlink', $symlink_target, $symlink_dir . $symlink->basename)) {
+        return drush_set_error('MULTI_COULD_NOT_CREATE_SYMLINK',
+          dt('Could not create symbolic link from !target into !pwd.',
+            array(
+              '!target' => rtrim($filename, '/'), 
+              '!pwd' => getcwd()
+            )
+          )
+        );  
+      }         
+    }
+  }
+  // couldn't chdir() to $new_drupal_root
+  else { 
+    return drush_set_error('DRUSH_SM_COULD_CHANGE_NEW_DRUPAL_ROOT', 
+      dt('chdir(): Could not change to new Drupal root !new.',
+        array('!new' => $new_drupal_root)
+      )
+    ); 	
+  }  
 }
 /** @} */ /** End of defgroup symlinks */
-
 
 /**
  * Returns all available drupal installations of your major release 
