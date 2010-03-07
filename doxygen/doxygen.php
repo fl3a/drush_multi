@@ -13,9 +13,11 @@
  * 
  * <img src="drush_logo-black.png" alt="drush logo" title="drush logo" /> 
  * 
- * <a href="http://drupal.org/project/drush_multi">Drush Multi</a> is an  an extension to <a href="http://drupal.org/project/drush">drush</a> aka <a href="http://drupal.org">Drupal</a> Shell</a> which deals with Drupal multisites.
+ * <strong>
+ * <a href="http://drupal.org/project/drush_multi" style="font-weight:bold">Drush Multi</a> is an  an extension to <a href="http://drupal.org/project/drush" style="font-weight:bold">drush</a> aka <a href="http://drupal.org" style="font-weight:bold">Drupal</a> Shell</a> which deals with Drupal multisites.
  * 
- * Drush Multi requires drush >= v.2.1.
+ * Drush Multi requires drush >= v.3.0-beta1.
+ * </strong>
  * 
  * @subpage intro "Introduction"
  * 
