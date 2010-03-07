@@ -864,7 +864,7 @@ function drush_multi_drupalupdate_validate () {
 function drush_multi_pre_multi_drupalupdate() {
   
   if (drush_get_option('--sql-dump')) { 
-    drush_invoke('multi sql dump'); 
+    drush_invoke('multi-sql-dump'); 
   }  
 }
 
@@ -934,7 +934,7 @@ function drush_multi_drupalupdate_rollback() {
 function drush_multi_post_multi_drupalupdate() {
   
   if (drush_get_option('--updatedb')) { 
-    drush_invoke('multi exec', 'updatedb'); 
+    drush_invoke('multi-exec', 'updatedb'); 
   }
   else {
     drush_log(dt('Drupalupdate finished, now you should run update.php for each site'), 'completed');
