@@ -548,7 +548,7 @@ function _multi_nagios_root() {
           	'!remcommended_version' => $recommended_version['version'],
            	'!release-date' => date('Y-m-d\ H:i', $recommended_version['date']),
            	'!release_link' => $recommended_version['release_link'],       
-         )
+          )
         )
       );      
       return MULTI_NAGIOS_CRITICAL;

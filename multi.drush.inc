@@ -55,7 +55,7 @@ function multi_drush_command() {
     'description' => 'Status of your drupal multisite installation',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'examples' => array(
-      'drush -r /path/to/drupal multi status' => 'Displays the status.',
+      'drush -r /path/to/drupal multi-status' => 'Displays the status.',
     ),      	
   );
   $items['multi-nagios'] = array(
@@ -64,7 +64,7 @@ function multi_drush_command() {
     'description' => 'Message and exit code for nagios.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
     'examples' => array(
-      'drush -r /path/to/drupal multi nagios' =>
+      'drush -r /path/to/drupal multi-nagios' =>
       "We assume that drupal-6.14 is the recommended release.\n" . 
       "With an older version, eg. drupal-6.13 we get:\n" .
       "DRUPAL ROOT CRITICAL: drupal-6.13 @ /var/www/drupal-6.13\n" .
@@ -73,8 +73,8 @@ function multi_drush_command() {
       "Or if we are running the recommended version:\n" .
       "'DRUPAL ROOT OK: drupal-6.14 @ /path/to/drupal/6.x is uptodate.'\n" .
       "with exit status 0.",
-      'drush -r /path/to/drupal multi nagios --file=/path/to/file' => 'Same as above with a specified file.',
-      'drush -r /path/to/drupal -l example.com multi nagios' => 
+      'drush -r /path/to/drupal multi-nagios --file=/path/to/file' => 'Same as above with a specified file.',
+      'drush -r /path/to/drupal -l example.com multi-nagios' => 
       "If there are no updates available, this will produce to following output:\n" .
       "DRUPAL SITE OK - example.com @ /path/to/drupal/example.com: All modules are uptodate.\n" .
       "If there are available updates, it might produce the following output:\n" .
@@ -98,13 +98,13 @@ function multi_drush_command() {
     'description' => 'Run a drush command on all sites in your multisite installation. Implemented drush commands are: \'cache clear\', \'cron\', \'update\', \'updatecode\', \'updatedb\', \'watchdog delete\', \'watchdog show\' and \'refresh\'.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'examples' => array(
-      'drush -r /path/to/drupal multi exec cron' => 'Run all cron hooks on all sites in your multisite installation.',
-      'drush -r /path/to/drupal multi exec \'watchdog show\' --option=\'--limit=30\' --argument=php'  => 'Shows the 30 newest log entries with facility \'php\' for all sites.',
-      'drush -r /path/to/drupal multi exec updatedb'  => 'Execute the update.php process for all sites.',
+      'drush -r /path/to/drupal multi-exec cron' => 'Run all cron hooks on all sites in your multisite installation.',
+      'drush -r /path/to/drupal multi-exec variable-set --argument=\'site_offline 1\' --option=\'--nocolor\''  => 'Put all sites in maintenance mode without using color highlighting on log messages.',
+      'drush -r /path/to/drupal multi-exec updatedb'  => 'Execute the update.php process for all sites.',
     ),     
     'options' => array(      
-      '--option'     => 'Option to pass to drush command. e.g. \'--limit=20\' for \'watchdog show\'. The number of messages to show. Optional.',
-      '--argument'		=> 'Argument to pass to drush command e.g. \'php\' as type for \'watchdog delete\' and  \'watchdog show\'. Optional.',       
+      '--argument'		=> 'Argument to pass to drush command e.g. \'php\' as type for \'watchdog delete\' and  \'watchdog show\'. Optional.',
+      '--option'     => 'Option to pass to drush command. or drush itself e.g. \--nocolor\' to suppress color highlighting on log messages. Optional.',       
     ),    
     'arguments' => array(
       'command' => 'The drush command to execute. For drush commands with blanks like \'watchdog show\' make sure to use single or double quotes. Mandatory.',             
@@ -116,12 +116,12 @@ function multi_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'options' => array(
       '--sql-dump' => 'Calls multi_sql_dump for all sites before starting the drupalupdate. See "drush help multi sql dump" for options and details.', 
-      '--updatedb' => 'Execute updatedb for all sites after drupalupdate.',      
+      '--updatedb' => 'Put sites in maintenance mode before drupalupdate, execute updatedb and put sites back from maintenance mode after drupalupdate.',      
     ),
     'examples' => array(
-      'drush -r /path/to/drupal multi drupalupdate' => 'Update your drupal installation to the recommended release.',
-      'drush -r /path/to/drupal multi drupalupdate --sql-dump --comment="before drupaldate" --update' =>
-      'Runs a "multi drupalupdate" on /path/to/drupal with making sql dumps of all sites with optional comment "before drupalupdate" for sql dump filenames and execution of "updatedb" afterwards',   
+      'drush -r /path/to/drupal multi-drupalupdate' => 'Update your drupal installation to the recommended release.',
+      'drush -r /path/to/drupal multi-drupalupdate --sql-dump --comment="before drupaldate" --update' =>
+      'Runs a "multi-drupalupdate" on /path/to/drupal with making sql dumps of all sites with optional comment "before drupalupdate" for sql dump filenames and execution of "updatedb" afterwards',   
     ),     
   );
   $items['multi-site'] = array(
@@ -129,7 +129,7 @@ function multi_drush_command() {
     'description' => 'Create a site in your drupal installation',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'examples' => array(
-      'drush -r /path/to/drupal multi site example.com --create-directories=dir1,dir2,dir3' => 
+      'drush -r /path/to/drupal multi-site example.com --create-directories=dir1,dir2,dir3' => 
       "Create the site 'example.com' within a settings.php,\n" . 
       "a 'files', 'themes', 'modules' directory\n" .
       "and the additional directories 'dir1', 'dir2' and 'dir3' in /path/to/drupal/sites.",
@@ -146,7 +146,7 @@ function multi_drush_command() {
     'description' => 'Create a multisite installation',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, // No bootstrap at all.
     'examples' => array(
-      'drush multi create /var/www 6' =>
+      'drush multi-create /var/www 6' =>
       'Create a drupal 6 installation in /var/www with creating the directories '. 
       '6.x_sites, 6.x_backup in /var/www ' . 
       'linked as sites and backup withing the drupal installation folder.',      
@@ -164,7 +164,7 @@ function multi_drush_command() {
     'description' => 'Exports the Drupal DB as SQL for all sites. File pattern is ${uri} and a \'_date(\'Y-m-d\TH:i\').sql suffix.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
     'examples' => array(
-      'drush -r /path/to/drupal multi sql dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups' => 
+      'drush -r /path/to/drupal multi-sql-dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups' => 
         'Run \'sql dump\' on all sites with comment \'before-update-to-6.15\' as comment for each result file. ' .
         'The result files are bzip compressed and stored in \'db_backups\' in your home dirctory.' .
         "\nDump name schema:\n'\${uri}'_before-update-to-6.1_{date('Y-m-d\TH:i')}.sql.bz2'."
@@ -519,19 +519,23 @@ function drush_multi_exec_validate ($command) {
   
   // available commands and aliases
   $commands = array(
-    'cache clear', 'cc',
-    'refresh', 'rf',
-    'update', 'up',
-    'updatedb', 'updb',
-    'updatecode', 'upc',
-    'download', 'dl',
-    'enable', 'en',
-    'disable', 'dis',
+    'cache-clear', 'cc',
+    'pm-refresh', 'rf',
+    'pm-update', 'up',
+    'pm-updatecode', 'upc',
+    'pm-download', 'dl',
+    'pm-enable', 'en',
+    'pm-disable', 'dis',
+    'pm-uninstall', 
     'statusmodules',  'sm',
-    'watchdog show', 'ws',
-    'sql query', 'sqlq',
-    'watchdog delete', 'wd',    
-    'cron', 'eval', 'script', 'uninstall',
+    'watchdog-show', 'ws',
+    'watchdog-delete', 'wd-del',
+    'sql-query', 'sqlq',
+    'variable-set', 'vset',
+    'variable-get', 'vget',
+    'variable-delete', 'vdel',
+    'updatedb', 'updb',  
+    'cron', 'eval', 'script', 
   );
   
   if (!in_array($command, $commands)) {
@@ -547,8 +551,12 @@ function drush_multi_exec_validate ($command) {
  */
 function drush_multi_exec($command) {  
   
-  // drush's executable with absolute path
-  $drush = DRUSH_COMMAND; // defined in drush.php  
+  // Determine a proper way to call drush again
+  // defined in includes/environment.php, initialized via drush_find_drush()
+  // Consists of:
+  // absolute path to php, absolute path to drush's executable and appended php option, e.g:
+  // /usr/bin/php /usr/local/bin/drush/drush.php --php=/usr/bin/php
+  $drush = DRUSH_COMMAND; 
   
   // --root option
   $root = ' -r ' . drush_get_context('DRUSH_DRUPAL_ROOT');
@@ -561,28 +569,26 @@ function drush_multi_exec($command) {
   
   // --yes option 
   // because drush_shell_exec() allows no interaction anymore
-  $yes = ' -y ';  
-  
-  // --option, Option to pass to drush command
-  $opt = ' ' . drush_get_option('option');  
+  $yes = ' -y';  
   
   // --argument, Argument to pass to drush command
   $arg = ' ' . drush_get_option('argument');  
   
-  // prepend php to exec
-  $exec = "php ";
+  // --option, Option to pass to drush command or drush itself
+  $opt = ' ' . drush_get_option('option');  
   
   $sites = array();
   $sites = _multi_scan_sites();
   
   foreach ($sites as $site) {
-    $exec .= $drush . $yes . $root . $uri . $site . $command . $opt . $arg;
-    drush_shell_exec($exec);
+    $cmd = $drush . $yes . $root . $uri . $site . $command . $arg . $opt;
+    drush_shell_exec($cmd);
+    
     foreach (drush_shell_exec_output() as $line) {
       drush_print($line);
-    }   
+    } 
   }  
-}
+}    
 /** @} */ /** End of defgroup multi_exec */
 
 /**
@@ -653,7 +659,9 @@ function drush_multi_create($destination, $core) {
   // Download and  unpack drupal to $destination
   drush_set_option('package-handler', 'wget');
   drush_set_option('destination', $destination);  
+  drush_set_context('DRUSH_NOCOLOR', 1);
   drush_invoke('download', $recommended_version);
+  drush_set_context('DRUSH_NOCOLOR', 0);
 
   // create backup directory  
   if (!drush_op('mkdir', $core . '.x_backup')) {
@@ -800,10 +808,10 @@ function drush_multi_create_rollback($destination, $core) {
  * Performs general checks and set needed variables via drush_set_context()
  */
 function drush_multi_drupalupdate_validate () {
-
+  
   // Check if parent directory of DRUSH_DRUPAL_ROOT is writable
   if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
-    return drush_set_error('MULTI_DRUPALUPDATE_DESTINATION_NOT_WRITABLE',
+    drush_set_error('MULTI_DRUPALUPDATE_DESTINATION_NOT_WRITABLE',
       dt('\'!destination\' is not writable, check permission. Aborting.',
         array('!destination' => $dest)
       ) 
@@ -823,7 +831,7 @@ function drush_multi_drupalupdate_validate () {
     drush_set_context('DRUSH_DRUPAL_ROOT', $drupal_root);
   }
   else {
-    return drush_set_error('MULTI_DRUPALUPDATE_DRUPAL_ROOT_IS_NO_SYMLINK',
+    drush_set_error('MULTI_DRUPALUPDATE_DRUPAL_ROOT_IS_NO_SYMLINK',
       dt('Drupal root !drupal_root is not a symbolic link. Aborting.',
         array('!drupal_root' => $drupal_root)
       )
@@ -859,13 +867,24 @@ function drush_multi_drupalupdate_validate () {
 /**
  * Implementation of drush_hook_pre_COMMAND()
  * 
- * Execute 'sql dump' if '--sql-dump' option is set
+ * Invokes 'multi-exec' with  'sql-dump' argument if '--sql-dump' option is set
+ * 
+ * Invokes 'multi-exec' with  'variable-set' and 'site_offline 1' argument if '--updatedb' option is set 
  */
 function drush_multi_pre_multi_drupalupdate() {
   
   if (drush_get_option('--sql-dump')) { 
+    drush_set_option('option', '--nocolor');
     drush_invoke('multi-sql-dump'); 
-  }  
+  } 
+  if (drush_get_option('--updatedb')) {
+    // put sites in maintenance mode
+    drush_set_option('argument', 'site_offline 1');
+    drush_set_option('option', '--nocolor');
+    drush_invoke('multi-exec', 'variable-set');
+    drush_unset_option('argument');
+    drush_unset_option('option');   
+  }
 }
 
 /**
@@ -887,7 +906,9 @@ function drush_multi_drupalupdate() {
   // 1) download and  2) unpack drupal via drush dl to parent of $drupal_root
   drush_set_option('destination', $dest);
   drush_set_option('package-handler', 'wget');
+  drush_set_context('DRUSH_NOCOLOR', 1);
   drush_invoke('download', $recommended_version);
+  drush_set_context('DRUSH_NOCOLOR', 0);
     
   // 3) Create all symlinks found in the root of the old installation for the new installation.
   //    this also include steps 3) backup sites, 4) symlink sites and 5) symlink backup, if found.
@@ -929,12 +950,22 @@ function drush_multi_drupalupdate_rollback() {
 /**
  * Implementation of drush_hook_post_COMMAND()
  * 
- * Executes 'updatedb' on all sites if '--updatedb' option is set
+ * Invokes 'multi-exec' with  'variable-set' and 'site_offline 0' argument if '--updatedb' option is set
+ * 
+ * Invokes 'multi-exec updatedb' if '--updatedb' option is set
  */
 function drush_multi_post_multi_drupalupdate() {
   
-  if (drush_get_option('--updatedb')) { 
-    drush_invoke('multi-exec', 'updatedb'); 
+  if (drush_get_option('--updatedb')) {
+    // execute updatedb
+    drush_set_option('option','--nocolor');
+    drush_invoke('multi-exec', 'updatedb');
+    // put sites back from maintenance mode
+    drush_set_option('argument', 'site_offline 0');
+    drush_invoke('multi-exec', 'variable-set');  
+    drush_unset_option('option');
+    drush_unset_option('argument');  
+    drush_log(dt('Drupalupdate finished.'), 'completed');
   }
   else {
     drush_log(dt('Drupalupdate finished, now you should run update.php for each site'), 'completed');

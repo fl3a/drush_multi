@@ -37,23 +37,26 @@ Here is the very specific structure this command deals with for multi drupalupda
  drupal/
  |-- 6.x -> drupal-6.14
  |-- 6.x_backup
+ |-- 6.x_profiles
  |-- 6.x_sites
- |   |--all
+ |   |-- all   
+ |   |-- default
+ |   |-- example.com
+ |   |   |-- files
  |   |   |-- modules
  |   |   `-- themes
- |   |-- default
- |   `-- example.com
- |      |-- files
- |      |-- modules
- |      `-- themes
+ |   `-- sub.example.com 
+ |       |-- files
+ |       |-- modules
+ |       `-- themes 
  `-- drupal-6.14
-     |-- backup -> ../6.x_backup
-     |-- includes
-     |-- misc
-     |-- modules
-     |-- profiles
-     |-- scripts
-     `-- sites  -> ../6.x_sites
+    |-- backup -> ../6.x_backup
+    |-- includes
+    |-- misc
+    |-- modules
+    |-- profiles -> ../6.x_profiles
+    |-- scripts
+    `-- sites  -> ../6.x_sites
 
 
 INSTALLATION
@@ -66,13 +69,22 @@ You can put the multi in a number of places:
     related to an existing module, this is the preferred option.
   - In a folder specified with the include option.
   - In /path/to/drush/commands (not a "Smart Thing to Do", but it would work).
+  
+Change / cd to one of that places above and type the following command to get the latest Version (HEAD) from cvs: 
+
+cvs -z6 -d:pserver:anonymous:anonymous@cvs.drupal.org:/cvs/drupal-contrib checkout -d drush_multi-HEAD contributions/modules/drush_multi/
+
 
 REQUIREMENTS
 ------------
 
-Since this is a drush command, you need drush.
+Since this is a drush command, all you need is drush.
+
+Drush Multi requires drush >= v.3.0-beta1.
+
 For the installation of drush see the drush README.txt 
 at http://cvs.drupal.org/viewvc/drupal/contributions/modules/drush/README.txt?revision=1.29&view=markup  
+
   
 COMMANDS
 --------
@@ -84,20 +96,21 @@ COMMANDS
  * multi create
   Create a Drupal installation with the symbolic link structure as above.
   
- * multi drupalupdate
+ * multi-drupalupdate
   Performs a drupal minor version update.
   
- * multi exec
+ * multi-exec
   Perform a drush core command on all sites.
   
- * multi sql dump
+ * multi-sql-dump
   Perform an sql dump on all sites.
   
- * multi nagios
+ * multi-nagios
   Command for use as nagios plugin with exit status and status message.   
   
- * multi site
+ * multi-site
   Create new site into the sites folder.  
+
 
 DOCUMENTATION
 -------------
@@ -105,11 +118,12 @@ DOCUMENTATION
 Each multi command got a help.
   
 To get specific help, type:
-drush help multi ${multicommand} 
+drush help ${multi-command} 
 
-Since the the code is commented with doxygen 
-you can find the documentation at 
+Since the the code is extensively commented  
+you can find the a Doxygen documentation at 
 http://is-loesungen.de/docu/drush_multi/.
+    
     
 FAQ
 ---

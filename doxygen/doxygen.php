@@ -79,12 +79,17 @@
 
 /** 
  * @page install Installation
- * You can put the multi in a number of places:
+ * You can put drush_multi in a number of places:
  * - In a .drush folder in your HOME folder.
  * - Along with one of your existing modules. If your command is
  *   related to an existing module, this is the preferred option.
  * - In a folder specified with the include option.
  * - In /path/to/drush/commands (not a "Smart Thing to Do", but it would work).
+ * 
+ * Change / cd to one of that places above and type the following command to get the latest Version (HEAD) from cvs:
+ * @code
+ * cvs -z6 -d:pserver:anonymous:anonymous@cvs.drupal.org:/cvs/drupal-contrib checkout -d drush_multi-HEAD contributions/modules/drush_multi/
+ * @endcode
  */
 
 /**
@@ -209,28 +214,27 @@
  * For drush commands with blanks like 'watchdog show'
  * make sure to use single or double quotes. Mandatory.
  * @section Options
- * @subsection multi_exec_option --option
- * Option to pass to drush command. e.g. 
- * '--limit=20' for 'watchdog show'. 
- * The number of messages to show. Optional.
  * @subsection multi_exec_argument --argument
- * Argument to pass to drush command e.g. 'php'
- * as type for 'watchdog delete' and  'watchdog show'. Optional.
+ * Argument to pass to drush command e.g. 'site_offline 1'
+ * as argument for 'variable-set'. Optional.
+ * @subsection multi_exec_option --option
+ * Option to pass to drush command. or drush itself e.g. 
+ * '--nocolor' to suppress color highlighting on log messages. Optional.
  * @section Examples
  * @code
  * drush -r /path/to/drupal multi-exec cron
  * @endcode
  * Run all cron hooks on all sites in your multisite installation.  
  * @code 
- * drush -r /path/to/drupal multi-exec 'watchdog show' --option='--limit=30' --argument=php
+ * drush -r /path/to/drupal multi-exec variable-set --argument='site_offine 1' --option='--nocolor'
  * @endcode
- * Shows the 30 newest log entries with facility 'php' 
+ * Put all sites in maintenance mode without using color highlighting on log messages.
  * @code
  * drush -r /path/to/drupal multi-exec updatedb
  * @endcode
  * Execute the update.php process for all sites.
  * @code
- * drush -r /path/to/drupal multi-exec cache clear
+ * drush -r /path/to/drupal multi-exec cache-clear
  * @endcode
  * Flushes the cache for all sites
  */ 
@@ -240,7 +244,7 @@
  * Update your installation if there is a new minor release available,
  * assuming the same structure as in the @ref intro for the installation.
  * 
- * All symbolic links within the original drupal installation are detected automatically.
+ * All symbolic links within the original drupal installation are detected and preserved automatically.
  * @see @ref symlinks for handling and preserving symbolic links.
  * 
  * @section Aliases
