@@ -719,11 +719,8 @@ function _multi_check_site($site) {
 function _multi_check_db_url($site) {
   /** @todo more tests */
   $db_spec = array();
-  
-  $db_spec = _drush_sql_get_spec_from_settings(
-    rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/' . $site . '/settings.php', ''
-  );  
-  
+  $db_spec = _drush_sql_get_db_spec();
+    
   // connect via database specific functions
   switch ($db_spec['driver']) {
     case 'mysql':
