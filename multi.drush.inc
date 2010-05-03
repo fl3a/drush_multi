@@ -1,4 +1,4 @@
-<?php
+  <?php
 // $Id$
 
 include 'includes/multi.inc';
@@ -298,15 +298,20 @@ function multi_moo() {
  * Implementation of drush_hook_COMMAND_validate 
  */
 function drush_multi_sql_dump_validate() {
-  
-  // check for --bzip2 option
+
+  // Check --bzip2 option
   if (in_array('--bzip2', $argv = $GLOBALS['argv'])) {
     drush_set_option('--bzip2', TRUE);
   }
    
-  // check for --date-stamp option
+  // Check --datetime option
   if (in_array('--datetime', $argv = $GLOBALS['argv'])) {
-    drush_set_option('--datetime', TRUE);
+    // Optional result-file datetime
+    $datetime = drush_get_option('datetime');
+    if (isset($datetime)) {
+      drush_set_option('datetime', date('Y-m-d\TH:i')) ;
+    }
+  
   }
   
   // check target argument
@@ -332,7 +337,7 @@ function drush_multi_sql_dump_validate() {
   $comment = drush_get_option('comment');  
   if (isset($comment) && !preg_match("/^[a-zA-Z0-9\-_]{1,}$/", $comment)) {
     return drush_set_error('MULTI_INVALID_COMMENT_ARGUMENT',
-      dt('Invalid argument for comment. Aborting.')
+      dt('Invalid argument for comment, only alphanumerics, "-" and "_" allowed. Aborting.')
     );
   }
   
@@ -351,48 +356,40 @@ function drush_multi_sql_dump_validate() {
  * Implementation of drush_hook_COMMAND()
  */
 function drush_multi_sql_dump() { 
-    
-  $target = drush_get_option('target');
-  
-  // Optional result-file datetime
-  $datetime = drush_get_option('datetime');
-  if (isset($datetime)) {
-    $datetime = '_' . date('Y-m-d\TH:i') ;
-  }
-  
-  // Optional result file comment
-  $comment = drush_get_option('comment');
-  if (isset($comment)) {
-    $comment =  '_' . $comment;      
-  }
-  
-  // File extension
-  $extension = '.sql';
-    
+     
   $sites = array();
   $sites = _multi_scan_sites();
-  
+   
   $dump_type = drush_get_option('dump-type', 'full'); 
-  // full: full sql dump
+  
+  // full: full sql dump 
   if ($dump_type == 'full') {
-    // iterates site databases
+     
+    $datetime = drush_get_option('datetime');
+    $comment = drush_get_option('comment'); 
+        
     foreach ($sites as $site) {
       drush_set_option('uri', $site);
-      $db_spec = _drush_sql_get_spec_from_settings(
-        rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/' . $site . '/settings.php', ''
-      );
-          
-      // Building result-file name 
-      $result_file = $target . '/' . $site . $datetime . $comment . $extension;
+      drush_bootstrap_max();
+      $db_spec = _drush_sql_get_db_spec();
+      drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUSH);      
+                      
+      //  Building result-file name 
+      $result_file = $target . '/' . $site . $datetime . $comment . '.sql';
       
       // set --result-file argument for drush_sql_dump()
       drush_set_option('result-file', $result_file);
       
       // preperation for --update
+
+      /** @tode Implement --update option for disabling all non-core modules */
+
+      /*
       $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
       $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
       $disable_optional_modules_sql = "";
       $enable_optional_modules_sql = "";
+      */
       
       $exec = drush_sql_dump($db_spec);        
       if (drush_op('system', $exec) == 0) {
@@ -404,7 +401,7 @@ function drush_multi_sql_dump() {
               '!file'     => $result_file
             )
           ),
-          'success'        
+          'notice'        
         );      
         if (drush_get_option('--bzip2')) {
           // delete $result_file if it already exists 
@@ -432,12 +429,21 @@ function drush_multi_sql_dump() {
     // iterates site databases
     foreach ($sites as $site) {
       drush_set_option('uri', $site);
-      $db_spec = _drush_sql_get_spec_from_settings(
-        rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/' . $site . '/settings.php', ''
-      );
+      drush_bootstrap_max();
+      
+      $db_spec = _drush_sql_get_db_spec();
+      if (empty($db_spec['driver'])) {
+        drush_log(
+          dt('Skipping !site, missing $db_spec`s....',
+            array('!site' => $site)
+          )
+        );
+        continue;
+      }
 
-      drush_sql_connect();
+      //drush_sql_connect();
       $tables = array();
+      drush_print_r(_drush_sql_get_table_list('tables'));
             
       // get available tables from current database (site)      
       $exec = 'echo "SHOW TABLES"|';
@@ -455,7 +461,7 @@ function drush_multi_sql_dump() {
       foreach($tables as $table) {
       
         // Building result-file name 
-        $result_file = $target . '/' . $site . '.' . $table . $datetime . $comment . $extension;
+        $result_file = $target . '/' . $site . '.' . $table . $datetime . $comment . '.sql';
                
         // build mysqldump statement
         $exec = 'mysqldump -u' . $db_spec['username'];
@@ -497,6 +503,7 @@ function drush_multi_sql_dump() {
     }
   }    
 }
+
 /** @} */ /** 	End of defgroup multi_sql_dump */
 
 /**
