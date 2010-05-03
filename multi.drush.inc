@@ -267,7 +267,7 @@ function multi_nagios() {
  * Congratulation, you have found an easteregg
  */
 function multi_moo() {
-  $cowsay  = " ------------\n";
+  $cowsay  = "\n ------------\n";
   $cowsay .= "< i <3 drush >\n";
   $cowsay .= " ------------\n";
   $cowsay .= "        \   ^__^\n";
@@ -309,7 +309,7 @@ function drush_multi_sql_dump_validate() {
     // Optional result-file datetime
     $datetime = drush_get_option('datetime');
     if (isset($datetime)) {
-      drush_set_option('datetime', date('Y-m-d\TH:i')) ;
+      drush_set_option('datetime', '_' . date('Y-m-d\TH:i')) ;
     }
   
   }
@@ -362,12 +362,15 @@ function drush_multi_sql_dump() {
    
   $dump_type = drush_get_option('dump-type', 'full'); 
   
+  $datetime = drush_get_option('datetime');
+  $comment  = drush_get_option('comment'); 
+  $target   = drush_get_option('target');
+        
+    
+  
   // full: full sql dump 
   if ($dump_type == 'full') {
      
-    $datetime = drush_get_option('datetime');
-    $comment = drush_get_option('comment'); 
-        
     foreach ($sites as $site) {
       drush_set_option('uri', $site);
       drush_bootstrap_max();
@@ -401,7 +404,7 @@ function drush_multi_sql_dump() {
               '!file'     => $result_file
             )
           ),
-          'notice'        
+          'success'        
         );      
         if (drush_get_option('--bzip2')) {
           // delete $result_file if it already exists 
@@ -411,7 +414,7 @@ function drush_multi_sql_dump() {
               dt('Overwriting existing file !file',
                 array('!file' => $result_file . '.bz2')
               ),
-              'notice'
+              'success'
             );               
           }        
           if (drush_shell_exec("bzip2 \"$result_file\"")) {
@@ -430,27 +433,16 @@ function drush_multi_sql_dump() {
     foreach ($sites as $site) {
       drush_set_option('uri', $site);
       drush_bootstrap_max();
-      
       $db_spec = _drush_sql_get_db_spec();
-      if (empty($db_spec['driver'])) {
-        drush_log(
-          dt('Skipping !site, missing $db_spec`s....',
-            array('!site' => $site)
-          )
-        );
-        continue;
-      }
 
-      //drush_sql_connect();
-      $tables = array();
-      drush_print_r(_drush_sql_get_table_list('tables'));
-            
       // get available tables from current database (site)      
       $exec = 'echo "SHOW TABLES"|';
       $exec.= 'mysql -u' . $db_spec['username'];
       $exec.= ' -p'. $db_spec['password'];
       $exec.= ' '. $db_spec['database'];
       $output = shell_exec($exec);
+      
+      $tables = array();
       $tables = explode("\n", $output);
       // remove "Tables_in_database" from array
       unset($tables[0]);
@@ -1093,7 +1085,7 @@ function drush_multi_site($site_name) {
   if($directories_option = drush_get_option('create-directories')) {
     array_push($directories, $directories_option);        
   } 
-  
+    
   // create directories
   foreach ($directories as $directory) {
     if (!drush_op('mkdir', $directory, 0755, TRUE)) {
@@ -1102,6 +1094,28 @@ function drush_multi_site($site_name) {
       );
     }      
   }        
+}
+
+/**
+ * Implementation of drush_hook_post_COMMAND()
+ *  
+ * @param $site_name
+ */
+function drush_multi_post_multi_site($site_name){
+  
+  $site_path    = drush_get_context('DRUSH_DRUPAL_ROOT') . '/sites/' . $site_name;
+  
+  $apache_user  = drush_get_option('multi-apache-user');
+  $apache_group = drush_get_option('multi-apache-group');  
+  
+  if ($apache_user){
+    drush_op('chown', $site_path . '/settings.php', $apache_user);
+    drush_op('chown', $site_path . '/files', $apache_user);
+  }
+  if ($apache_group){
+    drush_op('chgrp', $site_path . '/settings.php', $apache_group);
+    drush_op('chgrp', $site_path . '/files', $apache_group);
+  }
 }
 
 /**
