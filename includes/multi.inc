@@ -219,7 +219,6 @@ function _multi_scan_sites($symlinks = TRUE){
   	  $dir = $tmp;
   	  // get directory string without a leading slash       
       $dir = implode('/', $dir);
-      drush_print_r($dir);      
       // add a leading slash
       $dir = '/' . $dir;            
   	  if (is_link($dir)) {
