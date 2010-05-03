@@ -192,7 +192,7 @@ function _multi_check_project($core, $project = 'drupal') {
  */
 
 /**
- * Finds all sites in the drupal installation, 
+ * Finds all sites within the drupal installation (DRUSH_DRUPAL_ROOT), 
  * by searching for a settings.php which indicates a drupal-site.
  * and check for a valid $db_url for database connections.  
  * @see _multi_check_db_url()
@@ -209,28 +209,24 @@ function _multi_scan_sites($symlinks = TRUE){
   $scan_result = drush_scan_directory(
     rtrim(drush_get_context('DRUSH_DRUPAL_ROOT')) . '/sites', '/^settings\.php$/'
   );
-  
+   
   foreach($scan_result as $site ) {
     
     $tmp = array();
-  	$tmp = split('/', ltrim($site->filename, '/'));
+  	$tmp = explode('/', ltrim($site->filename, '/'));
+  	
   	if (!$symlinks) {  	  
   	  $dir = $tmp;
-  	  // unset last path part (settings.php), it remains the site directory element 
-      unset($dir[count($dir)-1]);
-      // get directory string without a leading slash       
-      $dir = implode('/', $dir);      
+  	  // get directory string without a leading slash       
+      $dir = implode('/', $dir);
+      drush_print_r($dir);      
       // add a leading slash
       $dir = '/' . $dir;            
   	  if (is_link($dir)) {
   	    continue;
   	  }
-  	}
-  	// check site got a valid $db_url within settings.php
-  	if (_multi_check_db_url($tmp[count($tmp)-2])) {
-  	  // the site element
-  	  $sites[] = $tmp[count($tmp)-2];
-    }  		  	   		
+  	}  	
+  	$sites[] = $tmp[count($tmp)-2];
   }
   return $sites;
 }
@@ -423,6 +419,9 @@ function _multi_previous_installations() {
   $installations = array();
   if(count($installations = _multi_available_installations()) != 1) {
     $size = array_keys($installations, _multi_current_version());
+    if (sizeof($size) == 0) {
+      return FALSE;
+    }    
     // get chunks of previous(index 0) and newer(index 1, including current) releases
     $previous_versions = array_chunk($installations, $size[0]);
     if (sizeof($previous_versions[0]) != 0) {
@@ -540,6 +539,7 @@ function _multi_nagios_root() {
   }
   if ($recommended_version = _multi_recommended_version(drush_drupal_major_version(), 'drupal', FALSE, $file)) {
     if ((float) drush_drupal_version() < (float) $recommended_version['version']) {
+      
       drush_print(  
         dt('DRUPAL ROOT CRITICAL - !version @ !drupal_root: drupal-!remcommended_version (!release-date) available, see !release_link for details.',
           array(
@@ -550,9 +550,9 @@ function _multi_nagios_root() {
            	'!release_link' => $recommended_version['release_link'],       
           )
         )
-      );      
-      return MULTI_NAGIOS_CRITICAL;
-    } 
+      );
+      return MULTI_NAGIOS_CRITICAL;          
+    }
     else {
       drush_print(
       	dt('DRUPAL ROOT OK - !version @ !drupal_root is uptodate.',
@@ -718,9 +718,9 @@ function _multi_check_site($site) {
  */
 function _multi_check_db_url($site) {
   /** @todo more tests */
-  $db_spec = array();
+  $db_spec = array();  
   $db_spec = _drush_sql_get_db_spec();
-    
+  
   // connect via database specific functions
   switch ($db_spec['driver']) {
     case 'mysql':
