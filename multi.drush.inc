@@ -267,6 +267,7 @@ function multi_nagios() {
  * Congratulation, you have found an easteregg
  */
 function multi_moo() {
+  
   $cowsay  = "\n ------------\n";
   $cowsay .= "< i <3 drush >\n";
   $cowsay .= " ------------\n";
@@ -655,11 +656,18 @@ function drush_multi_create($destination, $core) {
     );
   }
   
+  $makefile = '/tmp/search.make';  
+  $destination = '/tmp/otto'; 
+  drush_op('system', 'drush make ' . $makefile . ' ' .  $destination);
+  
+  exit;
+    
+  
   // Download and  unpack drupal to $destination
   drush_set_option('package-handler', 'wget');
   drush_set_option('destination', $destination);  
   drush_set_context('DRUSH_NOCOLOR', 1);
-  drush_invoke('download', $recommended_version);
+  drush_invoke('pm-download', $recommended_version);
   drush_set_context('DRUSH_NOCOLOR', 0);
 
   // create backup directory  
@@ -906,7 +914,7 @@ function drush_multi_drupalupdate() {
   drush_set_option('destination', $dest);
   drush_set_option('package-handler', 'wget');
   drush_set_context('DRUSH_NOCOLOR', 1);
-  drush_invoke('download', $recommended_version);
+  drush_invoke('pm-download', $recommended_version);
   drush_set_context('DRUSH_NOCOLOR', 0);
     
   // 3) Create all symlinks found in the root of the old installation for the new installation.
