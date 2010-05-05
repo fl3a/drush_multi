@@ -694,7 +694,8 @@ function drush_multi_create($destination) {
       return $recommended_version;
     }
     $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
-    drush_op('system', 'drush make ' . $makefile . ' ' . $destination . '/' . $recommended_version);
+    //drush_op('system', 'drush make ' . $makefile . ' ' . $destination . '/' . $recommended_version);
+    drush_invoke('make', $makefile, $destination . '/' . $recommended_version);
   }
   // Else download a naked drupal to $destination
   else {
