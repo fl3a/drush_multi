@@ -94,7 +94,9 @@ COMMANDS
   sites, sitescounter, previous installations and drupal version status
     
  * multi create
-  Create a Drupal installation with the symbolic link structure as above.
+  Creates a Drupal multisite installation, 
+  supports usage of drush_make <http://drupal.org/project/drush_make> makefiles
+  
   
  * multi-drupalupdate
   Performs a drupal minor version update.

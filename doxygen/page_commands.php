@@ -19,7 +19,8 @@
  *  
  * @subpage multi_create_help "multi-create"
  * 
- * Creates a multisite installation
+ * Creates a Drupal multisite installation, 
+ * supports usage of <a href="http://drupal.org/project/drush_make">drush_make</a> makefiles
  *  
  * @subpage multi_exec_help "multi-exec"
  * 
