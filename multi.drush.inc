@@ -629,7 +629,6 @@ function drush_multi_create_validate($destination) {
   
   // Check makefile argument
   $makefile = drush_get_option('makefile');
-  drush_print($makefile);
   if ($makefile) {
     if (!is_file($makefile)) {
       return drush_set_error('MULTI_INVALID_MAKEFILE', 
@@ -641,19 +640,19 @@ function drush_multi_create_validate($destination) {
     drush_set_option('makefile', realpath($makefile));
     // Check for required make command (drush_make)
     if (!drush_is_command('make')) {
-      drush_set_error('Could not find drush_make');    
+      return drush_set_error('Could not find drush_make');    
     }
     $core = FALSE;
     $parsed_makefile = drush_make_parse_info_file($makefile);
     $core = (int) $parsed_makefile['core'];
     // core was not specified in makefile
     if (!$core) {
-      drush_set_error('NO CORE');
+      return drush_set_error('NO CORE');
     }
     // Set makefile`s core
     drush_set_option('core', $core);
     if (!in_array('drupal', $parsed_makefile['projects'])){
-      drush_set_error('NO DRUPAL');      
+      return drush_set_error('NO DRUPAL');      
     }
   }
   // Check core argument
