@@ -146,15 +146,18 @@ function multi_drush_command() {
     'description' => 'Create a multisite installation',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, // No bootstrap at all.
     'examples' => array(
-      'drush multi-create /var/www 6' =>
-      'Create a drupal 6 installation in /var/www with creating the directories '. 
-      '6.x_sites, 6.x_backup in /var/www ' . 
-      'linked as sites and backup withing the drupal installation folder.',      
+      'drush multi-create /var/www --core=6.x' =>
+      'Creates a Drupal 6 multisite installation in /var/www with creating the directories '. 
+      '6.x_backup, 6.x_profiles and 6.x_sites, in /var/www ' . 
+      'linked as sites and backup withing the drupal installation folder.',
+      'drush multi-create /var/www --makefile=/path/to/makefile.make' => 
+      'Creates a Drupal multisite installation in /var/www by using the supplied makefile' .
+      ' at /path/to/makefile.make.',      
     ),
     'options' => array(
       /** @todo implement --document-root option for 'multi create' */ //'--document-root' => "Specify a custom name for DOCUMENT_ROOT. \nDefault \${major_version}.x,\neg. 6.x for a drupal 6 release.",
-      '--makefile' => '',
-      '--core' => '',     
+      '--makefile' => "Path to drush_make makefile. \nThe makefile must contain the core specification (eg. \"core = 6.x\" for Drupal 6)\nand Drupal as project (projects[] =  drupal).",
+      '--core'     => "Drupal core version (5.x, 6.x). \nTakes default from pm_parse_project_version(array('drupal') if not supplied.",     
     ),            
     'arguments' => array(
       '/path/to/installation'   => 'Path to where drupal should be installed. Mandatory',
@@ -655,7 +658,7 @@ function drush_multi_create_validate($destination) {
   }
   // Check core argument
   else {
-    $core = drush_get_option('core');
+    $core = (int)drush_get_option('core');
     // Set recommended drupal core version 
     if (!$core) {
       $parsed_version = array();
