@@ -152,11 +152,12 @@ function multi_drush_command() {
       'linked as sites and backup withing the drupal installation folder.',      
     ),
     'options' => array(
-      /** @todo implement --document-root option for 'multi create' */ //'--document-root' => "Specify a custom name for DOCUMENT_ROOT. \nDefault \${major_version}.x,\neg. 6.x for a drupal 6 release.",      
+      /** @todo implement --document-root option for 'multi create' */ //'--document-root' => "Specify a custom name for DOCUMENT_ROOT. \nDefault \${major_version}.x,\neg. 6.x for a drupal 6 release.",
+      '--makefile' => '',
+      '--core' => '',     
     ),            
     'arguments' => array(
       '/path/to/installation'   => 'Path to where drupal should be installed. Mandatory',
-      'core' => 'Drupal core compatiblity. Mandatory.', 
     ), 
   );
   $items['multi-sql-dump'] = array(
@@ -600,10 +601,10 @@ function drush_multi_exec($command) {
 /**
  * Implementation of drush_hook_COMMAND_validate()
  * @param $destination
- * @param $core
  */
-function drush_multi_create_validate($destination, $core) {
+function drush_multi_create_validate($destination) {
   
+  // Check destination argument
   if (!$destination) {
     return drush_set_error('MULTI_MISSING_DESTINATION', 
       dt('Missing argument for destination. Aborting'));
@@ -622,53 +623,94 @@ function drush_multi_create_validate($destination, $core) {
       )
     );
   }
-  if (!$core) {
-    return drush_set_error('MULTI_MISSING_MAJORVERSION', 
-      dt('Missing argument for major-version. Aborting'));
+  
+  // Check makefile argument
+  $makefile = drush_get_option('makefile');
+  drush_print($makefile);
+  if ($makefile) {
+    if (!is_file($makefile)) {
+      return drush_set_error('MULTI_INVALID_MAKEFILE', 
+        dt('Invalid argument for makefile, file !makefile does not exist. Aborting',
+          array('!makefile' => $makefile)
+        )
+      );
+    }
+    drush_set_option('makefile', realpath($makefile));
+    // Check for required make command (drush_make)
+    if (!drush_is_command('make')) {
+      drush_set_error('Could not find drush_make');    
+    }
+    $core = FALSE;
+    $parsed_makefile = drush_make_parse_info_file($makefile);
+    $core = (int) $parsed_makefile['core'];
+    // core was not specified in makefile
+    if (!$core) {
+      drush_set_error('NO CORE');
+    }
+    // Set makefile`s core
+    drush_set_option('core', $core);
+    if (!in_array('drupal', $parsed_makefile['projects'])){
+      drush_set_error('NO DRUPAL');      
+    }
   }
-  else if (!_multi_check_project($core)) {
-    return drush_set_error('MULTI_INVALID_MAJORVERSION', dt('Invalid argument for major-version. Aborting'));
-  }   
+  // Check core argument
+  else {
+    $core = drush_get_option('core');
+    // Set recommended drupal core version 
+    if (!$core) {
+      $parsed_version = array();
+      $parsed_version = pm_parse_project_version(array('drupal'));
+      $recommended_core = ((int)$parsed_version['drupal']['drupal_version']);
+      drush_set_option('core', $recommended_core);      
+    }
+    // Check supplied core version
+    else if (!_multi_check_project($core)) {
+      return drush_set_error('MULTI_INVALID_MAJORVERSION', dt('Invalid argument for major-version. Aborting'));
+    }   
+  }
 }
 
 /**
  * Implementation of drush_hook_COMMAND()
  * @param $destination
- * @param $core
  */
-function drush_multi_create($destination, $core) {
+function drush_multi_create($destination) {
   
+  // convert $destination to an absolute path
+  $destination = realpath($destination);
+    
   // Get recommended release of specified core version
+  $core = drush_get_option('core');
   if (!$recommended_version = _multi_recommended_version($core)) {
     return $recommended_version;
   }
   $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
+      
+  // Use supplied makefile and build it at $destination
+  if ($makefile = rtrim(drush_get_option('makefile'), '/')) {    
+    if (!$recommended_version = _multi_recommended_version($core)) {
+      return $recommended_version;
+    }
+    $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
+    drush_op('system', 'drush make ' . $makefile . ' ' . $destination . '/' . $recommended_version);
+  }
+  // Else download a naked drupal to $destination
+  else {
+    drush_set_option('package-handler', 'wget');
+    drush_set_option('destination', $destination);  
+    drush_set_context('DRUSH_NOCOLOR', 1);
+    drush_invoke('pm-download', $recommended_version);
+    drush_set_context('DRUSH_NOCOLOR', 0);
+  }
   
-  // convert $destination to an absolute path
-  $destination = realpath($destination);
-  
-    // chdir to destination
+  // chdir to destination
   if (!drush_op('chdir', $destination)) {
     return drush_set_error('MULTI_COULD_NOT_CHANGE_TO_DESTINATION', 
       dt('Could not change to !destination. Aborting.', 
         array('!destination' => $destination)
       )
     );
-  }
-  
-  $makefile = '/tmp/search.make';  
-  $destination = '/tmp/otto'; 
-  drush_op('system', 'drush make ' . $makefile . ' ' .  $destination);
-  
-  exit;
-    
-  
-  // Download and  unpack drupal to $destination
-  drush_set_option('package-handler', 'wget');
-  drush_set_option('destination', $destination);  
-  drush_set_context('DRUSH_NOCOLOR', 1);
-  drush_invoke('pm-download', $recommended_version);
-  drush_set_context('DRUSH_NOCOLOR', 0);
+  }  
 
   // create backup directory  
   if (!drush_op('mkdir', $core . '.x_backup')) {
@@ -797,7 +839,7 @@ function drush_multi_create($destination, $core) {
 /**
  * Implementation of drush_hook_COMMAND_rollback()
  */
-function drush_multi_create_rollback($destination, $core) {
+function drush_multi_create_rollback($destination) {
   /** @todo implement drush_multi_create_rollback() */
 }
 
