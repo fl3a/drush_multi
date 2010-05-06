@@ -1,7 +1,7 @@
   <?php
 // $Id$
 
-include 'includes/multi.inc';
+include_once 'includes/multi.inc';
 
 /**
  * @file
@@ -1052,7 +1052,7 @@ function drush_multi_site_validate($site_name) {
     $directories = explode(',', $directories_option);
     foreach ($directories as $directory) {
       /** @todo check each directory name with regex */
-      /** @todo check path, must be in within $drupal_root */
+      ltrim($directory, '/');
     }
   }  
 }
@@ -1136,17 +1136,13 @@ function drush_multi_site($site_name) {
   
   // get additional directories from create-directories option
   if($directories_option = drush_get_option('create-directories')) {
-    array_push($directories, $directories_option);        
+    $tmp = array();    
+    $tmp = explode(',', $directories_option);
+    $directories = array_merge($directories, $tmp);
   } 
     
   // create directories
-  foreach ($directories as $directory) {
-    if (!drush_op('mkdir', $directory, 0755, TRUE)) {
-      drush_set_error('MULTI_SITE_COULD_NOT_DIRECTORY',
-        dt('Could not create directory \'!dir\'', array('!dir' => $directory))
-      );
-    }      
-  }        
+  drush_op('mkdir', implode(' ', $directories), 0755, TRUE);          
 }
 
 /**
