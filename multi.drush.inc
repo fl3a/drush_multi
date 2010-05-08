@@ -103,8 +103,8 @@ function multi_drush_command() {
       'drush -r /path/to/drupal multi-exec updatedb'  => 'Execute the update.php process for all sites.',
     ),     
     'options' => array(      
-      '--argument'		=> 'Argument to pass to drush command e.g. \'php\' as type for \'watchdog delete\' and  \'watchdog show\'. Optional.',
-      '--option'     => 'Option to pass to drush command. or drush itself e.g. \--nocolor\' to suppress color highlighting on log messages. Optional.',       
+      '--argument'		=> 'Argument to pass to drush command e.g. \'php\' as type for \'watchdog delete\' and  \'watchdog show\'.',
+      '--option'     => 'Option to pass to drush command. or drush itself e.g. \--nocolor\' to suppress color highlighting on log messages.',       
     ),    
     'arguments' => array(
       'command' => 'The drush command to execute. For drush commands with blanks like \'watchdog show\' make sure to use single or double quotes. Mandatory.',             
@@ -174,15 +174,15 @@ function multi_drush_command() {
         "\nDump name schema:\n'\${uri}'_before-update-to-6.1_{date('Y-m-d\TH:i')}.sql.bz2'."
     ),
     'options' => array(
-      '--target' => 'Absolute Path to the directory where to store the sql dumps. Default /tmp. Optional.',
+      '--target' => 'Absolute Path to the directory where to store the sql dumps. Default /tmp.',
       '--dump-type' => "Arguments:\n" .
       "\"full\" Creates one file for all tables (default).\n" .
       '"tables" Creates for each table within each database a seperate file.',
-      '--comment'     => 'Comment for filename. May contain alphanumics, \'-\' and \'_\'. Optional.',
+      '--comment'     => 'Comment for filename. May contain alphanumics, \'-\' and \'_\'.',
       '--datetime' => 'Adds an optional datetime string to each result file. Format YYYY-MM-DDThh:mm',
       /** @todo implement --update option for sql_dump, */ //'--update' => 'Disable all optional modules (core/contrib), put your sites in maintainance mode and a activate a default theme. Optional',           
       /** @todo implement --maintance option for sql_dump, */ //'--maintanace' => 'Put your sites in maintainance mode. Optional', 
-      '--bzip2' => 'Use bzip2 for compression of each sql dump. Optional',
+      '--bzip2' => 'Use bzip2 for compression of each sql dump.',
     ),    
   );  
   return $items;

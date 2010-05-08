@@ -1,5 +1,5 @@
 <?php
-// $Id: 
+// $Id:
 
 /*
  * Examples of valid drush_multi statements for a drushrc.php file. 
@@ -72,5 +72,3 @@
 /** @todo Implement that multi-site works with option "multi-site-create-directories */
 // List of optional directories created within a site directory (multi-site)
 // $options['multi-site-create-directories'] = 'modules/patched,foo,foobar';
-
-
