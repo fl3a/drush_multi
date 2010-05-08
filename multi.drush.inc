@@ -640,19 +640,19 @@ function drush_multi_create_validate($destination) {
     drush_set_option('makefile', realpath($makefile));
     // Check for required make command (drush_make)
     if (!drush_is_command('make')) {
-      return drush_set_error('Could not find drush_make');    
+      return drush_set_error('MULTI_MAKE_UNAVAILABLE', 'Could not find drush_make');    
     }
     $core = FALSE;
     $parsed_makefile = drush_make_parse_info_file($makefile);
     $core = (int) $parsed_makefile['core'];
     // core was not specified in makefile
     if (!$core) {
-      return drush_set_error('NO CORE');
+      return drush_set_error('MULTI_MAKE_NO_CORE', 'Core must be supplied in the makefile. Aborting.');
     }
     // Set makefile`s core
     drush_set_option('core', $core);
     if (!in_array('drupal', $parsed_makefile['projects'])){
-      return drush_set_error('NO DRUPAL');      
+      return drush_set_error('MULTI_MAKE_NO_DRUPAL','Drupal must be supplied in the makefile. Aborting.');      
     }
   }
   // Check core argument
