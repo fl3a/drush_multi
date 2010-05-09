@@ -1142,7 +1142,13 @@ function drush_multi_site($site_name) {
   } 
     
   // create directories
-  drush_op('mkdir', implode(' ', $directories), 0755, TRUE);          
+  foreach ($directories as $directory) { 	   
+    if (!drush_op('mkdir', $directory, 0755, TRUE)) { 	 
+	  drush_set_error('MULTI_SITE_COULD_NOT_DIRECTORY', 	 
+	    dt('Could not create directory \'!dir\'', array('!dir' => $directory)) 	 
+	  ); 	 
+	} 	 
+  }          
 }
 
 /**
