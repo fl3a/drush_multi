@@ -1,18 +1,25 @@
 <?php
 // $Id:
 
-/*
+/**
+ *@file 
  * Examples of valid drush_multi statements for a drushrc.php file. 
  * Use this file to cut down on typing of options and avoid mistakes.
  *
- * Append this file to drushrc.php. drushrc.php should be in one of
+ * Append (without leading "<?php") or copy this file to drushrc.php. 
+ * drushrc.php should be in one of
  * five convenient places, listed below in order of precedence:
  *
  * 1. Drupal site folder (e.g sites/{default|example.com}/drushrc.php).
+ *
  * 2. Drupal installation root.
+ *
  * 3. In any location, as specified by the --config (-c) option.
+ *
  * 4. User's .drush folder (i.e. ~/.drush/drushrc.php).
+ *
  * 5. System wide configuration folder (e.g. /etc/drush/drushrc.php).
+ *
  * 6. Drush installation folder.
  *
  * If a configuration file is found in any of the above locations, it
@@ -46,29 +53,34 @@
  * for remote sites.
  */
 
+/** 
+ * (APACHE_RUN_USER) Used to set permissions to the webserver user (multi-site)
+ * for settings.php during the installation and for the files directory 
+ */
 /** @todo Implement that multi-site works with "apache-user" option from commandline too */
-// (APACHE_RUN_USER) Used to set permissions to the webserver user (multi-site)
-// for settings.php during the installation and for the files directory
-// $options['multi-apache-user'] = 'www-data';
+$options['multi-apache-user'] = 'www-data';
 
+
+/** 
+ *(APACHE_RUN_GROUP) Used to set permissions to the webserver group (multi-site)
+ * for settings.php during the installation and for the files directory 
+ */
 /** @todo Implement that multi-site works with "apache-group" option from commandline too */
-// (APACHE_RUN_GROUP) Used to set permissions to the webserver group (multi-site)
-// for settings.php during the installation and for the files directory
-// $options['multi-apache-group'] = 'www-data';
+$options['multi-apache-group'] = 'www-data';
 
+/** Target directory used for writing the result files to (multi-sql-dump) */
 /** @todo Implement that multi-sql-dump works with option "multi-sql-dump-target" */
 /** @todo Rename --target option to something else, target is used by drush itself */
-// Target directory used for writing the result files to (multi-sql-dump)
-// $options['multi-sql-dump-target'] = '/path/where/to/store/the/sqldumps';
+$options['multi-sql-dump-target'] = '/path/where/to/store/the/sqldumps';
 
+/** Use bzip2 for the compression of the result files (multi-sql-dump) */
 /** @todo Implement that multi-sql-dump works with option "multi-sql-dump-bzip2" */
-// Use bzip2 for the compression of the result files (multi-sql-dump)
-// $options['multi-sql-dump-bzip2'] = TRUE;
+$options['multi-sql-dump-bzip2'] = TRUE;
 
+/** Use datetime strings in result file names (multi-sql-dump) */
 /** @todo Implement that multi-sql-dump works with option "multi-sql-dump-datetime" */
-// Use datetime strings in result file names (multi-sql-dump)
-// $options['multi-sql-dump-datetime'] = TRUE;
+$options['multi-sql-dump-datetime'] = TRUE;
 
+/** List of optional directories created within a site directory (multi-site) */
 /** @todo Implement that multi-site works with option "multi-site-create-directories */
-// List of optional directories created within a site directory (multi-site)
-// $options['multi-site-create-directories'] = 'modules/patched,foo,foobar';
+$options['multi-site-create-directories'] = 'modules/patched,foo,foobar';
