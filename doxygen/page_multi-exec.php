@@ -12,6 +12,9 @@
 /** 
  * @page multi_exec_help "multi-exec"
  * Perform a drush core command on all sites (batch mode).
+ * @deprecated @deprecated Similar functionality is in drush core 3.x, see http://drupal.org/node/652778 for details.
+ * @deprecated Please use <code>drush -r /path/to/drupal \@sites ${command}</code> instead!
+ * @deprecated <strong>This command will be removed soon.</strong>
  * @section Aliases
  * @subsection multi_exec_alias mex
  * @section Arguments

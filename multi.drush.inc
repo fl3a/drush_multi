@@ -510,6 +510,9 @@ function drush_multi_sql_dump() {
  */
 
 /**
+ * @deprecated Similar functionality is in drush core 3.x
+ * @deprecated See http://drupal.org/node/652778 for details.
+ * 
  * Implementation of drush_hook_COMMAND_validate 
  * @param $command
  */
@@ -550,10 +553,18 @@ function drush_multi_exec_validate ($command) {
 }
 
 /**
- * Implementation of drush_hook_COMMAND()
+ * @deprecated Similar functionality is in drush core 3.x
+ * @deprecated See http://drupal.org/node/652778 for details.
+ * 
+ * Implementation of drush_hook_COMMAND() 
  * @param $command 
  */
 function drush_multi_exec($command) {  
+  
+  /** @todo Print notification, that this command is depricated and will be removed soon. 
+   * Add a reference to <code>drush -r /path/to/drupal \@sites ${command}</code> too.
+   */  
+  /** @todo Remove drush_multi_exec() and drush_multi_exec_validate() */
   
   // Determine a proper way to call drush again
   // defined in includes/environment.php, initialized via drush_find_drush()
@@ -1029,6 +1040,8 @@ function drush_multi_post_multi_drupalupdate() {
 /**
  * @defgroup multi_site multi-site
  * Hooks for invocation of @ref multi_site_help	, see multi_drush_command() for definition
+ * @todo Add support drush_make support for site creation
+ * @todo Add site-install for for site creation
  * @{
  */
 
