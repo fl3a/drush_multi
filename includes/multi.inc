@@ -394,6 +394,8 @@ function _multi_preserve_symlinks($drupal_root, $new_drupal_root) {
  * @return array 
  *    An ascending ordered array with drupal installation in form of 'drupal-'${MAJOR}.${MINOR},
  *    with at least the current installations found in the parent directory of DRUPAL_ROOT 
+ *    or
+ *    0 if none was found
  */
 function _multi_available_installations() {
   $scan_result = array();
@@ -401,11 +403,16 @@ function _multi_available_installations() {
     rtrim(drush_get_context('DRUSH_DRUPAL_ROOT')) . '/..', 
     '/^drupal-' . drush_drupal_major_version().'/', array(), 0, FALSE 
   );
-  foreach ($scan_result as $install) {
-    $installations[] = $install->basename;        
-  }  
-  usort($installations, "strnatcmp");
-  return $installations;  
+  if (empty($scan_result)) {
+    return 0;
+  } 
+  else {
+    foreach ($scan_result as $install) {
+      $installations[] = $install->basename;        
+    }  
+    usort($installations, "strnatcmp");
+    return $installations;  
+  }
 }
 
 /**

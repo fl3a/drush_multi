@@ -195,49 +195,47 @@ function multi_drush_command() {
  */
 
 /**
- * Command callback for @ref multi_status_help
+ * Command callback for @ref multi_status
  */
 function multi_status() {
-  
+
+  /** @todo Implement --pipe support */
   // Prepend additional information to drush's core status
-  $status = drush_core_status();	
-   
+  drush_core_status(); 
+  
+  $table = $sites = array();
+  
   // get sites in that installation
-  $sites = array();
   $sites = _multi_scan_sites(); 
   
   // Site counter
-  $status .= sprintf("  %-18s: %s\n", 'Site Counter', count($sites));
+  $table['Site Counter'] = count($sites);
    
   // Sites
   if(count($sites) != 0 ){
-    $status .= sprintf("  %-18s: %s\n", 'Sites', implode(' ', $sites));   
+    $table['Sites'] = implode(' ', $sites);
   }
   
   // Previous local installations
-  if (count($versions = _multi_previous_installations()) != 0) {
-    $status .= sprintf("  %-18s: %s\n", 'Prev.Installations', implode(' ', $versions)); 
+  if ($versions = _multi_previous_installations() != 0) {
+    $table['Prev. Installations'] = implode(' ', $versions); 
   }
   
   // Drupal core status / Available updates for drupal core
   if ($recommended_version = _multi_recommended_version(
-        drush_drupal_major_version(), 'drupal', TRUE)
+    drush_drupal_major_version(), 'drupal', TRUE)
   ) {  
     if (drush_drupal_version() < $recommended_version) {
-      $status .= sprintf("  %-18s: \033[31m\033[1m%s\033[0m\n", 
-        'Drupal Core', $recommended_version . " available"
-      );
+      $table['Drupal core status'] = $recommended_version . " available";
     } 
     else {
-      $status .= sprintf("  %-18s: %s\n", 'Drupal Core', 'Uptodate');      
+      $table['Drupal core status'] = 'Uptodate';      
     }   
   }
   else {
-    $status .= sprintf("  %-18s: \033[31m\033[1m%s\033[0m\n", 
-        'Drupal core status', $recommended_version . 'Unknown'
-    );
+     $table['Drupal core status'] = 'Unknown';
   }  
-  drush_print($status);   
+  drush_print_table(drush_key_value_to_array_table($table), TRUE);
 }
 
 
