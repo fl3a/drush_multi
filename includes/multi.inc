@@ -205,6 +205,8 @@ function _multi_check_project($core, $project = 'drupal') {
  */
 function _multi_scan_sites($symlinks = TRUE){
   
+  /** @todo Investigate the usage of drush`s core site detection via alias and consider removing this one */
+  
   $sites = array();	
   $scan_result = drush_scan_directory(
     rtrim(drush_get_context('DRUSH_DRUPAL_ROOT')) . '/sites', '/^settings\.php$/'

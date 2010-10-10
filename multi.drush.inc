@@ -1,4 +1,4 @@
-  <?php
+ <?php
 // $Id$
 
 include_once 'includes/multi.inc';
@@ -296,6 +296,7 @@ function multi_moo() {
 /**
  * @defgroup multi_sql_dump multi-sql-dump
  * Hooks for the invocation of @ref multi_sql_dump_help, see multi_drush_command() for definitions
+ * @todo Investigate the usage of "multi-sql-dump" as single site command in with alias usage
  * @{  
  */
 
@@ -561,10 +562,15 @@ function drush_multi_exec_validate ($command) {
  */
 function drush_multi_exec($command) {  
   
-  /** @todo Print notification, that this command is depricated and will be removed soon. 
-   * Add a reference to <code>drush -r /path/to/drupal \@sites ${command}</code> too.
-   */  
   /** @todo Remove drush_multi_exec() and drush_multi_exec_validate() */
+  
+  drush_log(
+  	'This command is depricated since drush v. 3.x implements ' . 
+    'the execution of a single command on multiple sites and will be removed soon.' . "\n" .
+    'Please consider using "drush @sites [command]" instead and take a look at ' .
+    'http://drupal.org/node/628996 and http://drupal.org/node/652778 for further details.',
+    'warning' 
+  );
   
   // Determine a proper way to call drush again
   // defined in includes/environment.php, initialized via drush_find_drush()
@@ -609,6 +615,7 @@ function drush_multi_exec($command) {
 /**
  * @defgroup multi_create multi-create
  * Hooks for invocation of @ref multi_create_help, see multi_drush_command() for definition
+ * @todo Fix <a href="http://drupal.org/node/819870">Issue #819870 : multi-create --core=6.x -> multi-create --core=6</a>
  * @{  
  */
 
@@ -1040,8 +1047,8 @@ function drush_multi_post_multi_drupalupdate() {
 /**
  * @defgroup multi_site multi-site
  * Hooks for invocation of @ref multi_site_help	, see multi_drush_command() for definition
- * @todo Add support drush_make support for site creation
- * @todo Add site-install for for site creation
+ * @todo Add "drush_make" support for site creation
+ * @todo Add "site-install" support for for site creation
  * @{
  */
 
