@@ -1,4 +1,4 @@
- <?php
+  <?php
 // $Id$
 
 include_once 'includes/multi.inc';
@@ -195,47 +195,49 @@ function multi_drush_command() {
  */
 
 /**
- * Command callback for @ref multi_status
+ * Command callback for @ref multi_status_help
  */
 function multi_status() {
-
-  /** @todo Implement --pipe support */
+  
   // Prepend additional information to drush's core status
-  drush_core_status(); 
-  
-  $table = $sites = array();
-  
+  $status = drush_core_status();	
+   
   // get sites in that installation
+  $sites = array();
   $sites = _multi_scan_sites(); 
   
   // Site counter
-  $table['Site Counter'] = count($sites);
+  $status .= sprintf("  %-18s: %s\n", 'Site Counter', count($sites));
    
   // Sites
   if(count($sites) != 0 ){
-    $table['Sites'] = implode(' ', $sites);
+    $status .= sprintf("  %-18s: %s\n", 'Sites', implode(' ', $sites));   
   }
   
   // Previous local installations
-  if ($versions = _multi_previous_installations() != 0) {
-    $table['Prev. Installations'] = implode(' ', $versions); 
+  if (count($versions = _multi_previous_installations()) != 0) {
+    $status .= sprintf("  %-18s: %s\n", 'Prev.Installations', implode(' ', $versions)); 
   }
   
   // Drupal core status / Available updates for drupal core
   if ($recommended_version = _multi_recommended_version(
-    drush_drupal_major_version(), 'drupal', TRUE)
+        drush_drupal_major_version(), 'drupal', TRUE)
   ) {  
     if (drush_drupal_version() < $recommended_version) {
-      $table['Drupal core status'] = $recommended_version . " available";
+      $status .= sprintf("  %-18s: \033[31m\033[1m%s\033[0m\n", 
+        'Drupal Core', $recommended_version . " available"
+      );
     } 
     else {
-      $table['Drupal core status'] = 'Uptodate';      
+      $status .= sprintf("  %-18s: %s\n", 'Drupal Core', 'Uptodate');      
     }   
   }
   else {
-     $table['Drupal core status'] = 'Unknown';
+    $status .= sprintf("  %-18s: \033[31m\033[1m%s\033[0m\n", 
+        'Drupal core status', $recommended_version . 'Unknown'
+    );
   }  
-  drush_print_table(drush_key_value_to_array_table($table), TRUE);
+  drush_print($status);   
 }
 
 
@@ -294,7 +296,6 @@ function multi_moo() {
 /**
  * @defgroup multi_sql_dump multi-sql-dump
  * Hooks for the invocation of @ref multi_sql_dump_help, see multi_drush_command() for definitions
- * @todo Investigate the usage of "multi-sql-dump" as single site command in with alias usage
  * @{  
  */
 
@@ -509,9 +510,6 @@ function drush_multi_sql_dump() {
  */
 
 /**
- * @deprecated Similar functionality is in drush core 3.x
- * @deprecated See http://drupal.org/node/652778 for details.
- * 
  * Implementation of drush_hook_COMMAND_validate 
  * @param $command
  */
@@ -552,23 +550,10 @@ function drush_multi_exec_validate ($command) {
 }
 
 /**
- * @deprecated Similar functionality is in drush core 3.x
- * @deprecated See http://drupal.org/node/652778 for details.
- * 
- * Implementation of drush_hook_COMMAND() 
+ * Implementation of drush_hook_COMMAND()
  * @param $command 
  */
 function drush_multi_exec($command) {  
-  
-  /** @todo Remove drush_multi_exec() and drush_multi_exec_validate() */
-  
-  drush_log(
-  	'This command is depricated since drush v. 3.x implements ' . 
-    'the execution of a single command on multiple sites and will be removed soon.' . "\n" .
-    'Please consider using "drush @sites [command]" instead and take a look at ' .
-    'http://drupal.org/node/628996 and http://drupal.org/node/652778 for further details.',
-    'warning' 
-  );
   
   // Determine a proper way to call drush again
   // defined in includes/environment.php, initialized via drush_find_drush()
@@ -613,7 +598,6 @@ function drush_multi_exec($command) {
 /**
  * @defgroup multi_create multi-create
  * Hooks for invocation of @ref multi_create_help, see multi_drush_command() for definition
- * @todo Fix <a href="http://drupal.org/node/819870">Issue #819870 : multi-create --core=6.x -> multi-create --core=6</a>
  * @{  
  */
 
@@ -673,7 +657,6 @@ function drush_multi_create_validate($destination) {
   }
   // Check core argument
   else {
-    $core = (int)drush_get_option('core');
     // Set recommended drupal core version 
     if (!$core) {
       $parsed_version = array();
@@ -707,10 +690,10 @@ function drush_multi_create($destination) {
   // Use supplied makefile and build it at $destination
   if ($makefile = rtrim(drush_get_option('makefile'), '/')) {    
     if (!$recommended_version = _multi_recommended_version($core)) {
+    //drush_op('system', 'drush make ' . $makefile . ' ' . $destination . '/' . $recommended_version);
       return $recommended_version;
     }
     $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
-    //drush_op('system', 'drush make ' . $makefile . ' ' . $destination . '/' . $recommended_version);
     drush_invoke('make', $makefile, $destination . '/' . $recommended_version);
   }
   // Else download a naked drupal to $destination
@@ -1045,8 +1028,6 @@ function drush_multi_post_multi_drupalupdate() {
 /**
  * @defgroup multi_site multi-site
  * Hooks for invocation of @ref multi_site_help	, see multi_drush_command() for definition
- * @todo Add "drush_make" support for site creation
- * @todo Add "site-install" support for for site creation
  * @{
  */
 
