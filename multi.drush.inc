@@ -1,4 +1,4 @@
-  <?php
+<?php
 // $Id$
 
 include_once 'includes/multi.inc';
