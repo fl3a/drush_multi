@@ -10,7 +10,7 @@
 
 /** 
  * @page multi_sql_dump_help "multi-sql-dump"
- * Perform an sql dump on all sites (batch mode).
+ * Improved sql-dump.
  * @section Aliases
  * @subsection multi_sql_dump_alias_msd msd
  * @section Options
@@ -32,14 +32,15 @@
  * Use bzip2 for compression of each sql dump.
  * @section Examples
  * @code
- * drush -r /path/to/drupal multi-sql-dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups
+ * drush -r /path/to/drupal -l example.com  multi-sql-dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups
  * @endcode
- * Run 'sql dump' on all sites with comment 
- * 'before-update-to-6.15' as comment for each  result file.
+ * Run 'sql dump' on example.com with 'before-update-to-6.15' as comment.                     
  *
- * The result files are bzip2 compressed and stored in 'db_backups' in your home dirctory. 
+ * The result file will be bzip compressed and stored in 'db_backups' in your home directory.
  * 
- * Dump name schema for the command as executed above. 
- * 
- * 'example.com_before-update-to-6.15.sql.bz2', where example.com is one of your sites.
+ * Dump name schema:
+ * @code
+ * ${uri} [ _ ${comment} _ ${date('Y-m-d\TH:i')] .sql [.bz2]
+ *                               
+ * where ${url} is example.com supplied by -l/--uri.
  */

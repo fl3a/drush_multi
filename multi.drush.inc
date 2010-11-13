@@ -34,9 +34,9 @@ function multi_drush_help($section) {
     case 'drush:multi-create':
       return dt('Create a multisite installation.');
     case 'drush:multi-sql-dump':
-      return dt('Execute \'sql dump\' for all sites in your your multisite installation. The default pattern for the result-file is $uri . \'_\' . date(\'Y-m-d\TH:i\').sql, where $uri is the foldername of a site.');
+      return dt('Improved sql-dump.');
     case 'drush:multi-nagios':
-      return 'For the use as nagios plugin. Print a message and returns with exit status 2 (Critical) if there is a drupal update available.';      
+      return 'For the use as nagios plugin. Print a message and returns with exit status.';      
   }
 }
 
@@ -161,18 +161,18 @@ function multi_drush_command() {
     ),            
     'arguments' => array(
       '/path/to/installation'   => 'Path to where drupal should be installed. Mandatory',
-      'DocumentRoot' =>  'Name of DocumentRoot, name of directory that should be created within "/path/to/installation". Optional, default ${core}.x.',
+      /** @todo Continue writung 'DocumentRoot' for multi-create */ //'DocumentRoot' =>  'Name of DocumentRoot, name of directory that should be created within "/path/to/installation". Optional, default ${core}.x.',
     ), 
   );
   $items['multi-sql-dump'] = array(
     'aliases' => array('msq'),
     'description' => 'Exports the Drupal DB as SQL. File pattern is ${uri} and a \'_date(\'Y-m-d\TH:i\').sql suffix.',
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_DATABASE, 
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_DATABASE, // Bootstrap database. 
     'examples' => array(
       'drush -r /path/to/drupal -l example.com multi-sql-dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups' => 
         'Run \'sql dump\' on example.com with \'before-update-to-6.15\' as comment. ' . "\n" .
         'The result file will be bzip compressed and stored in \'db_backups\' in your home directory.' .
-        "\nDump name schema:\n'\${uri}'_before-update-to-6.15_{date('Y-m-d\TH:i')}.sql.bz2', \nwhere \${url} is example.com supplied by -l/--uri."
+        "\nDump name schema:\n\${uri} [ _ \${comment} _ \${date('Y-m-d\TH:i')] .sql [.bz2], \nwhere \${url} is example.com supplied by -l/--uri."
     ),
     'options' => array(
       '--target' => 'Absolute Path to the directory where to store the sql dumps. Default /tmp.',
@@ -181,8 +181,6 @@ function multi_drush_command() {
       '"tables" Creates for each table within each database a seperate file.',
       '--comment'     => 'Comment for filename. May contain alphanumics, \'-\' and \'_\'.',
       '--datetime' => 'Adds an optional datetime string to each result file. Format YYYY-MM-DDThh:mm',
-      /** @todo implement --update option for sql_dump, */ //'--update' => 'Disable all optional modules (core/contrib), put your sites in maintainance mode and a activate a default theme. Optional',           
-      /** @todo implement --maintance option for sql_dump, */ //'--maintanace' => 'Put your sites in maintainance mode. Optional', 
       '--bzip2' => 'Use bzip2 for compression of each sql dump.',
     ),    
   );  
@@ -199,48 +197,45 @@ function multi_drush_command() {
  * Command callback for @ref multi_status
  */
 function multi_status() {
-  
+
+  /** @todo Implement --pipe support */
   // Prepend additional information to drush's core status
-  $status = drush_core_status();	
-   
+  drush_core_status(); 
+  
+  $table = $sites = array();
+  
   // get sites in that installation
-  $sites = array();
   $sites = _multi_scan_sites(); 
   
   // Site counter
-  $status .= sprintf("  %-18s: %s\n", 'Site Counter', count($sites));
+  $table['Site Counter'] = count($sites);
    
   // Sites
   if(count($sites) != 0 ){
-    $status .= sprintf("  %-18s: %s\n", 'Sites', implode(' ', $sites));   
+    $table['Sites'] = implode(' ', $sites);
   }
   
   // Previous local installations
-  if (count($versions = _multi_previous_installations()) != 0) {
-    $status .= sprintf("  %-18s: %s\n", 'Prev.Installations', implode(' ', $versions)); 
+  if ($versions = _multi_previous_installations() != 0) {
+    $table['Prev. Installations'] = implode(' ', $versions); 
   }
   
   // Drupal core status / Available updates for drupal core
   if ($recommended_version = _multi_recommended_version(
-        drush_drupal_major_version(), 'drupal', TRUE)
+    drush_drupal_major_version().'.x', 'drupal', TRUE)
   ) {  
     if (drush_drupal_version() < $recommended_version) {
-      $status .= sprintf("  %-18s: \033[31m\033[1m%s\033[0m\n", 
-        'Drupal Core', $recommended_version . " available"
-      );
+      $table['Drupal core status'] = $recommended_version . " available";
     } 
     else {
-      $status .= sprintf("  %-18s: %s\n", 'Drupal Core', 'Uptodate');      
+      $table['Drupal core status'] = 'Uptodate';      
     }   
   }
   else {
-    $status .= sprintf("  %-18s: \033[31m\033[1m%s\033[0m\n", 
-        'Drupal core status', $recommended_version . 'Unknown'
-    );
+     $table['Drupal core status'] = 'Unknown';
   }  
-  drush_print($status);   
+  drush_print_table(drush_key_value_to_array_table($table), TRUE);
 }
-
 
 /**
  * Command callback for @ref multi_nagios_help
@@ -306,18 +301,13 @@ function multi_moo() {
 function drush_multi_sql_dump_validate() {
 
   // Check --bzip2 option
-  if (in_array('--bzip2', $argv = $GLOBALS['argv'])) {
-    drush_set_option('--bzip2', TRUE);
+  if (in_array('--bzip2', $GLOBALS['argv'])) {
+    drush_set_option('bzip2', TRUE);
   }
    
   // Check --datetime option
-  if (in_array('--datetime', $argv = $GLOBALS['argv'])) {
-    // Optional result-file datetime
-    $datetime = drush_get_option('datetime');
-    if (isset($datetime)) {
-      drush_set_option('datetime', '_' . date('Y-m-d\TH:i')) ;
-    }
-  
+ if (in_array('--datetime', $GLOBALS['argv'])) {
+    drush_set_option('datetime', '_' . date('Y-m-d\TH:i')) ;
   }
   
   // check target argument
@@ -363,12 +353,14 @@ function drush_multi_sql_dump_validate() {
  */
 function drush_multi_sql_dump() { 
    
-  $dump_type = drush_get_option('dump-type', 'full'); 
-  
+  $dump_type = drush_get_option('dump-type', 'full');
+  $db_spec = _drush_sql_get_db_spec();
+    
+  $site = drush_get_option(array('uri','l'));
   $datetime = drush_get_option('datetime');
   $comment  = drush_get_option('comment'); 
   $target   = drush_get_option('target');    
-  
+   
   // full: full sql dump 
   if ($dump_type == 'full') {
                     
@@ -401,7 +393,7 @@ function drush_multi_sql_dump() {
         ),
         'success'        
       );      
-      if (drush_get_option('--bzip2')) {
+      if (drush_get_option('bzip2')) {
         // delete $result_file if it already exists 
         if (is_file($result_file . '.bz2')){
           drush_shell_exec('rm '. $result_file . '.bz2');
@@ -423,7 +415,6 @@ function drush_multi_sql_dump() {
   }
   // tables: seperate sql dump/file for each table 
   else {
-    $db_spec = _drush_sql_get_db_spec();
 
     // get available tables from current database (site)      
     $exec = 'echo "SHOW TABLES"|';
@@ -450,7 +441,7 @@ function drush_multi_sql_dump() {
       $exec.= ' -p'. $db_spec['password'];
       $exec.= ' '. $db_spec['database'] .' ' . $table;
       //drush_print($exec . '>' . $result_file);
-      if (drush_shell_exec($exec . '>' . $result_file)) {
+      if (drush_shell_exec($exec . '>' . $result_file) == 0) {
         drush_log(
           dt('SQL dump for site !site, datebase !database, table !table saved in !file.', 
             array(
@@ -462,15 +453,16 @@ function drush_multi_sql_dump() {
           ),
         	'success'        
         );
-        if (drush_get_option('--bzip2')) {
-          // delete $result_file if it already exists
+        if (drush_get_option('bzip2')) {
+          drush_print('bzip2');
+          // delete $result_file if it already exists 
           if (is_file($result_file . '.bz2')){
             drush_shell_exec('rm '. $result_file . '.bz2');
             drush_log(
               dt('Overwriting existing file !file',
                 array('!file' => $result_file . '.bz2')
               ),
-              'notice'
+              'success'
             );               
           }        
           if (drush_shell_exec("bzip2 \"$result_file\"")) {
@@ -478,8 +470,8 @@ function drush_multi_sql_dump() {
               array('!file' => $result_file)),
             	'success'        
             );
-          }
-        }                
+          }                
+        } 		  
       }                 
     }
   }    
