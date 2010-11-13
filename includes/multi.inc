@@ -1,6 +1,5 @@
 <?php
 // $Id$
-
 /**
  * @file
  * Helper functions for multi commands
@@ -47,7 +46,7 @@ define('MULTI_NAGIOS_CRITICAL', 2);
  * Get the recommended version of a specified project from a file or an url
  * 
  * @param $core 
- *   Core compatibility / drupal major version (5, 6, 7 and so forth)
+ *   Core compatibility / drupal major version (5.x, 6.x, 7.x and so forth)
  *   but also possible for versions before drupal 5 like drupal/4.7.x or image/4.7.x etc without error
  * @param $project 
  *   Name of the project. Default 'drupal'
@@ -81,7 +80,7 @@ define('MULTI_NAGIOS_CRITICAL', 2);
 function _multi_recommended_version($core, $project = 'drupal', $float = FALSE, $path = FALSE) {
   
   if (!$path) {
-    $path = 'http://updates.drupal.org/release-history/'. $project. '/'. $core . '.x';
+    $path = 'http://updates.drupal.org/release-history/'. $project. '/'. $core;
   }    
   if ($xml = @simplexml_load_file($path)) {
     if ($error = $xml->xpath('/error')) {
@@ -152,7 +151,7 @@ function _multi_released_versions($core, $project = 'drupal') {
  * Check if the combination of the specified core compatibility and the specified project exists on drupal.org.
  *  
  * @param $core 
- *   Core compatibility / drupal major version (5, 6, 7 and so forth)
+ *   Core compatibility / drupal major version (5.x, 6.x, 7.x and so forth)
  *   but also possible for versions before drupal 5 like drupal-4.7.x or image-4.7.x etc without error  
  * @param $project 
  * 	Name of the project. Default 'drupal' 
@@ -161,7 +160,7 @@ function _multi_released_versions($core, $project = 'drupal') {
  */
 function _multi_check_project($core, $project = 'drupal') {
   
-  $url = 'http://updates.drupal.org/release-history/'. $project . '/'. $core . '.x';
+  $url = 'http://updates.drupal.org/release-history/'. $project . '/'. $core;
   if ($xml = @simplexml_load_file($url)) {
     if ($error = $xml->xpath('/error')) {
   	  return drush_set_error('MULTI_INVALID_PROJECT_OR_MAJOR_VERSION', 
@@ -545,7 +544,7 @@ function _multi_nagios_root() {
   else {
     $file = FALSE;
   }
-  if ($recommended_version = _multi_recommended_version(drush_drupal_major_version(), 'drupal', FALSE, $file)) {
+  if ($recommended_version = _multi_recommended_version(drush_drupal_major_version(). '.x', 'drupal', FALSE, $file)) {
     if ((float) drush_drupal_version() < (float) $recommended_version['version']) {
       
       drush_print(  

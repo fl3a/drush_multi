@@ -161,22 +161,23 @@ function multi_drush_command() {
     ),            
     'arguments' => array(
       '/path/to/installation'   => 'Path to where drupal should be installed. Mandatory',
+      'DocumentRoot' =>  'Name of DocumentRoot, name of directory that should be created within "/path/to/installation". Optional, default ${core}.x.',
     ), 
   );
   $items['multi-sql-dump'] = array(
     'aliases' => array('msq'),
-    'description' => 'Exports the Drupal DB as SQL for all sites. File pattern is ${uri} and a \'_date(\'Y-m-d\TH:i\').sql suffix.',
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
+    'description' => 'Exports the Drupal DB as SQL. File pattern is ${uri} and a \'_date(\'Y-m-d\TH:i\').sql suffix.',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_DATABASE, 
     'examples' => array(
-      'drush -r /path/to/drupal multi-sql-dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups' => 
-        'Run \'sql dump\' on all sites with comment \'before-update-to-6.15\' as comment for each result file. ' .
-        'The result files are bzip compressed and stored in \'db_backups\' in your home dirctory.' .
-        "\nDump name schema:\n'\${uri}'_before-update-to-6.1_{date('Y-m-d\TH:i')}.sql.bz2'."
+      'drush -r /path/to/drupal -l example.com multi-sql-dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups' => 
+        'Run \'sql dump\' on example.com with \'before-update-to-6.15\' as comment. ' . "\n" .
+        'The result file will be bzip compressed and stored in \'db_backups\' in your home directory.' .
+        "\nDump name schema:\n'\${uri}'_before-update-to-6.15_{date('Y-m-d\TH:i')}.sql.bz2', \nwhere \${url} is example.com supplied by -l/--uri."
     ),
     'options' => array(
       '--target' => 'Absolute Path to the directory where to store the sql dumps. Default /tmp.',
       '--dump-type' => "Arguments:\n" .
-      "\"full\" Creates one file for all tables (default).\n" .
+      "\"full\" Creates one file for all tables, default.\n" .
       '"tables" Creates for each table within each database a seperate file.',
       '--comment'     => 'Comment for filename. May contain alphanumics, \'-\' and \'_\'.',
       '--datetime' => 'Adds an optional datetime string to each result file. Format YYYY-MM-DDThh:mm',
@@ -195,7 +196,7 @@ function multi_drush_command() {
  */
 
 /**
- * Command callback for @ref multi_status_help
+ * Command callback for @ref multi_status
  */
 function multi_status() {
   
@@ -361,65 +362,115 @@ function drush_multi_sql_dump_validate() {
  * Implementation of drush_hook_COMMAND()
  */
 function drush_multi_sql_dump() { 
-     
-  $sites = array();
-  $sites = _multi_scan_sites();
    
   $dump_type = drush_get_option('dump-type', 'full'); 
   
   $datetime = drush_get_option('datetime');
   $comment  = drush_get_option('comment'); 
-  $target   = drush_get_option('target');
-        
-    
+  $target   = drush_get_option('target');    
   
   // full: full sql dump 
   if ($dump_type == 'full') {
-     
-    foreach ($sites as $site) {
-      drush_set_option('uri', $site);
-      drush_bootstrap_max();
-      $db_spec = _drush_sql_get_db_spec();
-      drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUSH);      
-                      
-      //  Building result-file name 
-      $result_file = $target . '/' . $site . $datetime . $comment . '.sql';
-      
-      // set --result-file argument for drush_sql_dump()
-      drush_set_option('result-file', $result_file);
-      
-      // preperation for --update
+                    
+    //  Building result-file name 
+    $result_file = $target . '/' . $site . $datetime . $comment . '.sql';
+    
+    // set --result-file argument for drush_sql_dump()
+    drush_set_option('result-file', $result_file);
+    
+    // preperation for --update
 
-      /** @tode Implement --update option for disabling all non-core modules */
+    /** @tode Implement --update option for disabling all non-core modules */
 
-      /*
-      $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
-      $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
-      $disable_optional_modules_sql = "";
-      $enable_optional_modules_sql = "";
-      */
-      
-      $exec = drush_sql_dump($db_spec);        
-      if (drush_op('system', $exec) == 0) {
+    /*
+    $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
+    $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
+    $disable_optional_modules_sql = "";
+    $enable_optional_modules_sql = "";
+    */
+    
+    $exec = drush_sql_dump($db_spec);        
+    if (drush_op('system', $exec) == 0) {
+      drush_log(
+        dt('SQL dump for site !site, database !database saved in !file.', 
+          array(
+            '!site'     => $site,
+            '!database' => $db_spec['database'],
+            '!file'     => $result_file
+          )
+        ),
+        'success'        
+      );      
+      if (drush_get_option('--bzip2')) {
+        // delete $result_file if it already exists 
+        if (is_file($result_file . '.bz2')){
+          drush_shell_exec('rm '. $result_file . '.bz2');
+          drush_log(
+            dt('Overwriting existing file !file',
+              array('!file' => $result_file . '.bz2')
+            ),
+            'success'
+          );               
+        }        
+        if (drush_shell_exec("bzip2 \"$result_file\"")) {
+          drush_log(dt('Compressed !file using bzip2.', 
+            array('!file' => $result_file)),
+          	'success'        
+          );
+        }                
+      } 		  
+    }    
+  }
+  // tables: seperate sql dump/file for each table 
+  else {
+    $db_spec = _drush_sql_get_db_spec();
+
+    // get available tables from current database (site)      
+    $exec = 'echo "SHOW TABLES"|';
+    $exec.= 'mysql -u' . $db_spec['username'];
+    $exec.= ' -p'. $db_spec['password'];
+    $exec.= ' '. $db_spec['database'];
+    $output = shell_exec($exec);
+    
+    $tables = array();
+    $tables = explode("\n", $output);
+    // remove "Tables_in_database" from array
+    unset($tables[0]);
+    // remove last element which contains the databasename
+    unset($tables[sizeof($tables)]);
+
+     // iterate tables
+    foreach($tables as $table) {
+    
+      // Building result-file name 
+      $result_file = $target . '/' . $site . '.' . $table . $datetime . $comment . '.sql';
+             
+      // build mysqldump statement
+      $exec = 'mysqldump -u' . $db_spec['username'];
+      $exec.= ' -p'. $db_spec['password'];
+      $exec.= ' '. $db_spec['database'] .' ' . $table;
+      //drush_print($exec . '>' . $result_file);
+      if (drush_shell_exec($exec . '>' . $result_file)) {
         drush_log(
-          dt('SQL dump for site !site, database !database saved in !file.', 
+          dt('SQL dump for site !site, datebase !database, table !table saved in !file.', 
             array(
-              '!site'     => $site,
-              '!database' => $db_spec['database'],
-              '!file'     => $result_file
+              '!site'      => $site,
+              '!database'  => $db_spec['database'],
+              '!table'     => $table, 
+              '!file'      => $result_file
             )
           ),
-          'success'        
-        );      
+        	'success'        
+        );
         if (drush_get_option('--bzip2')) {
-          // delete $result_file if it already exists 
+          // delete $result_file if it already exists
           if (is_file($result_file . '.bz2')){
             drush_shell_exec('rm '. $result_file . '.bz2');
             drush_log(
               dt('Overwriting existing file !file',
                 array('!file' => $result_file . '.bz2')
               ),
-              'success'
+              'notice'
             );               
           }        
           if (drush_shell_exec("bzip2 \"$result_file\"")) {
@@ -427,76 +478,9 @@ function drush_multi_sql_dump() {
               array('!file' => $result_file)),
             	'success'        
             );
-          }                
-        } 		  
-      }    
-    }
-  }
-  // tables: table wise sql dump
-  else {
-    // iterates site databases
-    foreach ($sites as $site) {
-      drush_set_option('uri', $site);
-      drush_bootstrap_max();
-      $db_spec = _drush_sql_get_db_spec();
-
-      // get available tables from current database (site)      
-      $exec = 'echo "SHOW TABLES"|';
-      $exec.= 'mysql -u' . $db_spec['username'];
-      $exec.= ' -p'. $db_spec['password'];
-      $exec.= ' '. $db_spec['database'];
-      $output = shell_exec($exec);
-      
-      $tables = array();
-      $tables = explode("\n", $output);
-      // remove "Tables_in_database" from array
-      unset($tables[0]);
-      // remove last element which contains the databasename
-      unset($tables[sizeof($tables)]);
-
-       // iterate tables
-      foreach($tables as $table) {
-      
-        // Building result-file name 
-        $result_file = $target . '/' . $site . '.' . $table . $datetime . $comment . '.sql';
-               
-        // build mysqldump statement
-        $exec = 'mysqldump -u' . $db_spec['username'];
-        $exec.= ' -p'. $db_spec['password'];
-        $exec.= ' '. $db_spec['database'] .' ' . $table;
-        //drush_print($exec . '>' . $result_file);
-        if (drush_shell_exec($exec . '>' . $result_file)) {
-          drush_log(
-            dt('SQL dump for site !site, datebase !database, table !table saved in !file.', 
-              array(
-                '!site'      => $site,
-                '!database'  => $db_spec['database'],
-                '!table'     => $table, 
-                '!file'      => $result_file
-              )
-            ),
-          	'success'        
-          );
-          if (drush_get_option('--bzip2')) {
-            // delete $result_file if it already exists
-            if (is_file($result_file . '.bz2')){
-              drush_shell_exec('rm '. $result_file . '.bz2');
-              drush_log(
-                dt('Overwriting existing file !file',
-                  array('!file' => $result_file . '.bz2')
-                ),
-                'notice'
-              );               
-            }        
-            if (drush_shell_exec("bzip2 \"$result_file\"")) {
-              drush_log(dt('Compressed !file using bzip2.', 
-                array('!file' => $result_file)),
-              	'success'        
-              );
-            }
-          }                
-        }                 
-      }
+          }
+        }                
+      }                 
     }
   }    
 }
@@ -592,7 +576,7 @@ function drush_multi_exec($command) {
       drush_print($line);
     } 
   }  
-}    
+}
 /** @} */ /** End of defgroup multi_exec */
 
 /**
@@ -605,30 +589,35 @@ function drush_multi_exec($command) {
  * Implementation of drush_hook_COMMAND_validate()
  * @param $destination
  */
-function drush_multi_create_validate($destination) {
+function drush_multi_create_validate($destination, $document_root = NULL) {
   
   // Check destination argument
   if (!$destination) {
     return drush_set_error('MULTI_MISSING_DESTINATION', 
       dt('Missing argument for destination. Aborting'));
   }
-  else if (!is_dir($destination)) {
-    return drush_set_error('MULTI_INVALID_DESTINATION', 
-      dt('Invalid argument for destination, !destination is no directory. Aborting',
-        array('!destination' => $destination)
-      )
-    );
+  else {
+    if (!is_dir($destination)) {
+      return drush_set_error('MULTI_INVALID_DESTINATION', 
+        dt('Invalid argument for destination, "!destination"  is no directory. Aborting',
+          array('!destination' => $destination)
+        )
+      );
+    }
+    if (!is_writable($destination)){
+      return drush_set_error('MULTI_DESTINATION_NOT_WRITABLE', 
+        dt('Destinattion !destination is not writable. Aborting',
+          array(            
+            '!destination' => $destination,    
+          )
+        )
+      );
+    }    
   }
-  else if (!is_writable($destination)){
-    return drush_set_error('MULTI_DESTINATION_NOT_WRITABLE', 
-      dt('Destination !destination is not writable. Aborting',
-        array('!destination' => realpath($destination))
-      )
-    );
-  }
-  
+    
   // Check makefile argument
   $makefile = drush_get_option('makefile');
+  
   if ($makefile) {
     if (!is_file($makefile)) {
       return drush_set_error('MULTI_INVALID_MAKEFILE', 
@@ -658,11 +647,12 @@ function drush_multi_create_validate($destination) {
   // Check core argument
   else {
     // Set recommended drupal core version 
+    $core = drush_get_option('core');
     if (!$core) {
       $parsed_version = array();
       $parsed_version = pm_parse_project_version(array('drupal'));
-      $recommended_core = ((int)$parsed_version['drupal']['drupal_version']);
-      drush_set_option('core', $recommended_core);      
+      $recommended_core = $parsed_version['drupal']['drupal_version'];
+      drush_set_option('core', $recommended_core);
     }
     // Check supplied core version
     else if (!_multi_check_project($core)) {
@@ -675,18 +665,11 @@ function drush_multi_create_validate($destination) {
  * Implementation of drush_hook_COMMAND()
  * @param $destination
  */
-function drush_multi_create($destination) {
+function drush_multi_create($destination, $document_root = NULL) {
   
   // convert $destination to an absolute path
   $destination = realpath($destination);
     
-  // Get recommended release of specified core version
-  $core = drush_get_option('core');
-  if (!$recommended_version = _multi_recommended_version($core)) {
-    return $recommended_version;
-  }
-  $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
-      
   // Use supplied makefile and build it at $destination
   if ($makefile = rtrim(drush_get_option('makefile'), '/')) {    
     if (!$recommended_version = _multi_recommended_version($core)) {
@@ -698,6 +681,13 @@ function drush_multi_create($destination) {
   }
   // Else download a naked drupal to $destination
   else {
+     // Get recommended release of specified core version
+    $core = drush_get_option('core');
+    if (!$recommended_version = _multi_recommended_version($core)) {
+      return $recommended_version;
+    }
+    $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
+      
     drush_set_option('package-handler', 'wget');
     drush_set_option('destination', $destination);  
     drush_set_context('DRUSH_NOCOLOR', 1);
@@ -715,7 +705,7 @@ function drush_multi_create($destination) {
   }  
 
   // create backup directory  
-  if (!drush_op('mkdir', $core . '.x_backup')) {
+  if (!drush_op('mkdir', $core . '_backup')) {
     return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_DIR', 
       dt('Could not create backup directory "!pwd/!core.x_backup". Aborting.',
         array('!pwd' => drush_cwd(), '!core' => $core)
@@ -724,9 +714,9 @@ function drush_multi_create($destination) {
   }
   
   // Create sites directory
-  if (!drush_op('mkdir', $core . '.x_sites')) {
+  if (!drush_op('mkdir', $core . '_sites')) {
     return drush_set_error('MULTI_COULD_NOT_CREATE_SITES_DIR', 
-      dt('Could not create sites directory "!pwd/!core.x_sites". Aborting.',
+      dt('Could not create sites directory "!pwd/!core_sites". Aborting.',
         array('!pwd' => drush_cwd(), '!core' => $core)
       )
     );
@@ -735,7 +725,7 @@ function drush_multi_create($destination) {
   $dir = realpath($destination . '/' . $recommended_version . '/sites');
   
   // Copy content of sites directory to ${major_version}_sites
-  $exec = 'cp -r ' . $dir . '/* ' . $core . '.x_sites';
+  $exec = 'cp -r ' . $dir . '/* ' . $core . '_sites';
   if (!drush_shell_exec($exec)) {
     return drush_set_error('MULTI_COULD_NOT_COPY_SITES_DEFAULT_DIR', 
   	  dt('Could not copy !dir to !target',
@@ -756,9 +746,9 @@ function drush_multi_create($destination) {
   }
 
   // create profiles directory
-  if (!drush_op('mkdir', $core . '.x_profiles')) {
+  if (!drush_op('mkdir', $core . '_profiles')) {
     return drush_set_error('MULTI_COULD_NOT_CREATE_PROFILES_DIR', 
-      dt('Could not create profiles directory "!pwd/!core.x_profiles". Aborting.',
+      dt('Could not create profiles directory "!pwd/!core_profiles". Aborting.',
         array('!pwd' => drush_cwd(), 
         '!core' => $core)
       )
@@ -768,11 +758,11 @@ function drush_multi_create($destination) {
   $dir = realpath($destination . '/' . $recommended_version . '/profiles');
   
   // Copy content of profiles directory to ${major_version}_profiles
-  $exec = 'cp -r ' . $dir . '/* ' . $core . '.x_profiles';
+  $exec = 'cp -r ' . $dir . '/* ' . $core . '_profiles';
   if (!drush_shell_exec($exec)) {
     return drush_set_error('MULTI_COULD_NOT_COPY_PROFILES_DEFAULT_DIR', 
   	  dt('Could not copy !dir to !target',
-  	    array('!dir' => $dir . '/default', '!target' => $core . '.x_profiles')
+  	    array('!dir' => $dir . '/default', '!target' => $core . '_profiles')
   	  )
   	);
   } 
@@ -791,7 +781,7 @@ function drush_multi_create($destination) {
   // Change into new drupal directory
   if(drush_op('chdir', realpath($destination . '/' . $recommended_version))) {        
     // 4) create relative symlink for sites-directory into new drupal-root
-  	$sites_dir = _multi_relative_path($destination . '/' . $core .'.x_sites');
+  	$sites_dir = _multi_relative_path($destination . '/' . $core .'_sites');
   	if (!drush_op('symlink', $sites_dir, 'sites')) {
       return drush_set_error('MULTI_COULD_NOT_CREATE_SITES_SYMLINK', 
         dt('symlink(): Unable to create symlink from !source into !target for sites-directory.',
@@ -800,7 +790,7 @@ function drush_multi_create($destination) {
       );                
     }
     // Create relative symlink for backup-directory into new drupal-root
-    $backup_dir = _multi_relative_path($destination . '/' . $core .'.x_backup');
+    $backup_dir = _multi_relative_path($destination . '/' . $core .'_backup');
     if (!drush_op('symlink', $backup_dir, 'backup')) {
       return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_SYMLINK', 
         dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
@@ -809,7 +799,7 @@ function drush_multi_create($destination) {
       );      
     }
     // Create relative symlink for profiles-directory into new drupal-root
-    $profiles_dir = _multi_relative_path($destination . '/' . $core .'.x_profiles');
+    $profiles_dir = _multi_relative_path($destination . '/' . $core .'_profiles');
     if (!drush_op('symlink', $profiles_dir, 'profiles')) {
       return drush_set_error('MULTI_COULD_NOT_CREATE_PROFILES_SYMLINK', 
         dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
@@ -829,9 +819,9 @@ function drush_multi_create($destination) {
   drush_op('chdir', $destination);
   
   // create new symlink for document root/symlink from new drupal to ${MAJOR_VERSION}.x
-  if (!drush_op('symlink', $recommended_version, $core . '.x')) {
+  if (!drush_op('symlink', $recommended_version, $core)) {
     return drush_set_error('MULTI_COULD_NOT_SYMLINK_DOKUMENT_ROOT',
-   	  dt('symlink(): Could not create symlink from !drupal to !major.x for DOCUMENT_ROOT',
+   	  dt('symlink(): Could not create symlink from !drupal to !major for DOCUMENT_ROOT',
    	  	array('!drupal' => $recommended_version, '!major' => $core)
    	  )
     );	
@@ -841,7 +831,7 @@ function drush_multi_create($destination) {
 /**
  * Implementation of drush_hook_COMMAND_rollback()
  */
-function drush_multi_create_rollback($destination) {
+function drush_multi_create_rollback($destination, $document_root = NULL) {
   /** @todo implement drush_multi_create_rollback() */
 }
 
@@ -890,7 +880,7 @@ function drush_multi_drupalupdate_validate () {
   }
   
   // Get release informtion from drupal.org via xml-xpath  
-  if (!$recommended_version = _multi_recommended_version(drush_drupal_major_version())) {
+  if (!$recommended_version = _multi_recommended_version(drush_drupal_major_version() . '.x')) {
     // return with exit code of _multi_recommended_version() if an error ocurrs
     return $recommended_version;
   } 
@@ -1182,4 +1172,5 @@ function drush_multi_site_rollback($site_name) {
   }
 }
 /** @} */ /** End of defgroup multi_sql_dump */
+  
 /** @} */ /** End of defgroup commands */
