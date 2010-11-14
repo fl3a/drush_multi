@@ -611,45 +611,47 @@ function drush_multi_create_validate($destination, $document_root = NULL) {
   $makefile = drush_get_option('makefile');
   
   if ($makefile) {
+    // Check for required make command (make/drush_make)
+    if (!drush_is_command('make')) {
+      return drush_set_error('MULTI_MAKE_UNAVAILABLE', 'Could not find drush_make');    
+    }    
     if (!is_file($makefile)) {
       return drush_set_error('MULTI_INVALID_MAKEFILE', 
         dt('Invalid argument for makefile, file !makefile does not exist. Aborting',
           array('!makefile' => $makefile)
         )
       );
+    } 
+    
+    $parsed_makefile = drush_make_parse_info_file($makefile);    
+ 
+    // Check if drupal  or [type] = "core", e.g. Pressflow exists within projects[] as core project  
+    if (!in_array('drupal', $parsed_makefile['projects'])){
+      $core_project = FALSE;
+      foreach ($parsed_makefile['projects'] as $project) {
+        if (is_array($project)) {
+          if (array_search('core', $project)) {
+            $core_project = TRUE;
+          }
+        }
+      }     
     }
-    drush_set_option('makefile', realpath($makefile));
-    // Check for required make command (drush_make)
-    if (!drush_is_command('make')) {
-      return drush_set_error('MULTI_MAKE_UNAVAILABLE', 'Could not find drush_make');    
+    else {
+      $core_project = TRUE;
     }
+    if (!$core_project){
+      return drush_set_error('MULTI_MAKE_NO_CORE_PROJECT','A core project must be supplied in the makefile. Aborting.');      
+    }   
     $core = FALSE;
-    $parsed_makefile = drush_make_parse_info_file($makefile);
-    $core = (int) $parsed_makefile['core'];
+    $core = $parsed_makefile['core'];
     // core was not specified in makefile
     if (!$core) {
       return drush_set_error('MULTI_MAKE_NO_CORE', 'Core must be supplied in the makefile. Aborting.');
     }
-    // Set makefile`s core
-    drush_set_option('core', $core);
-    if (!in_array('drupal', $parsed_makefile['projects'])){
-      return drush_set_error('MULTI_MAKE_NO_DRUPAL','Drupal must be supplied in the makefile. Aborting.');      
-    }
-  }
-  // Check core argument
-  else {
-    // Set recommended drupal core version 
-    $core = drush_get_option('core');
-    if (!$core) {
-      $parsed_version = array();
-      $parsed_version = pm_parse_project_version(array('drupal'));
-      $recommended_core = $parsed_version['drupal']['drupal_version'];
-      drush_set_option('core', $recommended_core);
-    }
-    // Check supplied core version
-    else if (!_multi_check_project($core)) {
-      return drush_set_error('MULTI_INVALID_MAJORVERSION', dt('Invalid argument for major-version. Aborting'));
-    }   
+    else {
+      // Set makefile`s core
+      drush_set_option('core', $core);
+    }    
   }
 }
 
@@ -661,15 +663,23 @@ function drush_multi_create($destination, $document_root = NULL) {
   
   // convert $destination to an absolute path
   $destination = realpath($destination);
-    
+  
+  $core = drush_get_option('core');
+  
+  if ($document_root == NULL) {
+    if (!$recommended_version = _multi_recommended_version($core)) {
+      return $recommended_version;
+    }      
+    $document_root_destination = 'drupal-' . strtolower($recommended_version['version']);
+    $document_root = $core;
+  }
+  else {
+    $document_root_destination = $document_root . '-' . strtolower($recommended_version['version']);
+  }
+      
   // Use supplied makefile and build it at $destination
   if ($makefile = rtrim(drush_get_option('makefile'), '/')) {    
-    if (!$recommended_version = _multi_recommended_version($core)) {
-    //drush_op('system', 'drush make ' . $makefile . ' ' . $destination . '/' . $recommended_version);
-      return $recommended_version;
-    }
-    $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
-    drush_invoke('make', $makefile, $destination . '/' . $recommended_version);
+    drush_invoke('make', $makefile, $destination . '/' . $document_root_destination);
   }
   // Else download a naked drupal to $destination
   else {
@@ -697,31 +707,31 @@ function drush_multi_create($destination, $document_root = NULL) {
   }  
 
   // create backup directory  
-  if (!drush_op('mkdir', $core . '_backup')) {
+  if (!drush_op('mkdir', $document_root . '_backup')) {
     return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_DIR', 
-      dt('Could not create backup directory "!pwd/!core.x_backup". Aborting.',
-        array('!pwd' => drush_cwd(), '!core' => $core)
+      dt('Could not create backup directory "!pwd/!document_root.x_backup". Aborting.',
+        array('!pwd' => drush_cwd(), '!document_root' => $document_root)
       )
     );
   }
   
   // Create sites directory
-  if (!drush_op('mkdir', $core . '_sites')) {
+  if (!drush_op('mkdir', $document_root . '_sites')) {
     return drush_set_error('MULTI_COULD_NOT_CREATE_SITES_DIR', 
-      dt('Could not create sites directory "!pwd/!core_sites". Aborting.',
-        array('!pwd' => drush_cwd(), '!core' => $core)
+      dt('Could not create sites directory "!pwd/!document_root_sites". Aborting.',
+        array('!pwd' => drush_cwd(), '!document_root' => $document_root)
       )
     );
   }
   
-  $dir = realpath($destination . '/' . $recommended_version . '/sites');
+  $dir = realpath($destination . '/' . $document_root_destination . '/sites');
   
   // Copy content of sites directory to ${major_version}_sites
-  $exec = 'cp -r ' . $dir . '/* ' . $core . '_sites';
+  $exec = 'cp -r ' . $dir . '/* ' . $document_root . '_sites';
   if (!drush_shell_exec($exec)) {
     return drush_set_error('MULTI_COULD_NOT_COPY_SITES_DEFAULT_DIR', 
   	  dt('Could not copy !dir to !target',
-  	    array('!dir' => $dir . '/default', '!target' => $core . '.x_sites')
+  	    array('!dir' => $dir . '/default', '!target' => $document_root . '.x_sites')
   	  )
   	);
   } 
@@ -738,23 +748,23 @@ function drush_multi_create($destination, $document_root = NULL) {
   }
 
   // create profiles directory
-  if (!drush_op('mkdir', $core . '_profiles')) {
+  if (!drush_op('mkdir', $document_root . '_profiles')) {
     return drush_set_error('MULTI_COULD_NOT_CREATE_PROFILES_DIR', 
-      dt('Could not create profiles directory "!pwd/!core_profiles". Aborting.',
+      dt('Could not create profiles directory "!pwd/!document_root_profiles". Aborting.',
         array('!pwd' => drush_cwd(), 
-        '!core' => $core)
+        '!document_root' => $document_root)
       )
     );
   }
   
-  $dir = realpath($destination . '/' . $recommended_version . '/profiles');
+  $dir = realpath($destination . '/' . $document_root_destination . '/profiles');
   
   // Copy content of profiles directory to ${major_version}_profiles
-  $exec = 'cp -r ' . $dir . '/* ' . $core . '_profiles';
+  $exec = 'cp -r ' . $dir . '/* ' . $document_root . '_profiles';
   if (!drush_shell_exec($exec)) {
     return drush_set_error('MULTI_COULD_NOT_COPY_PROFILES_DEFAULT_DIR', 
   	  dt('Could not copy !dir to !target',
-  	    array('!dir' => $dir . '/default', '!target' => $core . '_profiles')
+  	    array('!dir' => $dir . '/default', '!target' => $document_root . '_profiles')
   	  )
   	);
   } 
@@ -771,9 +781,9 @@ function drush_multi_create($destination, $document_root = NULL) {
   }
   
   // Change into new drupal directory
-  if(drush_op('chdir', realpath($destination . '/' . $recommended_version))) {        
+  if(drush_op('chdir', realpath($destination . '/' . $document_root_destination))) {        
     // 4) create relative symlink for sites-directory into new drupal-root
-  	$sites_dir = _multi_relative_path($destination . '/' . $core .'_sites');
+  	$sites_dir = _multi_relative_path($destination . '/' . $document_root .'_sites');
   	if (!drush_op('symlink', $sites_dir, 'sites')) {
       return drush_set_error('MULTI_COULD_NOT_CREATE_SITES_SYMLINK', 
         dt('symlink(): Unable to create symlink from !source into !target for sites-directory.',
@@ -782,7 +792,7 @@ function drush_multi_create($destination, $document_root = NULL) {
       );                
     }
     // Create relative symlink for backup-directory into new drupal-root
-    $backup_dir = _multi_relative_path($destination . '/' . $core .'_backup');
+    $backup_dir = _multi_relative_path($destination . '/' . $document_root .'_backup');
     if (!drush_op('symlink', $backup_dir, 'backup')) {
       return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_SYMLINK', 
         dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
@@ -791,7 +801,7 @@ function drush_multi_create($destination, $document_root = NULL) {
       );      
     }
     // Create relative symlink for profiles-directory into new drupal-root
-    $profiles_dir = _multi_relative_path($destination . '/' . $core .'_profiles');
+    $profiles_dir = _multi_relative_path($destination . '/' . $document_root .'_profiles');
     if (!drush_op('symlink', $profiles_dir, 'profiles')) {
       return drush_set_error('MULTI_COULD_NOT_CREATE_PROFILES_SYMLINK', 
         dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
@@ -811,10 +821,10 @@ function drush_multi_create($destination, $document_root = NULL) {
   drush_op('chdir', $destination);
   
   // create new symlink for document root/symlink from new drupal to ${MAJOR_VERSION}.x
-  if (!drush_op('symlink', $recommended_version, $core)) {
+  if (!drush_op('symlink', $document_root_destination, $document_root)) {
     return drush_set_error('MULTI_COULD_NOT_SYMLINK_DOKUMENT_ROOT',
-   	  dt('symlink(): Could not create symlink from !drupal to !major for DOCUMENT_ROOT',
-   	  	array('!drupal' => $recommended_version, '!major' => $core)
+   	  dt('symlink(): Could not create symlink from !drupal to !document_root for DOCUMENT_ROOT',
+   	  	array('!drupal' => $document_root_destination, '!document_root' => $document_root)
    	  )
     );	
   }           	
