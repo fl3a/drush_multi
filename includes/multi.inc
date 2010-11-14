@@ -88,10 +88,18 @@ function _multi_recommended_version($core, $project = 'drupal', $float = FALSE, 
     }
 	else {
 	  $recommended_major = $xml->xpath("/project/recommended_major");
-	  $xpath_releases = "/project/releases/release[status='published'][version_major=" . (string)$recommended_major[0] . "]";
-	  $releases = $xml->xpath($xpath_releases);
-	  $release = (array)$releases[0];	  
-	  unset($release['terms']);	   
+      if (!empty($recommended_major)) {
+	    $xpath_releases = "/project/releases/release[status='published'][version_major=" . (string)$recommended_major[0] . "]";
+	    $releases = $xml->xpath($xpath_releases);
+	    $release = (array)$releases[0];	    	   
+	  }
+	  else {
+	    drush_log('No recommended version available, taking latest release', 'warning');
+	    $xpath_releases = '/project/releases/release';
+	    $releases = $xml->xpath($xpath_releases);
+	    $release = (array)$releases[0];
+	  }	  
+	  unset($release['terms']);
 	  return (!$float) ? $release : $release['version'];
 	}
   }

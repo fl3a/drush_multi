@@ -661,35 +661,26 @@ function drush_multi_create_validate($destination, $document_root = NULL) {
  */
 function drush_multi_create($destination, $document_root = NULL) {
   
-  // convert $destination to an absolute path
   $destination = realpath($destination);
-  
   $core = drush_get_option('core');
   
+  if (!$recommended_version = _multi_recommended_version($core)) {
+    return $recommended_version;
+  }  
   if ($document_root == NULL) {
-    if (!$recommended_version = _multi_recommended_version($core)) {
-      return $recommended_version;
-    }      
     $document_root_destination = 'drupal-' . strtolower($recommended_version['version']);
     $document_root = $core;
   }
   else {
     $document_root_destination = $document_root . '-' . strtolower($recommended_version['version']);
-  }
-      
+  }      
   // Use supplied makefile and build it at $destination
   if ($makefile = rtrim(drush_get_option('makefile'), '/')) {    
     drush_invoke('make', $makefile, $destination . '/' . $document_root_destination);
   }
-  // Else download a naked drupal to $destination
-  else {
-     // Get recommended release of specified core version
-    $core = drush_get_option('core');
-    if (!$recommended_version = _multi_recommended_version($core)) {
-      return $recommended_version;
-    }
-    $recommended_version = 'drupal-' . strtolower($recommended_version['version']);
-      
+  // Else download a naked drupal to $destination via dl
+  else {   
+    $recommended_version = 'drupal-' . strtolower($recommended_version['version']);      
     drush_set_option('package-handler', 'wget');
     drush_set_option('destination', $destination);  
     drush_set_context('DRUSH_NOCOLOR', 1);
