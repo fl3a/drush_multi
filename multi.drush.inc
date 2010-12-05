@@ -368,117 +368,12 @@ function drush_multi_sql_dump() {
   $target   = drush_get_option('target');    
    
   // full: full sql dump 
-  if ($dump_type == 'full') {
-                    
-    //  Building result-file name 
-    $result_file = $target . '/' . $site . $datetime . $comment . '.sql';
-    
-    // set --result-file argument for drush_sql_dump()
-    drush_set_option('result-file', $result_file);
-    
-    // preperation for --update
-
-    /** @tode Implement --update option for disabling all non-core modules */
-
-    /*
-    $required_core_modules = array("'block'","'filter'","'node'","'system'","'user'","'watchdog'");
-    $enabled_optional_modules_sql = "SELECT name FROM {system} WHERE status = 1 AND name not in (%s)";
-    $disable_optional_modules_sql = "";
-    $enable_optional_modules_sql = "";
-    */
-    
-    $exec = drush_sql_dump($db_spec);        
-    if (drush_op('system', $exec) == 0) {
-      drush_log(
-        dt('SQL dump for site !site, database !database saved in !file.', 
-          array(
-            '!site'     => $site,
-            '!database' => $db_spec['database'],
-            '!file'     => $result_file
-          )
-        ),
-        'success'        
-      );      
-      if (drush_get_option('bzip2')) {
-        // delete $result_file if it already exists 
-        if (is_file($result_file . '.bz2')){
-          drush_shell_exec('rm '. $result_file . '.bz2');
-          drush_log(
-            dt('Overwriting existing file !file',
-              array('!file' => $result_file . '.bz2')
-            ),
-            'success'
-          );               
-        }        
-        if (drush_shell_exec("bzip2 \"$result_file\"")) {
-          drush_log(dt('Compressed !file using bzip2.', 
-            array('!file' => $result_file)),
-          	'success'        
-          );
-        }                
-      } 		  
-    }    
+  if ($dump_type == 'full') {                    
+     _multi_sql_dump_full($db_spec, $site, $datetime, $comment, $target); 
   }
   // tables: seperate sql dump/file for each table 
   else {
-
-    // get available tables from current database (site)      
-    $exec = 'echo "SHOW TABLES"|';
-    $exec.= 'mysql -u' . $db_spec['username'];
-    $exec.= ' -p'. $db_spec['password'];
-    $exec.= ' '. $db_spec['database'];
-    $output = shell_exec($exec);
-    
-    $tables = array();
-    $tables = explode("\n", $output);
-    // remove "Tables_in_database" from array
-    unset($tables[0]);
-    // remove last element which contains the databasename
-    unset($tables[sizeof($tables)]);
-
-     // iterate tables
-    foreach($tables as $table) {
-    
-      // Building result-file name 
-      $result_file = $target . '/' . $site . '.' . $table . $datetime . $comment . '.sql';
-             
-      // build mysqldump statement
-      $exec = 'mysqldump -u' . $db_spec['username'];
-      $exec.= ' -p'. $db_spec['password'];
-      $exec.= ' '. $db_spec['database'] .' ' . $table;
-      //drush_print($exec . '>' . $result_file);
-      if (drush_shell_exec($exec . '>' . $result_file)) {
-        drush_log(
-          dt('SQL dump for site !site, datebase !database, table !table saved in !file.', 
-            array(
-              '!site'      => $site,
-              '!database'  => $db_spec['database'],
-              '!table'     => $table, 
-              '!file'      => $result_file
-            )
-          ),
-        	'success'        
-        );
-        if (drush_get_option('bzip2')) {
-          // delete $result_file if it already exists 
-          if (is_file($result_file . '.bz2')){
-            drush_shell_exec('rm '. $result_file . '.bz2');
-            drush_log(
-              dt('Overwriting existing file !file',
-                array('!file' => $result_file . '.bz2')
-              ),
-              'success'
-            );               
-          }        
-          if (drush_shell_exec("bzip2 \"$result_file\"")) {
-            drush_log(dt('Compressed !file using bzip2.', 
-              array('!file' => $result_file)),
-            	'success'        
-            );
-          }                
-        } 		  
-      }                 
-    }
+    _multi_sql_dump_tables($db_spec, $site, $datetime, $comment, $target); 
   }    
 }
 

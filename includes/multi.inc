@@ -694,6 +694,152 @@ function _multi_nagios_site() {
 /** @} */ /** End of defgroup nagios */
 
 /**
+ * @defgroup sql-dump 'SQL dump functions'
+ * SQL dump functions. 
+ * @{
+ */
+
+/**
+ * Helper function for a full sql-dump 
+ *  
+ * @param $db_spec
+ *   An array containing the db spec	
+ *   
+ * @param $site
+ *   A string containing the site name
+ *   
+ * @param $datetime
+ *   A string containing the datetime
+ *   
+ * @param $comment
+ *   A string containing the comment
+ *   
+ * @param $target
+ *   A string containg the path where the dumps should be stored
+ */
+function _multi_sql_dump_full($db_spec = array(), $site = NULL, $datetime = NULL, $comment = NULL, $target = NULL) {
+  
+  // Building result-file name 
+  $result_file = $target . '/' . $site . $datetime . $comment . '.sql';
+  
+  // set --result-file argument for drush_sql_dump()
+  drush_set_option('result-file', $result_file);
+    
+  $exec = drush_sql_dump($db_spec);        
+  if (drush_op('system', $exec) == 0) {
+    drush_log(
+      dt('SQL dump for site !site, database !database saved in !file.', 
+        array(
+          '!site'     => $site,
+          '!database' => $db_spec['database'],
+          '!file'     => $result_file
+        )
+      ),
+      'success'        
+    );      
+    if (drush_get_option('bzip2')) {
+      // delete $result_file if it already exists 
+      if (is_file($result_file . '.bz2')){
+        drush_shell_exec('rm '. $result_file . '.bz2');
+        drush_log(
+          dt('Overwriting existing file !file',
+            array('!file' => $result_file . '.bz2')
+          ),
+          'success'
+        );               
+      }        
+      if (drush_shell_exec("bzip2 \"$result_file\"")) {
+        drush_log(dt('Compressed !file using bzip2.', 
+          array('!file' => $result_file)),
+        	'success'        
+        );
+      }                
+    } 		  
+  }    
+}
+
+/**
+ * Helper function for a table wise sql-dump (one file for each table)
+ *  
+ * @param $db_spec
+ *   An array containing the db spec	
+ *   
+ * @param $site
+ *   A string containing the site name
+ *   
+ * @param $datetime
+ *   A string containing the datetime
+ *   
+ * @param $comment
+ *   A string containing the comment
+ *   
+ * @param $target
+ *   A string containg the path where the dumps should be stored
+ */
+function _multi_sql_dump_tables($db_spec = array(), $site = NULL, $datetime = NULL, $comment = NULL, $target = NULL) {
+ 
+  // get available tables from current database (site)      
+  $exec = 'echo "SHOW TABLES"|';
+  $exec.= 'mysql -u' . $db_spec['username'];
+  $exec.= ' -p'. $db_spec['password'];
+  $exec.= ' '. $db_spec['database'];
+  $output = shell_exec($exec);
+  
+  $tables = array();
+  $tables = explode("\n", $output);
+  // remove "Tables_in_database" from array
+  unset($tables[0]);
+  // remove last element which contains the databasename
+  unset($tables[sizeof($tables)]);
+
+   // iterate tables
+  foreach($tables as $table) {
+  
+    // Building result-file name 
+    $result_file = $target . '/' . $site . '.' . $table . $datetime . $comment . '.sql';
+           
+    // build mysqldump statement
+    $exec = 'mysqldump -u' . $db_spec['username'];
+    $exec.= ' -p'. $db_spec['password'];
+    $exec.= ' '. $db_spec['database'] .' ' . $table;
+    //drush_print($exec . '>' . $result_file);
+    if (drush_shell_exec($exec . '>' . $result_file)) {
+      drush_log(
+        dt('SQL dump for site !site, datebase !database, table !table saved in !file.', 
+          array(
+            '!site'      => $site,
+            '!database'  => $db_spec['database'],
+            '!table'     => $table, 
+            '!file'      => $result_file
+          )
+        ),
+      	'success'        
+      );
+      if (drush_get_option('bzip2')) {
+        // delete $result_file if it already exists 
+        if (is_file($result_file . '.bz2')){
+          drush_shell_exec('rm '. $result_file . '.bz2');
+          drush_log(
+            dt('Overwriting existing file !file',
+              array('!file' => $result_file . '.bz2')
+            ),
+            'success'
+          );               
+        }        
+        if (drush_shell_exec("bzip2 \"$result_file\"")) {
+          drush_log(dt('Compressed !file using bzip2.', 
+            array('!file' => $result_file)),
+          	'success'        
+          );
+        }                
+      } 		  
+    }                 
+  } 
+}
+
+/** @} */ /** End of defgroup sql-dump */
+
+/**
  * @defgroup misc 'Miscellaneous functions'
  * Miscellaneous functions. 
  * @{
