@@ -716,6 +716,8 @@ function _multi_nagios_site() {
  *   
  * @param $target
  *   A string containg the path where the dumps should be stored
+ *   
+ * @see drush_multi_sql_dump()  
  */
 function _multi_sql_dump_full($db_spec = array(), $site = NULL, $datetime = NULL, $comment = NULL, $target = NULL) {
   
@@ -760,6 +762,7 @@ function _multi_sql_dump_full($db_spec = array(), $site = NULL, $datetime = NULL
 
 /**
  * Helper function for a table wise sql-dump (one file for each table)
+ * Only works with mysql
  *  
  * @param $db_spec
  *   An array containing the db spec	
@@ -775,6 +778,8 @@ function _multi_sql_dump_full($db_spec = array(), $site = NULL, $datetime = NULL
  *   
  * @param $target
  *   A string containg the path where the dumps should be stored
+ *   
+ * @see drush_multi_sql_dump()  
  */
 function _multi_sql_dump_tables($db_spec = array(), $site = NULL, $datetime = NULL, $comment = NULL, $target = NULL) {
  

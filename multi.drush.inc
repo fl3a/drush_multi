@@ -356,6 +356,9 @@ function drush_multi_sql_dump_validate() {
 
 /**
  * Implementation of drush_hook_COMMAND()
+ * 
+ * @see _multi_sql_dump_full()
+ * @see _multi_sql_dump_tables()
  */
 function drush_multi_sql_dump() { 
    
