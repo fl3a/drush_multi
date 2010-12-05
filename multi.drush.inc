@@ -331,10 +331,16 @@ function drush_multi_sql_dump_validate() {
   
   // check --comment argument
   $comment = drush_get_option('comment');  
-  if (isset($comment) && !preg_match("/^[a-zA-Z0-9\-_]{1,}$/", $comment)) {
-    return drush_set_error('MULTI_INVALID_COMMENT_ARGUMENT',
-      dt('Invalid argument for comment, only alphanumerics, "-" and "_" allowed. Aborting.')
-    );
+  if (isset($comment)) { 
+    if (!preg_match("/^[a-zA-Z0-9\-_]{1,}$/", $comment)) {
+      return drush_set_error('MULTI_INVALID_COMMENT_ARGUMENT',
+       dt('Invalid argument for comment, only alphanumerics, "-" and "_" allowed. Aborting.')
+      );
+    }
+    else {
+      // prepend leading '_' (underscore)
+      drush_set_option('comment', '_' . $comment);
+    }
   }
   
   // check --dump-type argument
@@ -441,7 +447,7 @@ function drush_multi_sql_dump() {
       $exec.= ' -p'. $db_spec['password'];
       $exec.= ' '. $db_spec['database'] .' ' . $table;
       //drush_print($exec . '>' . $result_file);
-      if (drush_shell_exec($exec . '>' . $result_file) == 0) {
+      if (drush_shell_exec($exec . '>' . $result_file)) {
         drush_log(
           dt('SQL dump for site !site, datebase !database, table !table saved in !file.', 
             array(
@@ -454,7 +460,6 @@ function drush_multi_sql_dump() {
         	'success'        
         );
         if (drush_get_option('bzip2')) {
-          drush_print('bzip2');
           // delete $result_file if it already exists 
           if (is_file($result_file . '.bz2')){
             drush_shell_exec('rm '. $result_file . '.bz2');
