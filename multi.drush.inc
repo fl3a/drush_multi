@@ -361,7 +361,10 @@ function drush_multi_sql_dump_validate() {
  * @see _multi_sql_dump_tables()
  */
 function drush_multi_sql_dump() { 
-   
+
+  if (drush_get_option('backend')) {
+    drush_print('backend');
+  }
   $dump_type = drush_get_option('dump-type', 'full');
   $db_spec = _drush_sql_get_db_spec();
     
@@ -786,8 +789,7 @@ function drush_multi_drupalupdate_validate () {
   
   // Check if we need to update by comparing current and recommended version
   if (_multi_current_version() == $recommended_version) {  
-    drush_print('Your drupal version is uptodate. Aborting');
-    return MULTI_NOTHING_TO_DO; 
+    drush_user_abort('Your drupal version is uptodate. Aborting');  
   }
   
   // Set '--updatedb' option, if supplied to TRUE via drush_set_option() 
@@ -811,8 +813,9 @@ function drush_multi_drupalupdate_validate () {
 function drush_multi_pre_multi_drupalupdate() {
   
   if (drush_get_option('--sql-dump')) { 
-    drush_set_option('option', '--nocolor');
-    drush_invoke('multi-sql-dump'); 
+//    drush_set_option('option', '--nocolor');
+//    drush_invoke('multi-sql-dump'); 
+    
   } 
   if (drush_get_option('--updatedb')) {
     // put sites in maintenance mode
