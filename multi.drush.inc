@@ -806,24 +806,17 @@ function drush_multi_drupalupdate_validate () {
 /**
  * Implementation of drush_hook_pre_COMMAND()
  * 
- * Invokes 'multi-exec' with  'sql-dump' argument if '--sql-dump' option is set
+ * Invokes 'sql-dump' on \@site, if '--sql-dump' option is set
  * 
- * Invokes 'multi-exec' with  'variable-set' and 'site_offline 1' argument if '--updatedb' option is set 
+ * Invokes 'variable-set site_offline 1' on \@sites, if '--updatedb' option is set 
  */
 function drush_multi_pre_multi_drupalupdate() {
   
   if (drush_get_option('--sql-dump')) { 
-//    drush_set_option('option', '--nocolor');
-//    drush_invoke('multi-sql-dump'); 
-    
+    drush_shell_exec(DRUSH_COMMAND . ' -r ' . drush_get_context('DRUSH_DRUPAL_ROOT') . ' @sites' . ' multi-sql-dump -yd');    
   } 
   if (drush_get_option('--updatedb')) {
-    // put sites in maintenance mode
-    drush_set_option('argument', 'site_offline 1');
-    drush_set_option('option', '--nocolor');
-    drush_invoke('multi-exec', 'variable-set');
-    drush_unset_option('argument');
-    drush_unset_option('option');   
+    drush_shell_exec(DRUSH_COMMAND . ' -r ' . drush_get_context('DRUSH_DRUPAL_ROOT') . ' @sites' . ' variable-set site_offline 1 -yd');    
   }
 }
 
@@ -890,21 +883,13 @@ function drush_multi_drupalupdate_rollback() {
 /**
  * Implementation of drush_hook_post_COMMAND()
  * 
- * Invokes 'multi-exec' with  'variable-set' and 'site_offline 0' argument if '--updatedb' option is set
- * 
- * Invokes 'multi-exec updatedb' if '--updatedb' option is set
+ * Invokes 'updatedb' and 'variable-set site_offline 0' on \@sites, if '--updatedb' option is set
  */
 function drush_multi_post_multi_drupalupdate() {
   
   if (drush_get_option('--updatedb')) {
-    // execute updatedb
-    drush_set_option('option','--nocolor');
-    drush_invoke('multi-exec', 'updatedb');
-    // put sites back from maintenance mode
-    drush_set_option('argument', 'site_offline 0');
-    drush_invoke('multi-exec', 'variable-set');  
-    drush_unset_option('option');
-    drush_unset_option('argument');  
+    drush_shell_exec(DRUSH_COMMAND . ' -r ' . drush_get_context('DRUSH_DRUPAL_ROOT') . ' @sites' . ' updatedb -yd');
+    drush_shell_exec(DRUSH_COMMAND . ' -r ' . drush_get_context('DRUSH_DRUPAL_ROOT') . ' @sites' . ' variable-set site_offline 0 -yd');
     drush_log(dt('Drupalupdate finished.'), 'completed');
   }
   else {
