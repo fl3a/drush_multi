@@ -590,81 +590,29 @@ function _multi_nagios_root() {
  * 
  * Monitores a single Drupal site for module and core updates
  * 
- * This function was heavily inspired by Markus Benning's
- * script at http://www.w3r3wolf.de/blog/wp-content/uploads/2009/08/check_drupal_update.php.gz
- * 
  * @note If there is a site at sites/default, this command runs on site basis, although you have only specified the Drupal installation.
  *  
  * @return MULTI_NAGIOS_OK(0) if monitored site is uptodate
- * or MULTI_NAGIOS_CRITICAL(2) if there are updates available
+ * or MULTI_NAGIOS_WARNING (1) if there are updates available
+ * or MULTI_NAGIOS_CRITICAL(2) if there are security updates available
  */
 function _multi_nagios_site() {
  
-  /** @todo investigate why not all updateble modules are listed */
-  /** @todo continue writing. */
+  $updates = FALSE;
   drush_bootstrap_max();
   $core = drush_drupal_major_version();
 
-  drush_include_engine('update_info', 'drupal', NULL, DRUSH_BASE_PATH . '/commands/pm/update_info');
+  drush_set_context('DRUSH_NEGATIVE', TRUE);
+  drush_set_context('DRUSH_PIPE', TRUE);
+  drush_invoke('update');
   
-  $data = array();
-  
-  // Suppress output of  _pm_refresh()
-  ob_start();
-  //_pm_refresh();
   if ($core == 5) {
-    $info = update_status_get_available();
-    $data = update_status_calculate_project_data($info);
+    $updates_path = '/?q=admin/logs/updates';
   }
-  else if ($core = 6) {
-    $available = update_get_available(TRUE);
-    module_load_include('inc', 'update', 'update.compare');
-    $data = update_calculate_project_data($available);
-    
+  else if($core == 6) {
+    $updates_path = '/?q=admin/reports/updates';
   }
-  ob_end_clean();
-  
-  // Debug
-  drush_print_r($info);
-  drush_print_r($data);
-  
-  $modules = array();
-  $updates = FALSE;
 
-  foreach($data as $module) {
-    
-    if ($core == 5) {
-      
-      // Debug
-      drush_print('--');
-      drush_print('module:' . $module['name']);
-      drush_print('version:' . $module['existing_version']);
-      drush_print('recommended:' . $module['recommended']);
-      drush_print('--');
-      
-      if($module['existing_version'] != $module['recommended']) {
-        $updates = TRUE;
-        $modules[] = $module['name'];    
-        $updates_path = '/?q=admin/logs/updates';
-      }      
-    }
-    else if($core == 6) {
-      /** @todo check 7.x's _pm_get_update_info() result array */ 
-      
-      // Debug
-      drush_print('--');
-      drush_print('module:' . $module['name']);
-      drush_print('version:' . $module['info']['version']);
-      drush_print('recommended:' . $module['recommended']);
-      drush_print('--');
-      
-      if($module['info']['version'] != $module['recommended']) {
-        $updates = TRUE;
-        $modules[] = $module['name'];    
-        $updates_path = '/?q=admin/reports/updates';
-      }
-    }
-  }
 
   if($updates) {
     drush_print(

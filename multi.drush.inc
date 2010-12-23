@@ -247,7 +247,7 @@ function multi_status() {
 function multi_nagios() {
  
   // get -l/--uri option
-  (drush_get_option('uri')) ? $uri = drush_get_option('uri') : $uri = drush_get_option('l');  
+  $uri = drush_get_option(array('uri','l'));  
     
   if (!empty($uri)) {
     if (_multi_check_site($uri)) {
