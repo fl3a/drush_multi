@@ -60,18 +60,59 @@ define('MULTI_NAGIOS_CRITICAL', 2);
  *   combined with supplied $project,  '/', supplied  $core and '.x'.
  * @return
  *   An array with the following keys, we assume 6 was supplied for core, 'drupal' for project and v. 6.14 is recommended version:
- * @code  
- *   [name] => drupal 6.14   
- *   [version] => 6.14   
- *   [tag] => DRUPAL-6-14   
- *   [version_major] => 6   
- *   [version_patch] => 14   
- *   [status] => published   
- *   [release_link] => http://drupal.org/node/579476   
- *   [download_link] => http://ftp.drupal.org/files/projects/drupal-6.14.tar.gz   
- *   [date] => 1253130028   
- *   [mdhash] => 014bb453a8d0adb0233c763e40d63859   
- *   [filesize] => 1082687
+ * @code
+ * Array                                                      
+ * (                                                          
+ *   [name] => drupal 6.20                                  
+ *   [version] => 6.20                                      
+ *   [tag] => DRUPAL-6-20                                   
+ *   [version_major] => 6                                   
+ *   [version_patch] => 20                                  
+ *   [status] => published                                  
+ *   [release_link] => http://drupal.org/node/999422        
+ *   [download_link] => http://ftp.drupal.org/files/projects/drupal-6.20.tar.gz
+ *   [date] => 1292447789                                                      
+ *   [mdhash] => a4f59401fbb3e20e3a03ac5fc11bd27c
+ *   [filesize] => 1100246
+ *   [files] => SimpleXMLElement Object
+ *       (
+ *           [file] => Array
+ *               (
+ *                   [0] => SimpleXMLElement Object
+ *                       (
+ *                           [url] => http://ftp.drupal.org/files/projects/drupal-6.20.tar.gz
+ *                           [archive_type] => tar.gz
+ *                           [md5] => a4f59401fbb3e20e3a03ac5fc11bd27c
+ *                           [size] => 1100246
+ *                           [filedate] => 1292447789
+ *                       )
+ *
+ *
+ *
+ *                   [1] => SimpleXMLElement Object
+ *                       (
+ *                           [url] => http://ftp.drupal.org/files/projects/drupal-6.20.zip
+ *                           [archive_type] => zip
+ *                           [md5] => 06114b337ba9d682f44fa13d98ecfa46
+ *                           [size] => 1285970
+ *                           [filedate] => 1293228545
+ *                       )
+ *
+ *               )
+ *
+ *       )
+ *
+ *   [terms] => SimpleXMLElement Object
+ *       (
+ *           [term] => SimpleXMLElement Object
+ *               (
+ *                   [name] => Release type
+ *                   [value] => Bug fixes
+ *               )
+ *
+ *       )
+ *
+ * )
  * @endcode   
  *  or the recommended version as float, if float is set to TRUE, 
  *  
@@ -97,9 +138,8 @@ function _multi_recommended_version($core, $project = 'drupal', $float = FALSE, 
 	    drush_log('No recommended version available, taking latest release', 'warning');
 	    $xpath_releases = '/project/releases/release';
 	    $releases = $xml->xpath($xpath_releases);
-	    $release = (array)$releases[0];
+	    $release = $releases[0];
 	  }	  
-	  unset($release['terms']);
 	  return (!$float) ? $release : $release['version'];
 	}
   }
@@ -538,12 +578,6 @@ function _multi_relative_path($target) {
  */
 function _multi_nagios_root() {
   
-  /** 
-   * @todo check core version for url in critical message
-   * (/?q=admin/logs/updates for 5.x, 
-   * (/?q=admin/reports/updates for 6.x) 
-   */
-  
   if ($file = drush_get_option('file')) { 
      if (!is_file($file)) {
        $file = FALSE;
@@ -553,20 +587,33 @@ function _multi_nagios_root() {
     $file = FALSE;
   }
   if ($recommended_version = _multi_recommended_version(drush_drupal_major_version(). '.x', 'drupal', FALSE, $file)) {
+   
     if ((float) drush_drupal_version() < (float) $recommended_version['version']) {
       
+      $update_type = $recommended_version['terms']->term->value; 
+      if($update_type == 'Security update') {
+        $status_signal = dt('DRUPAL ROOT CRITICAL');
+        $status_code = MULTI_NAGIOS_CRITICAL;
+      }
+      else {
+        $status_signal = dt('DRUPAL ROOT WARNING');
+        $status_code = MULTI_NAGIOS_WARNING;
+      }      
+            
       drush_print(  
-        dt('DRUPAL ROOT CRITICAL - !version @ !drupal_root: drupal-!remcommended_version (!release-date) available, see !release_link for details.',
+        dt('!status_signal - !version @ !drupal_root: drupal-!remcommended_version (!update_type) from !release-date available, see !release_link for details.',
           array(
+            '!status_signal' => $status_signal, 
           	'!version'     => _multi_current_version(), 
          	'!drupal_root' => drush_get_context('DRUSH_DRUPAL_ROOT'),
           	'!remcommended_version' => $recommended_version['version'],
+            '!update_type' => $update_type,
            	'!release-date' => date('Y-m-d\ H:i', $recommended_version['date']),
            	'!release_link' => $recommended_version['release_link'],       
           )
         )
       );
-      return MULTI_NAGIOS_CRITICAL;          
+      return $status_code;          
     }
     else {
       drush_print(
@@ -586,58 +633,140 @@ function _multi_nagios_root() {
 }
 
 /**
- * EXPERIMENTAL
- * 
- * Monitores a single Drupal site for module and core updates
- * 
- * @note If there is a site at sites/default, this command runs on site basis, although you have only specified the Drupal installation.
+ * Monitores a single Drupal site for module and core updates * 
  *  
- * @return MULTI_NAGIOS_OK(0) if monitored site is uptodate
- * or MULTI_NAGIOS_WARNING (1) if there are updates available
+ * @return 
+ * MULTI_NAGIOS_OK (0) if monitored site is uptodate
+ * or MULTI_NAGIOS_WARNING (1) if there are updates or unsupported modules available
  * or MULTI_NAGIOS_CRITICAL(2) if there are security updates available
  */
 function _multi_nagios_site() {
- 
-  $updates = FALSE;
-  drush_bootstrap_max();
-  $core = drush_drupal_major_version();
-
-  drush_set_context('DRUSH_NEGATIVE', TRUE);
-  drush_set_context('DRUSH_PIPE', TRUE);
-  drush_invoke('update');
   
-  if ($core == 5) {
-    $updates_path = '/?q=admin/logs/updates';
+  drush_include_engine('update_info', 'drupal', NULL, DRUSH_BASE_PATH . '/commands/pm/update_info');
+  include(DRUSH_BASE_PATH . '/commands/pm/updatecode.pm.inc');
+  
+  $updatable = FALSE;
+  $updates = $security_updates = $not_supported = array();
+  
+  drush_bootstrap_max();
+    
+  // Get update status information.
+  ob_start();
+  $projects = _pm_get_update_info();
+  ob_end_clean();
+  
+  // Get name and type of update
+  foreach($projects as $project) {
+    switch (pm_update_filter($project)) {
+      case dt('Update available') :
+        $updates[] = $project['name'];
+        $updatable = TRUE;
+        break;
+      case dt('SECURITY UPDATE available'):
+        $security_updates[] = $project['name'];
+        $updatable = TRUE;
+        break;
+      case dt('Installed version not supported'):
+        $not_supported[] = $project['name'];
+        $updatable = TRUE;
+        break;
+    }    
   }
-  else if($core == 6) {
-    $updates_path = '/?q=admin/reports/updates';
+  
+  // Get uri for Available updates
+  switch (drush_drupal_major_version()) {
+    case 5:
+      $updates_path = '/?q=admin/logs/updates';
+      break;
+    case 6:
+    case 7:
+      $updates_path = '/?q=admin/reports/updates';
+      break;
   }
-
-
-  if($updates) {
-    drush_print(
-      dt('DRUPAL SITE CRITICAL - !uri @ !site_root: there are updates for !modules, see http://!uri!updates_path for datails.',
+  
+  // Build message and status
+  if($updatable) {
+    // CRITICAL / SECURITY UPDATES
+    if (!empty($security_updates)) {
+      $status_msg = dt('DRUPAL SITE CRITICAL - !uri @ !site_root: ', 
         array(
-      	  '!uri'      => drush_get_context('DRUSH_URI'),
-          '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
-          '!modules'  => implode(',', $modules),   
-          '!updates_path' => $updates_path,     
+        '!uri'      => drush_get_context('DRUSH_URI'),
+        '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),            
         )
+      );
+      $status_msg .= dt('SECURITY UPDATES available for !modules', 
+        array(
+          '!modules' => implode(',', $security_updates),
+        )
+      );
+      if (!empty($updates)) {
+        $status_msg .= dt(', Updates available for !modules', 
+          array(
+         	'!modules' => implode(',', $updates)
+          )
+        );          
+      }
+      if (!empty($not_supported)) {
+        $status_msg .= dt(', Installed version not supported: !modules',
+          array(
+            '!module' => implode(',', $not_supported)
+          )
+        );  
+      }
+      $status_msg .= dt(', see http://!update_uri for details.', 
+        array(
+          '!update_uri' => drush_get_context('DRUSH_URI') . $updates_path          
+        )
+      );
+      $status_code = MULTI_NAGIOS_CRITICAL;
+    }
+    // WARNING / Updates or Unsupported modules
+    else if (!empty($updatable) || !empty($not_supported)) {
+      $status_msg = dt('DRUPAL SITE WARNING - !uri @ !site_root: ', 
+        array(
+        '!uri'      => drush_get_context('DRUSH_URI'),
+        '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),            
+        )
+      );
+      if (!empty($updates)) {
+        $status_msg .= dt('Updates available for !modules', 
+          array(
+         	'!modules' => implode(',', $updates)
+          )
+        );          
+      }
+      if (!empty($not_supported)) {
+        if (!empty($updates)) {
+          $status_msg .= ', ';
+        }
+        $status_msg .= dt('Installed version not supported: !modules',
+          array(
+            '!module' => implode(',', $not_supported)
+          )
+        );  
+      }
+      $status_msg .= dt(', see http://!update_uri for details.', 
+        array(
+          '!update_uri' => drush_get_context('DRUSH_URI') . $updates_path          
+        )
+      );
+      $status_code = MULTI_NAGIOS_WARNING;
+    }
+  }
+  else {  
+    // OK / No updates
+    $status_msg =  dt('DRUPAL SITE OK - !uri @ !site_root: Everything is uptodate.',
+      array(
+  	    '!uri'      => drush_get_context('DRUSH_URI'),
+        '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
       )
     );
-    return MULTI_NAGIOS_CRITICAL;
-  } 
-  else {
-    drush_print(
-      dt('DRUPAL SITE OK - !uri @ !site_root: All modules are uptodate.',
-        array(
-      	  '!uri'      => drush_get_context('DRUSH_URI'),
-          '!site_root'=> drush_get_context('DRUSH_DRUPAL_ROOT') . '/' . drush_get_context('DRUSH_DRUPAL_SITE_ROOT'),
-        )
-      )
-    );
-    return MULTI_NAGIOS_OK;
-  }
+    $status_code = MULTI_NAGIOS_OK;
+  }  
+    
+  // Print message and exit with status
+  drush_print($status_msg);  
+  return $status_code;  
 }
 /** @} */ /** End of defgroup nagios */
 

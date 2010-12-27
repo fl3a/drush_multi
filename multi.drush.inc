@@ -214,7 +214,7 @@ function multi_status() {
   if(count($sites) != 0 ){
     $table['Sites'] = implode(' ', $sites);
   }
-  
+   
   // Previous local installations
   if ($versions = _multi_previous_installations() != 0) {
     $table['Prev. Installations'] = implode(' ', $versions); 
@@ -250,10 +250,7 @@ function multi_nagios() {
   $uri = drush_get_option(array('uri','l'));  
     
   if (!empty($uri)) {
-    if (_multi_check_site($uri)) {
-      // multi nagios was called with -l/--uri
-      return _multi_nagios_site();
-    }
+    return _multi_nagios_site();    
   }
   else {
     // multi nagios was called with -r/--root only

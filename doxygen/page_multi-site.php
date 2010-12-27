@@ -10,7 +10,7 @@
 
 
 /** 
- * @page multi_site_help "multi-site"
+ * @page multi_site_help multi-site
  * Create a new site in your your multisite installation within a files, modules and themes directory.
  * @section Aliases 
  * @subsection multi_nagios_site_alias_msi msi

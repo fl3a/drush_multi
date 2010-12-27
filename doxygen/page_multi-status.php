@@ -9,7 +9,7 @@
  */
 
 /**
- * @page multi_status_help "multi-status"
+ * @page multi_status_help multi-status
  * An extended drush core status
  * 
  * The core status is extended with 

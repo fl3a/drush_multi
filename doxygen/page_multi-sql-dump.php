@@ -9,7 +9,7 @@
  */
 
 /** 
- * @page multi_sql_dump_help "multi-sql-dump"
+ * @page multi_sql_dump_help multi-sql-dump
  * Improved sql-dump.
  * @section Aliases
  * @subsection multi_sql_dump_alias_msd msd
@@ -18,7 +18,7 @@
  * Absolute Path to the directory where to store the sql dumps. 
  * Default /tmp.
  * @subsection multi_sql_dump_dump_type --dump-type
- * Arguments:
+ * Allowed values:
  * 
  * "full" Creates one file for all tables (default).
  * 
@@ -30,6 +30,18 @@
  * Comment for filename. May contain alphanumics, '-' and '_'.
  * @subsection multi_sql_dump_bzip2 --bzip2
  * Use bzip2 for compression of each sql dump.
+ * 
+ * @section dump_name_schema Dump name schema
+ * With --dump-type=full (default)
+ * @code
+ * ${uri} [ _ ${comment}] [ _ ${datetime}] .sql [.bz2]
+ * @endcode
+ * 
+ * With --dump-type=tables:
+ * @code
+ * ${uri}.${table} [ _ ${comment}] [ _ ${datetime}] .sql [.bz2]
+ * @endcode                               
+ * where ${url} is example.com supplied by -l/--uri.
  * @section Examples
  * @code
  * drush -r /path/to/drupal -l example.com  multi-sql-dump --bzip2 --comment=before-update-to-6.15 --target=$HOME/db_backups
@@ -38,9 +50,4 @@
  *
  * The result file will be bzip compressed and stored in 'db_backups' in your home directory.
  * 
- * Dump name schema:
- * @code
- * ${uri} [ _ ${comment} _ ${date('Y-m-d\TH:i')] .sql [.bz2]
- *                               
- * where ${url} is example.com supplied by -l/--uri.
  */

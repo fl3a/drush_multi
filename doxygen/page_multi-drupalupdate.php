@@ -9,7 +9,7 @@
  */
 
 /**
- * @page multi_drupalupdate_help "multi-drupalupdate"
+ * @page multi_drupalupdate_help multi-drupalupdate
  * Update your installation if there is a new minor release available,
  * assuming the same structure as in the @ref intro for the installation.
  * 

@@ -9,7 +9,7 @@
  */
 
 /** 
- * @page multi_create_help "multi-create"
+ * @page multi_create_help multi-create
  * Create a Drupal installation with the symbolic link structure as described in the \ref intro.
  * @section Aliases
  * @subsection multi_create_alias_mcr mcr

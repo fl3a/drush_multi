@@ -34,10 +34,10 @@
  * @subpage multi_drupalupdate_help "multi-drupalupdate"
  * 
  * Updates the installation if there is a new minor release available
- *  
+ *   
  * @subpage multi_sql_dump_help "multi-sql-dump"
- * 
- * Execute a sql dump on all sites (batch mode)
+ *  
+ * An extended sql-dump command
  *  
  * @subpage multi_nagios_help "multi-nagios"
  * 
