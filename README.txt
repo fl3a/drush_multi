@@ -105,13 +105,8 @@ COMMANDS
  * multi-drupalupdate
   Performs a drupal minor version update.
   
- * multi-exec
-  Execute drush core commands on all sites (batch mode)
-  This command is depricated and will be removed soon!
-  see #652778 : Similar functionality is in drush core 3.x <http://drupal.org/node/652778>.  
-  
  * multi-sql-dump
-  Perform an sql dump on all sites.
+  An improved sql-dump.
   
  * multi-nagios
   Command for use as nagios plugin with exit status and status message.   

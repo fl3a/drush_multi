@@ -9,7 +9,7 @@ include_once 'includes/multi.inc';
  */
 
 /**
- * @defgroup drush_hooks 'Drush hooks'
+ * @defgroup drush_hooks Drush hooks
  * Implementation of general drush hooks
  * @{  
  */
@@ -194,7 +194,7 @@ function multi_drush_command() {
  */
 
 /**
- * Command callback for @ref multi_status
+ * Command callback for @ref multi_status_help
  */
 function multi_status() {
 
@@ -240,9 +240,14 @@ function multi_status() {
 /**
  * Command callback for @ref multi_nagios_help
  * 
- * Calls _multi_nagios_site() if a valid site was supplied or _multi_nagios_root()
+ * Calls _multi_nagios_site() if a valid site was supplied 
+ * or _multi_nagios_root() if only the installation was supplied
  * 
- * @return MULTI_NAGIOS_CRITICAL (2) or MULTI_NAGIOS_OK (0) 
+ * @return 
+ * Exit status of the referenced function
+ * 
+ * @see _multi_nagios_root()
+ * @see _multi_nagios_site() *  
  */
 function multi_nagios() {
  
@@ -259,7 +264,7 @@ function multi_nagios() {
 }
 
 /**
- * Command callback for "multi moo"
+ * Command callback for multi-moo
  * 
  * Congratulation, you have found an easteregg
  */
@@ -296,7 +301,7 @@ function multi_moo() {
  * Implementation of drush_hook_COMMAND_validate 
  */
 function drush_multi_sql_dump_validate() {
-
+    
   // Check --bzip2 option
   if (in_array('--bzip2', $GLOBALS['argv'])) {
     drush_set_option('bzip2', TRUE);
@@ -354,6 +359,10 @@ function drush_multi_sql_dump_validate() {
 /**
  * Implementation of drush_hook_COMMAND()
  * 
+ * Calls _multi_sql_dump_full() if called without dump-type option or --dump-type=full
+ * 
+ * or _multi_sql_dump_tables() if called with --dump-type=tables
+ * 
  * @see _multi_sql_dump_full()
  * @see _multi_sql_dump_tables()
  */
@@ -379,100 +388,6 @@ function drush_multi_sql_dump() {
     _multi_sql_dump_tables($db_spec, $site, $datetime, $comment, $target); 
   }    
 }
-
-/** @} */ /** 	End of defgroup multi_sql_dump */
-
-/**
- * @defgroup multi_exec multi-exec
- * Hooks for invocation of @ref multi_exec_help, see multi_drush_command() for definition
- * @{
- */
-
-/**
- * Implementation of drush_hook_COMMAND_validate 
- * @param $command
- */
-function drush_multi_exec_validate ($command) {
-  
-  if (empty($command)) {
-    return drush_set_error('MULTI_DRUSH_EXEC_MISSING_DRUSH_COMMAND',
-      dt('Missing drush-command. Aborting,')
-    );
-  }
-  
-  // available commands and aliases
-  $commands = array(
-    'cache-clear', 'cc',
-    'pm-refresh', 'rf',
-    'pm-update', 'up',
-    'pm-updatecode', 'upc',
-    'pm-download', 'dl',
-    'pm-enable', 'en',
-    'pm-disable', 'dis',
-    'pm-uninstall', 
-    'statusmodules',  'sm',
-    'watchdog-show', 'ws',
-    'watchdog-delete', 'wd-del',
-    'sql-query', 'sqlq',
-    'variable-set', 'vset',
-    'variable-get', 'vget',
-    'variable-delete', 'vdel',
-    'updatedb', 'updb',  
-    'cron', 'eval', 'script', 
-  );
-  
-  if (!in_array($command, $commands)) {
-    return drush_set_error('MULTI_DRUSH_EXEC_UNKNOWN_DRUSH_COMMAND',
-      dt('Unknown drush-command. Aborting,')
-    );
-  }  
-}
-
-/**
- * Implementation of drush_hook_COMMAND()
- * @param $command 
- */
-function drush_multi_exec($command) {  
-  
-  // Determine a proper way to call drush again
-  // defined in includes/environment.php, initialized via drush_find_drush()
-  // Consists of:
-  // absolute path to php, absolute path to drush's executable and appended php option, e.g:
-  // /usr/bin/php /usr/local/bin/drush/drush.php --php=/usr/bin/php
-  $drush = DRUSH_COMMAND; 
-  
-  // --root option
-  $root = ' -r ' . drush_get_context('DRUSH_DRUPAL_ROOT');
-  
-  // --uri option
-  $uri = ' -l ';
-
-  // prepend blank to command
-  $command = ' ' . $command;
-  
-  // --yes option 
-  // because drush_shell_exec() allows no interaction anymore
-  $yes = ' -y';  
-  
-  // --argument, Argument to pass to drush command
-  $arg = ' ' . drush_get_option('argument');  
-  
-  // --option, Option to pass to drush command or drush itself
-  $opt = ' ' . drush_get_option('option');  
-  
-  $sites = array();
-  $sites = _multi_scan_sites();
-  
-  foreach ($sites as $site) {
-    $cmd = $drush . $yes . $root . $uri . $site . $command . $arg . $opt;
-    drush_shell_exec($cmd);
-    
-    foreach (drush_shell_exec_output() as $line) {
-      drush_print($line);
-    } 
-  }  
-}
-/** @} */ /** End of defgroup multi_exec */
 
 /**
  * @defgroup multi_create multi-create

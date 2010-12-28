@@ -6,7 +6,7 @@
  */
 
 /**
-* @enum exit_status
+* @defgroup  exit_status Exit states
 * Numeric error status definitions
 * Error code definitions for interpreting the current error status.
 * @see drush_set_error(), drush_get_error(), drush_get_error_log(), drush_cmp_error()
@@ -19,24 +19,24 @@ define('MULTI_SUCCESS', 0);
 /** Status 0 */
 define('MULTI_NOTHING_TO_DO', 0);
 
-/** Status 0 for nagios OK, see also _multi_nagios_site() and _multi_nagios_root() */
+/** Status 0 for nagios OK @see _multi_nagios_site() and _multi_nagios_root() */
 define('MULTI_NAGIOS_OK', 0);
 
-/** Status 1 for nagios warning @see multi_nagios() */
+/** Status 1 for nagios warning @see _multi_nagios_site() and _multi_nagios_root() */
 define('MULTI_NAGIOS_WARNING', 1);
 
-/** Status 2 for nagios critical @see multi_nagios() */
+/** Status 2 for nagios critical @see _multi_nagios_site() and _multi_nagios_root() */
 define('MULTI_NAGIOS_CRITICAL', 2);
 /** @} */ /** End of defgroup exit_status */
  
 /**
- * @defgroup helper_functions 'Helper functions'
+ * @defgroup helper_functions Helper functions
  * Helper functions
  * @{  
  */
 
 /**
- * @defgroup xml_xpath 'XML xpath functions'
+ * @defgroup xml_xpath XML xpath functions
  * Functions that uses the xml files at http://updates.drupal.org/release-history/project/core.x with xpath
  * @{
  *  
@@ -113,9 +113,10 @@ define('MULTI_NAGIOS_CRITICAL', 2);
  *       )
  *
  * )
- * @endcode   
+ * @endcode
+ * @return   
  *  or the recommended version as float, if float is set to TRUE, 
- *  
+ * @return
  *  or FALSE via drush_set_error() if $core $project combination does 
  */
 function _multi_recommended_version($core, $project = 'drupal', $float = FALSE, $path = FALSE) {
@@ -163,7 +164,7 @@ function _multi_recommended_version($core, $project = 'drupal', $float = FALSE, 
  *   but also possible for versions before drupal 5 like drupal/4.7.x or image/4.7.x etc without error
  * @param $project 
  *   Name of the project, Default 'drupal'
- * @return array
+ * @return
  *   An ascending array that contains project and version in 
  *   form of ${PROJECT}'-'${MAJOR}.${MINOR} at each index or FALSE via drush_set_error()
  */ 
@@ -233,7 +234,7 @@ function _multi_check_project($core, $project = 'drupal') {
 /** @} */ /** End of defgroup xml_xpath */
  
 /**
- * @defgroup filesystem 'Filesystem functions'
+ * @defgroup filesystem Filesystem functions
  * Functions that do search and scan operation on the local file system.
  * @{  
  */
@@ -280,7 +281,7 @@ function _multi_scan_sites($symlinks = TRUE){
 }
 
 /**
- * @defgroup symlinks 'Symlink functions'
+ * @defgroup symlinks Symlink functions
  * Functions for handling and preserving symbolic links for @ref multi_drupalupdate_help.
  * @{  
  */
@@ -442,7 +443,7 @@ function _multi_preserve_symlinks($drupal_root, $new_drupal_root) {
  *    An ascending ordered array with drupal installation in form of 'drupal-'${MAJOR}.${MINOR},
  *    with at least the current installations found in the parent directory of DRUPAL_ROOT 
  *    or
- *    0 if none was found
+ * @return 0 if none was found
  */
 function _multi_available_installations() {
   $scan_result = array();
@@ -566,15 +567,21 @@ function _multi_relative_path($target) {
 /** @} */ /** End of defgroup filesystem */
 
 /**
- * @defgroup nagios 'Nagios functions'
+ * @defgroup nagios Nagios functions
  * Functions that deals with Nagios
+ * @see @ref multi_nagios_help
  * @{  
  */
 
 /**
  * Monitores a Drupal installation for core updates
- * @return MULTI_NAGIOS_OK(0) if monitored DRUPAL_ROOT is uptodate
- * or MULTI_NAGIOS_CRITICAL(2) if there are updates available
+ * 
+ * @return 
+ * MULTI_NAGIOS_OK(0) if monitored DRUPAL_ROOT is up to date
+ * @return
+ * or MULTI_NAGIOS_WARNING (1), if there is new release that contains bug fixes  
+ * @return
+ * or MULTI_NAGIOS_CRITICAL(2) if there is new release that contains a security updates
  */
 function _multi_nagios_root() {
   
@@ -633,11 +640,13 @@ function _multi_nagios_root() {
 }
 
 /**
- * Monitores a single Drupal site for module and core updates * 
+ * Monitores a single Drupal site for module and core updates  
  *  
- * @return 
- * MULTI_NAGIOS_OK (0) if monitored site is uptodate
+ * @return   
+ * MULTI_NAGIOS_OK (0) if monitored site is up to date
+ * @return
  * or MULTI_NAGIOS_WARNING (1) if there are updates or unsupported modules available
+ * @return
  * or MULTI_NAGIOS_CRITICAL(2) if there are security updates available
  */
 function _multi_nagios_site() {
@@ -771,8 +780,9 @@ function _multi_nagios_site() {
 /** @} */ /** End of defgroup nagios */
 
 /**
- * @defgroup sql-dump 'SQL dump functions'
- * SQL dump functions. 
+ * @defgroup sql_dump SQL dump functions
+ * SQL dump functions
+ * @see @ref multi_sql_dump_help 
  * @{
  */
 
@@ -922,7 +932,7 @@ function _multi_sql_dump_tables($db_spec = array(), $site = NULL, $datetime = NU
 /** @} */ /** End of defgroup sql-dump */
 
 /**
- * @defgroup misc 'Miscellaneous functions'
+ * @defgroup misc Miscellaneous functions
  * Miscellaneous functions. 
  * @{
  */
