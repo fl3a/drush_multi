@@ -9,6 +9,23 @@ include_once 'includes/multi.inc';
  */
 
 /**
+ * Implementation of hook_drush_init()
+ * 
+ * Check for needed drush_version.
+ */
+function multi_drush_init() {
+  $drush_version = array();
+  $drush_version = explode('-', DRUSH_VERSION);
+    
+  if ($drush_version[0] < 4.0) {
+    $drush_info = drush_read_drush_info();
+    if ($drush_version['datestamp'] < 1293480992) {
+      drush_log('Some command won`t work properly. You need a drush v. >=4.0[-dev -rc*] with a builddate newer or equal 27. Dec 2010 20:16:32 (1293480992).', 'warning');      
+    }
+  }  
+}
+
+/**
  * @defgroup drush_hooks Drush hooks
  * Implementation of general drush hooks
  * @{  
@@ -368,9 +385,6 @@ function drush_multi_sql_dump_validate() {
  */
 function drush_multi_sql_dump() { 
 
-  if (drush_get_option('backend')) {
-    drush_print('backend');
-  }
   $dump_type = drush_get_option('dump-type', 'full');
   $db_spec = _drush_sql_get_db_spec();
     
@@ -486,7 +500,7 @@ function drush_multi_create($destination, $document_root = NULL) {
     return $recommended_version;
   }  
   if ($document_root == NULL) {
-    $document_root_destination = 'drupal-' . strtolower($recommended_version['version']);
+    $document_root_destination = 'drupal-' . strtolower($recommended_version['version']);  
     $document_root = $core;
   }
   else {
@@ -599,16 +613,7 @@ function drush_multi_create($destination, $document_root = NULL) {
           array('!source' => $sites_dir, '!target' => getcwd() .'/sites')
         )
       );                
-    }
-    // Create relative symlink for backup-directory into new drupal-root
-    $backup_dir = _multi_relative_path($destination . '/' . $document_root .'_backup');
-    if (!drush_op('symlink', $backup_dir, 'backup')) {
-      return drush_set_error('MULTI_COULD_NOT_CREATE_BACKUP_SYMLINK', 
-        dt('symlink(): Unable to create relative symlink from !target into !target for backup-directory.',
-          array('!target' => $sites_dir, '!target' => getcwd())          
-        )
-      );      
-    }
+    }    
     // Create relative symlink for profiles-directory into new drupal-root
     $profiles_dir = _multi_relative_path($destination . '/' . $document_root .'_profiles');
     if (!drush_op('symlink', $profiles_dir, 'profiles')) {
@@ -800,6 +805,7 @@ function drush_multi_drupalupdate_rollback() {
 function drush_multi_post_multi_drupalupdate() {
   
   if (drush_get_option('--updatedb')) {
+    /** @todo Try drush_print(drush_invoke_sitealias_args() instead drush_shell_exec() */     
     drush_shell_exec(DRUSH_COMMAND . ' -r ' . drush_get_context('DRUSH_DRUPAL_ROOT') . ' @sites' . ' updatedb -yd');
     drush_shell_exec(DRUSH_COMMAND . ' -r ' . drush_get_context('DRUSH_DRUPAL_ROOT') . ' @sites' . ' variable-set site_offline 0 -yd');
     drush_log(dt('Drupalupdate finished.'), 'completed');

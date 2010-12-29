@@ -39,7 +39,7 @@ Here is the very specific structure this command deals with for multi drupalupda
  |-- 6.x_backup
  |-- 6.x_profiles
  |-- 6.x_sites
- |   |-- all   
+ |   |-- all
  |   |-- default
  |   |-- example.com
  |   |   |-- files
@@ -50,7 +50,6 @@ Here is the very specific structure this command deals with for multi drupalupda
  |       |-- modules
  |       `-- themes 
  `-- drupal-6.14
-    |-- backup -> ../6.x_backup
     |-- includes
     |-- misc
     |-- modules
@@ -84,7 +83,7 @@ REQUIREMENTS
 
 Since this is a drush command, all you need is drush.
 
-Drush Multi requires drush >= v.3.0-beta1.
+Drush Multi requires drush v. >=4.0[-dev -rc*] with a builddate newer or equal 27. Dec 2010 20:16:32 (1293480992). 
 
 For the installation of drush see the drush README.txt 
 at http://cvs.drupal.org/viewvc/drupal/contributions/modules/drush/README.txt?revision=1.29&view=markup  

@@ -139,7 +139,7 @@ function _multi_recommended_version($core, $project = 'drupal', $float = FALSE, 
 	    drush_log('No recommended version available, taking latest release', 'warning');
 	    $xpath_releases = '/project/releases/release';
 	    $releases = $xml->xpath($xpath_releases);
-	    $release = $releases[0];
+	    $release = (array)$releases[0];	    
 	  }	  
 	  return (!$float) ? $release : $release['version'];
 	}
@@ -814,8 +814,8 @@ function _multi_sql_dump_full($db_spec = array(), $site = NULL, $datetime = NULL
   // set --result-file argument for drush_sql_dump()
   drush_set_option('result-file', $result_file);
     
-  $exec = drush_sql_dump($db_spec);        
-  if (drush_op('system', $exec) == 0) {
+  $exec = drush_sql_dump($db_spec);
+  if (drush_op_system($exec[0]) == 0) {
     drush_log(
       dt('SQL dump for site !site, database !database saved in !file.', 
         array(
