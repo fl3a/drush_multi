@@ -53,7 +53,29 @@ function multi_drush_help($section) {
     case 'drush:multi-sql-dump':
       return dt('Improved sql-dump.');
     case 'drush:multi-nagios':
-      return 'For the use as nagios plugin. Print a message and returns with exit status.';      
+      return 'For the usage as nagios plugin: Monitores a Drupal installation or a Drupal site and print a message and return with an exit status.
+
+Monitoring of a Drupal installation
+multi_nagios could be run on the with -r /--root supplied Drupal installation to check for core updates.
+
+If the Drupal installation is not up to date, this command prints the recommended version, the type of the update (Bug fixes or Security update), the release date and the link to the release note of the recommended version.
+
+Exit status
+
+MULTI_NAGIOS_OK (0) if monitored Drupal is up to date
+or MULTI_NAGIOS_WARNING (1) if there is a \'Bug fixes\' available
+or MULTI_NAGIOS_CRITICAL(2) if there is a \'Security update\' available
+
+Monitoring of a Drupal site
+Checks on the the with -l / --uri supplied site for core and module updates.
+
+If the Drupal site is not up to date, this command will print the type of the update(Security update, update, unsupported release) including the corresponding modules, drupal core and a link to the \'Available updates\' page within drupal.
+
+Exit status
+
+MULTI_NAGIOS_OK (0) if monitored site is up to date
+or MULTI_NAGIOS_WARNING (1) if there are updates or unsupported modules available
+or MULTI_NAGIOS_CRITICAL(2) if there are Security updates available';      
   }
 }
 
@@ -78,26 +100,27 @@ function multi_drush_command() {
   $items['multi-nagios'] = array(
     'callback' => 'multi_nagios',
     'aliases' => array('mna', 'nagios'), 
-    'description' => 'Message and exit code for nagios.',
+    'description' => 'For the usage as nagios plugin: Monitores a Drupal installation or a Drupal site and print a message and return with an exit status.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
     'examples' => array(
       'drush -r /path/to/drupal multi-nagios' =>
-      "We assume that drupal-6.14 is the recommended release.\n" . 
+      "We assume that drupal-6.14 is the recommended release. (6.14 was a security update).\n" . 
       "With an older version, eg. drupal-6.13 we get:\n" .
-      "DRUPAL ROOT CRITICAL: drupal-6.13 @ /var/www/drupal-6.13\n" .
-      " - drupal-6.14 (2009-09-16 21:40) available, see http://drupal.org/node/579476 for details.\n" .
+      "'DRUPAL ROOT CRITICAL: drupal-6.13 @ /path/to/drupal/6.x\n" .
+      "- drupal-6.14 (Security update) from 2009-09-16 21:40 available, see http://drupal.org/node/579476 for details.'\n" .
       "with exit status 2\n" .
       "Or if we are running the recommended version:\n" .
-      "'DRUPAL ROOT OK: drupal-6.14 @ /path/to/drupal/6.x is uptodate.'\n" .
+      "' DRUPAL ROOT OK: drupal-6.14 @ /path/to/drupal/6.x is up to date.'\n" .
       "with exit status 0.",
       'drush -r /path/to/drupal multi-nagios --file=/path/to/file' => 'Same as above with a specified file.',
       'drush -r /path/to/drupal -l example.com multi-nagios' => 
-      "If there are no updates available, this will produce to following output:\n" .
-      "DRUPAL SITE OK - example.com @ /path/to/drupal/example.com: All modules are uptodate.\n" .
-      "If there are available updates, it might produce the following output:\n" .
-      "DRUPAL SITE CRITICAL - example.com @ /path/to/drupal/sites/example.com:\n" .
-      "there are updates for admin_menu,drupal,image, see http://example.com/?q=admin/reports/updates for datails.\n" .
-      "NOTE: If there is a site at sites/default, this command runs on site basis, although ou have only specified the Drupal installation."
+      "Assuming we have got security updates, updates and a unsupported release of a module,\n" .
+      "it will print the following output and exit with MULTI_NAGIOS_CRITICAL (2) because of the security update:\n" .
+      "DRUPAL SITE CRITICAL - example.com @ /path/to/drupal/6.x/sites/example.com:\n" .
+      "SECURITY UPDATES available for image,lightbox2, Updates available for drupal,bueditor," .
+      "imce, Installed version not supported: transliterations, see http://example.com/?q=admin/reports/updates for datails.\n" .
+      "\nIf there are no updates available, this will produce to following output:\n" .
+      "DRUPAL SITE OK - example.com @ /path/to/drupal/6.x/sites/example.com: Everything is up to date."
      ), 
     'options' => array(
       '--file' => "Path to release information file, this could be a (temp) file  to avoid nrpe-socket timeouts.\n" .
@@ -109,23 +132,6 @@ function multi_drush_command() {
     'aliases' => array('moo'),
     'callback' => 'multi_moo',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, // No bootstrap at all.
-  );
-  $items['multi-exec'] = array(
-    'aliases' => array('mex'),
-    'description' => 'Run a drush command on all sites in your multisite installation. Implemented drush commands are: \'cache clear\', \'cron\', \'update\', \'updatecode\', \'updatedb\', \'watchdog delete\', \'watchdog show\' and \'refresh\'.',
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, // Find a valid Drupal root.
-    'examples' => array(
-      'drush -r /path/to/drupal multi-exec cron' => 'Run all cron hooks on all sites in your multisite installation.',
-      'drush -r /path/to/drupal multi-exec variable-set --argument=\'site_offline 1\' --option=\'--nocolor\''  => 'Put all sites in maintenance mode without using color highlighting on log messages.',
-      'drush -r /path/to/drupal multi-exec updatedb'  => 'Execute the update.php process for all sites.',
-    ),     
-    'options' => array(      
-      '--argument'		=> 'Argument to pass to drush command e.g. \'php\' as type for \'watchdog delete\' and  \'watchdog show\'.',
-      '--option'     => 'Option to pass to drush command. or drush itself e.g. \--nocolor\' to suppress color highlighting on log messages.',       
-    ),    
-    'arguments' => array(
-      'command' => 'The drush command to execute. For drush commands with blanks like \'watchdog show\' make sure to use single or double quotes. Mandatory.',             
-    ),
   );
   $items['multi-drupalupdate'] = array(
     'aliases' => array('mdr', 'drupalupdate'),

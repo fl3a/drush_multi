@@ -36,8 +36,8 @@
  * 
  * If the Drupal site is not up to date, 
  * this command will print the type of the update(Security update, update, unsupported release)
- * including the corresponding modules
- * and a link to overview page within drupal.
+ * including the corresponding modules, Drupal core
+ * and a link to the 'Available updates' page within drupal.
  * 
  * <strong>Exit status</strong>
  * 

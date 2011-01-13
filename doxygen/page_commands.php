@@ -22,15 +22,6 @@
  * Creates a Drupal multisite installation, 
  * supports usage of <a href="http://drupal.org/project/drush_make">drush_make</a> makefiles
  *  
- * @subpage multi_exec_help "multi-exec"
- * 
- * Execute drush core commands on all sites (batch mode)
- *
- * <strong>
- * This command is depricated and will be removed soon!<br />
- * \@see <a href="http://drupal.org/node/652778">#652778: Similar functionality is in drush core 3.x</a>.
- * </strong>
- *  
  * @subpage multi_drupalupdate_help "multi-drupalupdate"
  * 
  * Updates the installation if there is a new minor release available
