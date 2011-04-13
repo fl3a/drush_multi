@@ -417,6 +417,7 @@ function drush_multi_sql_dump() {
 /**
  * Implementation of drush_hook_COMMAND_validate()
  * @param $destination
+ * @param $document_root
  */
 function drush_multi_create_validate($destination, $document_root = NULL) {
   
@@ -495,6 +496,7 @@ function drush_multi_create_validate($destination, $document_root = NULL) {
 /**
  * Implementation of drush_hook_COMMAND()
  * @param $destination
+ * @param $deocument_root
  */
 function drush_multi_create($destination, $document_root = NULL) {
   
@@ -553,7 +555,7 @@ function drush_multi_create($destination, $document_root = NULL) {
   }
   
   $dir = realpath($destination . '/' . $document_root_destination . '/sites');
-  
+   
   // Copy content of sites directory to ${major_version}_sites
   $exec = 'cp -r ' . $dir . '/* ' . $document_root . '_sites';
   if (!drush_shell_exec($exec)) {
@@ -975,7 +977,7 @@ function drush_multi_post_multi_site($site_name){
  */
 function drush_multi_site_rollback($site_name) {
   if (!drush_cmp_error('MULTI_SITE_COULD_NOT_CREATE_SITE_DIR')) {
-    delete_dir(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/'. $site_name);
+    drush_delete_dir(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/sites/'. $site_name);
   }
 }
 /** @} */ /** End of defgroup multi_sql_dump */
