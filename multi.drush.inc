@@ -673,16 +673,23 @@ function drush_multi_create_rollback($destination, $document_root = NULL) {
  */
 function drush_multi_drupalupdate_validate () {
   
+  // Get DRUSH_DRUPAL_ROOT without trailing '/'
+  $drupal_root = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/');
+
+  // Get parent of DRUSH_DRUPAL_ROOT 
+  $dest = realpath($drupal_root . '/..');
+
   // Check if parent directory of DRUSH_DRUPAL_ROOT is writable
-  if (!is_writable(realpath(rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/') . '/..'))) {
+  if (!is_writable($dest)) {
     drush_set_error('MULTI_DRUPALUPDATE_DESTINATION_NOT_WRITABLE',
       dt('\'!destination\' is not writable, check permission. Aborting.',
         array('!destination' => $dest)
       ) 
     );  
   }
-  // Get DRUSH_DRUPAL_ROOT without trailing '/'
-  $drupal_root = rtrim(drush_get_context('DRUSH_DRUPAL_ROOT'),'/');
+  else {
+    drush_set_context('DRUPAL_ROOT_PARENT', $dest);
+  }  
 
   // Check if DRUSH_DRUPAL_ROOT is a symbolic link
   if (is_link($drupal_root)) { 
@@ -754,11 +761,11 @@ function drush_multi_pre_multi_drupalupdate() {
 function drush_multi_drupalupdate() {
   
   // needed variables: 
-  $drupal_root 		    = drush_get_context('DRUSH_DRUPAL_ROOT');
+  $drupal_root 		      = drush_get_context('DRUSH_DRUPAL_ROOT');
   $link_name            = drush_get_context('DRUPAL_ROOT_SYMLINK');
   $recommended_version  = drush_get_context('DRUPAL_RECOMMENDED_VERSION');
-  $version 			    = drush_drupal_version();  
-  $dest				    = realpath($drupal_root . '/../');    
+  $version 			        = drush_drupal_version();  
+  $dest				          = drush_get_context('DRUPAL_ROOT_PARENT');
   
   // 1) download and  2) unpack drupal via drush dl to parent of $drupal_root
   drush_set_option('destination', $dest);
